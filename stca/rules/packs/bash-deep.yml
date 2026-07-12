@@ -1,0 +1,207 @@
+# STCA Bash Deep Rules Rules — 41 rules
+rules:
+  - id: bash-ifs-injection
+    pattern: "\\bIFS\\s*=\\s*['\\\"]"
+    severity: high
+    message: "IFS manipulation — word splitting attack"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-ifs-reset-missing
+    pattern: "^(?:#!.*\\n)?(?!.*IFS\\s*=\\s*\\$'\\\\x"
+    severity: low
+    message: "Script without IFS reset — word splitting risk"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-source-with-user-input
+    pattern: "(?:^|\\s)(?:source|\\.)\\s+\\$\\{?\\w+"
+    severity: high
+    message: "source with variable — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: bash-read-no-r
+    pattern: "\\bread\\s+\\w+\\s*<\\s*\\$\\w+"
+    severity: medium
+    message: "read from user-controlled file — LFI"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-mapfile-user
+    pattern: "\\bmapfile\\s+-t\\s+\\w+\\s*<\\s*\\$\\w+"
+    severity: medium
+    message: "mapfile from user-controlled file"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-readarray-user
+    pattern: "\\breadarray\\s+\\w+\\s*<\\s*\\$\\w+"
+    severity: medium
+    message: "readarray from user-controlled file"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-printf-format-string
+    pattern: "\\bprintf\\s+['\\\"][^'\\\"]*%[^'\\\"\\n]*['\\\"]\\s+\\$\\{?\\w+"
+    severity: high
+    message: "printf with user input format string"
+    metadata: {cwe: "CWE-134"}
+  - id: bash-echo-escape
+    pattern: "\\becho\\s+-e\\s+['\\\"][^'\\\"]*\\\\[^'\\\"\\n]*['\\\"]\\s+\\$\\{?\\w+"
+    severity: medium
+    message: "echo -e with user input — escape sequence injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-heredoc-user
+    pattern: "<<\\s*['\\\"]?\\w+['\\\"]?\\s*\\n[^<]*\\$\\{?\\w+"
+    severity: medium
+    message: "Heredoc with user input — verify interpolation"
+    metadata: {cwe: "CWE-94"}
+  - id: bash-eval-set
+    pattern: "\\beval\\s+\\\"set\\s+--"
+    severity: high
+    message: "eval set — word splitting risk"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-declare-user
+    pattern: "\\bdeclare\\s+-[anA]\\s+\\w+\\s*=\\s*\\$\\{?\\w+"
+    severity: medium
+    message: "declare with user input — array injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-local-user
+    pattern: "\\blocal\\s+\\w+\\s*=\\s*\\$\\{?\\w+[^)]*\\$\\("
+    severity: medium
+    message: "local with command substitution — verify"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-export-user
+    pattern: "\\bexport\\s+\\w+\\s*=\\s*\\$\\{?\\w+[^)]*\\$\\("
+    severity: medium
+    message: "export with command substitution — verify"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-typeset-user
+    pattern: "\\btypeset\\s+\\w+\\s*=\\s*\\$\\{?\\w+[^)]*\\$\\("
+    severity: medium
+    message: "typeset with command substitution"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-read-into-array
+    pattern: "\\bread\\s+-a\\s+\\w+\\s*<\\s*\\$\\w+"
+    severity: medium
+    message: "read -a from user file — array injection"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-read-silent
+    pattern: "\\bread\\s+-s\\s+\\w+"
+    severity: low
+    message: "read -s — verify it's for passwords only"
+    metadata: {cwe: "CWE-522"}
+  - id: bash-getopts-user
+    pattern: "\\bgetopts\\s+['\\\"][^'\\\"]*['\\\"]\\s+\\w+"
+    severity: low
+    message: "getopts — verify all options are handled"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-select-user
+    pattern: "\\bselect\\s+\\w+\\s+in\\s+[^;]*\\$\\{?\\w+"
+    severity: low
+    message: "select with user input list"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-coproc-user
+    pattern: "\\bcoproc\\s+\\w+\\s*\\{\\s*[^}]*\\$\\{?\\w+"
+    severity: medium
+    message: "coproc with user input — verify"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-builtin-user
+    pattern: "\\bbuiltin\\s+\\w+\\s+\\$\\{?\\w+"
+    severity: medium
+    message: "builtin with user input — verify"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-command-builtin
+    pattern: "\\bcommand\\s+\\w+\\s+\\$\\{?\\w+"
+    severity: medium
+    message: "command with user input — verify"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-let-user
+    pattern: "\\blet\\s+\\w+\\s*=\\s*[^=]*\\$\\{?\\w+"
+    severity: medium
+    message: "let with user input — arithmetic injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-expr-user
+    pattern: "\\bexpr\\s+[^|]*\\$\\{?\\w+"
+    severity: medium
+    message: "expr with user input — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-test-user
+    pattern: "\\b\\[\\s+[^]]*\\$\\{?\\w+\\s*=\\s*\\$\\{?\\w+"
+    severity: medium
+    message: "[ ] test with user input — verify quoting"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-double-bracket-user
+    pattern: "\\b\\[\\[\\s+[^]]*\\$\\{?\\w+"
+    severity: low
+    message: "[[ ]] with user input — safer than [ ]"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-regex-user
+    pattern: "\\[\\[\\s+\\$\\{?\\w+\\s*=~\\s*['\\\"]?\\$\\{?\\w+"
+    severity: high
+    message: "[[ =~ ]] with user input regex — ReDoS"
+    metadata: {cwe: "CWE-1333"}
+  - id: bash-case-user-pattern
+    pattern: "\\bcase\\s+['\\\"]?\\$\\{?\\w+['\\\"]?\\s+in"
+    severity: low
+    message: "case with user input — verify patterns"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-redirect-user
+    pattern: "\\b(?:exec|>\\s*)\\s*\\$\\{?\\w+>\\$\\{?\\w+"
+    severity: high
+    message: "redirect with user input — file overwrite"
+    metadata: {cwe: "CWE-73"}
+  - id: bash-exec-replace
+    pattern: "\\bexec\\s+\\$\\{?\\w+"
+    severity: high
+    message: "exec replaces shell process — verify intent"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-trap-user
+    pattern: "\\btrap\\s+['\\\"][^'\\\"]*['\\\"]\\s+\\$\\{?\\w+"
+    severity: medium
+    message: "trap with user input — code injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-trap-debug
+    pattern: "\\btrap\\s+['\\\"][^'\\\"]*['\\\"]\\s+DEBUG\\b"
+    severity: medium
+    message: "trap DEBUG — runs before every command"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-trap-exit
+    pattern: "\\btrap\\s+['\\\"][^'\\\"]*['\\\"]\\s+EXIT\\b"
+    severity: low
+    message: "trap EXIT — cleanup handler, verify"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-trap-err
+    pattern: "\\btrap\\s+['\\\"][^'\\\"]*['\\\"]\\s+ERR\\b"
+    severity: low
+    message: "trap ERR — error handler, good practice"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-umask-000
+    pattern: "\\bumask\\s+000\\b"
+    severity: high
+    message: "umask 000 — world-writable files"
+    metadata: {cwe: "CWE-732"}
+  - id: bash-umask-022
+    pattern: "\\bumask\\s+022\\b"
+    severity: low
+    message: "umask 022 — verify (077 is stricter)"
+    metadata: {cwe: "CWE-732"}
+  - id: bash-ssh-known-hosts-disable
+    pattern: "ssh\\s+[^|]*-o\\s+StrictHostKeyChecking=no"
+    severity: critical
+    message: "SSH StrictHostKeyChecking disabled — MITM"
+    metadata: {cwe: "CWE-295"}
+  - id: bash-ssh-user-known-hosts
+    pattern: "ssh\\s+[^|]*-o\\s+UserKnownHostsFile=/dev/null"
+    severity: critical
+    message: "SSH UserKnownHostsFile=/dev/null — MITM"
+    metadata: {cwe: "CWE-295"}
+  - id: bash-scp-no-preserve
+    pattern: "\\bscp\\s+[^|]*-p\\b"
+    severity: low
+    message: "scp -p preserves perms — verify intent"
+    metadata: {cwe: "CWE-732"}
+  - id: bash-rsync-no-checksum
+    pattern: "\\brsync\\s+[^|]*--no-checksum\\b"
+    severity: low
+    message: "rsync --no-checksum — verify data integrity"
+    metadata: {cwe: "CWE-345"}
+  - id: bash-tar-no-verify
+    pattern: "\\btar\\s+[^|]*-x[a-z]*\\s+\\$\\w+"
+    severity: medium
+    message: "tar extract from user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-unzip-no-check
+    pattern: "\\bunzip\\s+[^|]*\\$\\w+"
+    severity: medium
+    message: "unzip from user input — path traversal (Zip Slip)"
+    metadata: {cwe: "CWE-22"}

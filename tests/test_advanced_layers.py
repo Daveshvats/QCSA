@@ -79,9 +79,9 @@ def test_suppression_specific_rule(tmp_path):
 def test_is_suppressed_same_line(tmp_path):
     src = tmp_path / "app.py"
     src.write_text("eval(x)  # stca: ignore\n")
-    sups = find_suppressions(src)
+    sups = find_suppressions(src, tmp_path)  # v4.15: pass repo_root for relative paths
     finding = Finding(layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
-                      message="eval()", file=str(src), start_line=1)
+                      message="eval()", file="app.py", start_line=1)  # v4.15: relative path
     is_sup, _ = is_suppressed(finding.file, finding.start_line, finding.rule_id, sups)
     assert is_sup
 
@@ -90,8 +90,8 @@ def test_is_suppressed_line_above(tmp_path):
     """Comment on line N suppresses finding on line N+1."""
     src = tmp_path / "app.py"
     src.write_text("# stca: ignore\neval(x)\n")
-    sups = find_suppressions(src)
-    is_sup, _ = is_suppressed(str(src), 2, "L0.sast.mini:py-eval", sups)
+    sups = find_suppressions(src, tmp_path)  # v4.15: pass repo_root
+    is_sup, _ = is_suppressed("app.py", 2, "L0.sast.mini:py-eval", sups)  # v4.15: relative
     assert is_sup
 
 
@@ -100,9 +100,9 @@ def test_filter_suppressed_returns_kept_and_suppressed(tmp_path):
     src.write_text("eval(x)  # stca: ignore\nprint('safe')\n")
     findings = [
         Finding(layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
-                message="eval()", file=str(src), start_line=1),
+                message="eval()", file="app.py", start_line=1),  # v4.15: relative
         Finding(layer=LayerID.L0_FAST, rule_id="L0.print",
-                message="print", file=str(src), start_line=2),
+                message="print", file="app.py", start_line=2),  # v4.15: relative
     ]
     kept, suppressed = filter_suppressed(findings, tmp_path)
     # the stca: ignore on line 1 suppresses BOTH findings on that line
@@ -120,9 +120,9 @@ def test_filter_suppressed_specific_rule(tmp_path):
     src.write_text("eval(x)  # stca: ignore[L0.sast.mini:py-eval]\n")
     findings = [
         Finding(layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
-                message="eval()", file=str(src), start_line=1),
+                message="eval()", file="app.py", start_line=1),  # v4.15: relative
         Finding(layer=LayerID.L0_FAST, rule_id="L0.some-other-rule",
-                message="other", file=str(src), start_line=1),
+                message="other", file="app.py", start_line=1),  # v4.15: relative
     ]
     kept, suppressed = filter_suppressed(findings, tmp_path)
     assert len(suppressed) == 1
@@ -335,8 +335,10 @@ def test_tuner_no_adjustment_when_balanced():
 # === Auto-Fix ===
 
 def test_autofix_eval_to_literal_eval(tmp_path):
+    """eval() with a LITERAL argument should be fixed to ast.literal_eval()."""
     src = tmp_path / "app.py"
-    src.write_text("def f(x):\n    return eval(x)\n")
+    # Use a literal string argument — ast.literal_eval can handle this
+    src.write_text("def f():\n    return eval('[1, 2, 3]')\n")
     finding = Finding(
         layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
         message="eval()", file="app.py", start_line=2,
@@ -346,6 +348,68 @@ def test_autofix_eval_to_literal_eval(tmp_path):
     assert patch is not None
     assert "ast.literal_eval" in patch
     assert "import ast" in patch
+    # Verify the patched code actually parses
+    import ast as _ast
+    _ast.parse(patch)
+
+
+def test_autofix_eval_rejects_dynamic_args(tmp_path):
+    """eval() with a dynamic argument (variable, f-string) should NOT be fixed.
+
+    ast.literal_eval would crash on these — the fixer must reject them.
+    """
+    from stca.layers.l8_autofix import _fix_eval_python
+
+    # Variable argument — should NOT be fixed
+    src = tmp_path / "app.py"
+    src.write_text("def f(x):\n    return eval(x)\n")
+    finding = Finding(
+        layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
+        message="eval()", file="app.py", start_line=2,
+    )
+    patch = _fix_eval_python(finding, tmp_path)
+    assert patch is None  # rejected — would break at runtime
+
+    # F-string argument — should NOT be fixed
+    src.write_text("def f(name):\n    return eval(f'{name}')\n")
+    finding = Finding(
+        layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
+        message="eval()", file="app.py", start_line=2,
+    )
+    patch = _fix_eval_python(finding, tmp_path)
+    assert patch is None  # rejected — would break at runtime
+
+
+def test_autofix_hardcoded_password_produces_valid_syntax(tmp_path):
+    """The password fixer must produce code that actually parses.
+
+    Regression test for the bug where commenting out just the `if` line
+    left the indented body, causing a SyntaxError.
+    """
+    src = tmp_path / "app.py"
+    src.write_text(
+        'def check(user_input):\n'
+        '    password = user_input\n'
+        '    if password == "admin123":\n'
+        '        print("authenticated")\n'
+        '        return True\n'
+        '    return False\n'
+    )
+    finding = Finding(
+        layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-hardcoded-password",
+        message="hardcoded password", file="app.py", start_line=3,
+    )
+    from stca.layers.l8_autofix import _fix_hardcoded_password
+    patch = _fix_hardcoded_password(finding, tmp_path)
+    assert patch is not None
+    # CRITICAL: the patched code must parse without SyntaxError
+    import ast as _ast
+    _ast.parse(patch)  # raises if broken
+    # The if-line should be commented out
+    assert '# if password == "admin123":' in patch
+    # The body should also be commented out (not left dangling)
+    assert '# print("authenticated")' in patch
+    assert '# return True' in patch
 
 
 def test_autofix_bare_except(tmp_path):

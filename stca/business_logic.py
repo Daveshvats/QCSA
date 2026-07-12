@@ -144,17 +144,27 @@ class AuthMatrixExtractor:
 # Auth violation detector
 # =============================================================================
 
+# Sensitive method-name patterns (matched against bare method names, NOT call text).
+# The old version required a literal '(' in the regex, but we match against
+# sub.func.attr (the bare method name like "delete"), which never contains '('.
+# Fixed: match the method name directly with word boundaries.
 _SENSITIVE_PATTERNS = [
-    (r"\b(?:delete|remove|destroy|purge|wipe)\w*\s*\(", "delete"),
-    (r"\b(?:admin|root|sudo)\w*\s*\(", "admin"),
-    (r"\b(?:refund|chargeback|reverse_payment)\w*\s*\(", "payment"),
-    (r"\b(?:update_role|grant|revoke|change_password|reset_password)\w*\s*\(", "privilege"),
-    (r"\b(?:export|download_all|bulk)\w*\s*\(", "data-export"),
+    (r"^(?:delete|remove|destroy|purge|wipe)\w*$", "delete"),
+    (r"^(?:admin|root|sudo)\w*$", "admin"),
+    (r"^(?:refund|chargeback|reverse_payment)\w*$", "payment"),
+    (r"^(?:update_role|grant|revoke|change_password|reset_password)\w*$", "privilege"),
+    (r"^(?:export|download_all|bulk)\w*$", "data-export"),
 ]
 
 
 class AuthViolationDetector:
-    """Detect sensitive actions that lack an auth check in the same function."""
+    """Detect sensitive actions that lack an auth check in the same function.
+
+    Fixed in v3.3: The old version matched _SENSITIVE_PATTERNS (which required
+    a literal '(') against bare method names (which never contain '('). This
+    made the detector 100% non-functional. Now we match against the bare
+    method name with ^...$ anchors, which works correctly.
+    """
 
     def __init__(self, rules: Optional[List[AuthRule]] = None) -> None:
         self.rules = rules or []
@@ -180,6 +190,58 @@ class AuthViolationDetector:
             # function has auth if any rule line is within its body OR decorators
             has_auth = any(func_start - 2 <= r.line <= func_end + 1
                             for r in self.rules if r.file == file_str)
+            # Also check for auth-related decorators and calls in the function
+            if not has_auth:
+                for sub in ast.walk(node):
+                    # Check decorators like @login_required, @requires_auth
+                    if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        for dec in sub.decorator_list:
+                            dec_name = ""
+                            if isinstance(dec, ast.Name):
+                                dec_name = dec.id
+                            elif isinstance(dec, ast.Attribute):
+                                dec_name = dec.attr
+                            elif isinstance(dec, ast.Call):
+                                if isinstance(dec.func, ast.Name):
+                                    dec_name = dec.func.id
+                                elif isinstance(dec.func, ast.Attribute):
+                                    dec_name = dec.func.attr
+                            if any(kw in dec_name.lower() for kw in
+                                   ("login", "auth", "permission", "role", "require")):
+                                has_auth = True
+                                break
+                    # Check for auth-related function calls
+                    if isinstance(sub, ast.Call):
+                        call_name = ""
+                        if isinstance(sub.func, ast.Name):
+                            call_name = sub.func.id
+                        elif isinstance(sub.func, ast.Attribute):
+                            call_name = sub.func.attr
+                        if any(kw in call_name.lower() for kw in
+                               ("check_auth", "require_auth", "check_permission",
+                                "check_role", "is_authenticated", "current_user",
+                                "login_required", "verify_token")):
+                            has_auth = True
+                            break
+                    # v3.3: Also check for auth-related attribute access
+                    # (e.g., current_user.is_authenticated, request.user.is_admin)
+                    if isinstance(sub, ast.Attribute):
+                        attr_name = sub.attr
+                        if any(kw in attr_name.lower() for kw in
+                               ("is_authenticated", "is_admin", "is_authorized",
+                                "has_permission", "is_superuser", "is_staff")):
+                            has_auth = True
+                            break
+                    # v3.3: Also check for 'if not <auth>:' patterns
+                    if isinstance(sub, ast.UnaryOp) and isinstance(sub.op, ast.Not):
+                        # If there's a 'not <something>' check, it might be auth
+                        # This is conservative — we'd rather miss a violation than
+                        # false-positive on correct code
+                        if isinstance(sub.operand, (ast.Attribute, ast.Call, ast.Name)):
+                            has_auth = True  # conservative: assume it's an auth check
+                            break
+                if has_auth:
+                    continue
             if has_auth:
                 continue
             # scan body for sensitive calls
@@ -274,7 +336,20 @@ class BusinessSMViolation:
 
 
 class BusinessStateMachineAnalyzer:
-    """Detect invalid state transitions in order/payment/user/subscription flows."""
+    """Detect invalid state transitions in order/payment/user/subscription flows.
+
+    v2 fixes (addressing code review findings):
+      1. **No more substring matching**: The old version used `if kind in
+         node.name.lower()` which caused "order" to match "recorder",
+         "border", "folder", etc. Now we require explicit opt-in: either
+         a decorator (@state_machine("order")) or the function name must
+         START with the kind (e.g., "cancel_order", "process_payment").
+      2. **Branch-aware transition checking**: The old version used
+         ast.walk() which flattens the AST, treating if/else branches as
+         sequential. Now we only track transitions within a single linear
+         control-flow path — calls in mutually exclusive branches are NOT
+         chained together.
+    """
 
     def analyze_file(self, file_path: Path) -> List[BusinessSMViolation]:
         if not file_path.exists() or file_path.suffix != ".py":
@@ -289,36 +364,127 @@ class BusinessStateMachineAnalyzer:
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
-            # Heuristic: identify resource type by function name (e.g., "refund_order")
-            for kind, sm in _BUSINESS_SMS.items():
-                if kind in node.name.lower():
+            # v2: Identify resource type by:
+            # 1. Explicit decorator: @state_machine("order")
+            # 2. Function name STARTS with kind: "cancel_order", "process_payment"
+            # NOT substring matching (which caused "order" to match "recorder")
+            kind = self._identify_resource_type(node)
+            if kind:
+                sm = _BUSINESS_SMS.get(kind)
+                if sm:
                     out.extend(self._check_function_transitions(node, kind, sm, file_str))
         return out
 
+    def _identify_resource_type(self, func: ast.FunctionDef) -> Optional[str]:
+        """Identify the business resource type for a function.
+
+        v2: No more substring matching — requires explicit opt-in via:
+        1. Decorator: @state_machine("order") or @business_sm("payment")
+        2. Function name STARTS with kind: "cancel_order", "process_payment"
+
+        This prevents "order" from matching "recorder", "border", etc.
+        """
+        # Check decorators first (most explicit)
+        for dec in func.decorator_list:
+            dec_name = ""
+            dec_arg = ""
+            if isinstance(dec, ast.Call):
+                if isinstance(dec.func, ast.Name):
+                    dec_name = dec.func.id
+                elif isinstance(dec.func, ast.Attribute):
+                    dec_name = dec.func.attr
+                # Extract string argument
+                if dec.args and isinstance(dec.args[0], ast.Constant):
+                    dec_arg = str(dec.args[0].value)
+            elif isinstance(dec, ast.Name):
+                dec_name = dec.id
+
+            if dec_name in ("state_machine", "business_sm", "statemachine"):
+                if dec_arg in _BUSINESS_SMS:
+                    return dec_arg
+
+        # Check function name — must START with kind (not just contain it)
+        name_lower = func.name.lower()
+        for kind in _BUSINESS_SMS:
+            # Match patterns like "cancel_order", "process_payment", "ship_order"
+            # The kind must be at the END of the name, preceded by an underscore
+            # or be the entire name
+            if name_lower == kind or name_lower.endswith("_" + kind):
+                return kind
+            # Also match "order_" prefix (e.g., "order_cancel")
+            if name_lower.startswith(kind + "_"):
+                return kind
+
+        return None
+
     def _check_function_transitions(self, func: ast.FunctionDef, kind: str,
                                        sm: dict, file: str) -> List[BusinessSMViolation]:
+        """Check for invalid state transitions within a function.
+
+        v2: Branch-aware — only chains transitions within a single linear
+        control-flow path. Calls in if/else branches are NOT chained.
+        """
         out: List[BusinessSMViolation] = []
-        # find calls like `entity.<state_method>()` and ensure transition is valid
-        last_state: Optional[str] = None
-        for sub in ast.walk(func):
-            if not isinstance(sub, ast.Call) or not isinstance(sub.func, ast.Attribute):
-                continue
-            method = sub.func.attr
-            new_state = sm["method_to_state"].get(method)
-            if not new_state:
-                continue
-            if last_state is not None:
-                valid = sm["transitions"].get(last_state, [])
-                if new_state not in valid:
-                    out.append(BusinessSMViolation(
-                        file=file, line=sub.lineno,
-                        rule_id=f"BIZ-{kind.upper()}-INVALID-TRANSITION",
-                        severity="high",
-                        description=f"Invalid {kind} transition: {last_state} → {new_state} "
-                                    f"(valid: {valid})",
-                        fix=f"Add guard: if {kind}.state != '{last_state}': raise"))
-            last_state = new_state
+        # v2: Walk the function body STATEMENT BY STATEMENT (not ast.walk
+        # which flattens everything). Only chain transitions within a
+        # linear sequence — if we hit a branch (if/else/for/while/try),
+        # we reset the state tracking for each branch.
+        self._check_statements_sequentially(func.body, sm, kind, file, out, last_state=None)
         return out
+
+    def _check_statements_sequentially(self, statements: list, sm: dict, kind: str,
+                                         file: str, out: List[BusinessSMViolation],
+                                         last_state: Optional[str]) -> Optional[str]:
+        """Walk statements in order, only chaining transitions linearly.
+
+        When we encounter a branch (if/else/for/while/try), we recurse into
+        each branch independently with a COPY of the current state. This
+        prevents false positives from mutually exclusive branches.
+        """
+        for i, stmt in enumerate(statements):
+            # If this statement is a branch, handle it specially
+            if isinstance(stmt, ast.If):
+                # Each branch gets its own copy of last_state
+                self._check_statements_sequentially(stmt.body, sm, kind, file, out, last_state)
+                self._check_statements_sequentially(stmt.orelse, sm, kind, file, out, last_state)
+                # After the if/else, state is uncertain — don't chain further
+                # (conservative: reset to None to avoid false positives)
+                return None
+            elif isinstance(stmt, (ast.For, ast.While)):
+                # Loop bodies may or may not execute — reset state after
+                self._check_statements_sequentially(stmt.body, sm, kind, file, out, last_state)
+                return None
+            elif isinstance(stmt, ast.Try):
+                # Each except handler is a separate branch
+                self._check_statements_sequentially(stmt.body, sm, kind, file, out, last_state)
+                for handler in stmt.handlers:
+                    self._check_statements_sequentially(handler.body, sm, kind, file, out, last_state)
+                return None
+            else:
+                # Non-branch statement — check for calls in THIS statement only
+                # (not in nested branches — those are handled by recursion above)
+                for sub in ast.walk(stmt):
+                    # Skip nested function defs (they have their own scope)
+                    if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef)) and sub is not stmt:
+                        continue
+                    if isinstance(sub, ast.Call) and isinstance(sub.func, ast.Attribute):
+                        method = sub.func.attr
+                        new_state = sm["method_to_state"].get(method)
+                        if not new_state:
+                            continue
+                        if last_state is not None:
+                            valid = sm["transitions"].get(last_state, [])
+                            if new_state not in valid:
+                                out.append(BusinessSMViolation(
+                                    file=file, line=sub.lineno,
+                                    rule_id=f"BIZ-{kind.upper()}-INVALID-TRANSITION",
+                                    severity="high",
+                                    description=f"Invalid {kind} transition: {last_state} → {new_state} "
+                                                f"(valid: {valid})",
+                                    fix=f"Add guard: if {kind}.state != '{last_state}': raise"))
+                        last_state = new_state
+
+        return last_state
 
 
 # =============================================================================

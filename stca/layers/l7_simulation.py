@@ -1,4 +1,4 @@
-"""L7 — Deterministic simulation testing (stub).
+"""L7 — Deterministic simulation testing (EXPERIMENTAL stub).
 
 Full deterministic simulation requires a deterministic hypervisor like
 Antithesis. We provide a lightweight stub that:
@@ -11,10 +11,6 @@ In production, replace this with Antithesis integration or
 `loom`/`shuttle` (Rust deterministic concurrency testing).
 """
 from __future__ import annotations
-
-import logging
-
-logger = logging.getLogger("stca.layers.l7_simulation")
 
 import re
 import subprocess
@@ -100,7 +96,7 @@ class L7Simulation(LayerBase):
                                 cwe="CWE-362",
                                 raw={"line": line},
                             ))
-            except Exception as e:
-                logger.warning("simulation layer scanner failed: %s", e)
+            except Exception:
+                pass
 
         return findings

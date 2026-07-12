@@ -122,10 +122,13 @@ def process():
 
 
 def test_typestate_finds_requires_prior(tmp_path):
-    """Should detect method called without required prior method."""
+    """Should detect method called without required prior method.
+
+    v2: Uses type annotation (not constructor) so the prior is NOT satisfied.
+    """
     src = tmp_path / "app.py"
     src.write_text("""
-def process(conn):
+def process(conn: sqlite3.Connection):
     return conn.execute("SELECT 1")
 """)
     violations = analyze_typestate(src)
@@ -134,11 +137,15 @@ def process(conn):
 
 
 def test_typestate_finds_double_action(tmp_path):
-    """Should detect double-close / double-commit."""
+    """Should detect double-close / double-commit.
+
+    v2: Requires type evidence — uses constructor assignment.
+    """
     src = tmp_path / "app.py"
     src.write_text("""
-def process(conn):
-    conn.connect()
+def process():
+    conn = connect()
+    conn.execute("SELECT 1")
     conn.close()
     conn.close()
 """)
@@ -148,11 +155,14 @@ def process(conn):
 
 
 def test_typestate_passes_for_correct_usage(tmp_path):
-    """Should not flag correct protocol usage."""
+    """Should not flag correct protocol usage.
+
+    v2: Uses constructor assignment for type evidence.
+    """
     src = tmp_path / "app.py"
     src.write_text("""
-def process(conn):
-    conn.connect()
+def process():
+    conn = connect()
     conn.execute("SELECT 1")
     conn.close()
 """)
@@ -161,15 +171,34 @@ def process(conn):
     assert len(serious) == 0
 
 
+def test_typestate_no_false_positive_on_dict_get(tmp_path):
+    """v2 regression test: dict.get() must NOT be flagged as session_like violation.
+
+    This is the exact false-positive case from the code review — the old
+    version flagged cache.get() because 'get' is in session_like.methods.
+    """
+    src = tmp_path / "app.py"
+    src.write_text("""
+def sync_data(api_client, cache):
+    data = api_client.get("/users")
+    cache.get("key")
+    api_client.post("/sync", data=data)
+    return data
+""")
+    violations = analyze_typestate(src)
+    # No type evidence → no violations (correct behavior)
+    assert len(violations) == 0
+
+
 # === Metamorphic ===
 
 def test_metamorphic_classifies_sort_function():
-    cats = _classify_function("sort_list", "def sort_list(x): return sorted(x)")
+    cats = _classify_function("sort_list", "def sort_list(x): return sorted(x)", arity=1)
     assert "sort" in cats
 
 
 def test_metamorphic_classifies_hash_function():
-    cats = _classify_function("compute_hash", "def compute_hash(x): return hash(x)")
+    cats = _classify_function("compute_hash", "def compute_hash(x): return hash(x)", arity=1)
     assert "hash" in cats
 
 

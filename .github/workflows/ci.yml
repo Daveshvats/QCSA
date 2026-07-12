@@ -1,0 +1,95 @@
+name: CI
+
+# v4.5: Real CI for STCA's own source code.
+# Previously the only workflow (stca.yml) was a template for users to scan
+# THEIR repos with STCA — it never tested STCA itself. This workflow runs
+# the test suite, type checker, and STCA's own self-scan on every push/PR.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install STCA with dev dependencies
+        run: |
+          pip install -e ".[dev]"
+      - name: Run test suite
+        run: |
+          python -m pytest tests/ --tb=short -q
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install STCA with dev dependencies
+        run: |
+          pip install -e ".[dev]"
+      - name: Run mypy (gradual mode)
+        run: |
+          python -m mypy stca/ --ignore-missing-imports || true
+        continue-on-error: true  # Don't block PRs yet — gradual adoption
+
+  self-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install STCA
+        run: |
+          pip install -e ".[dev]"
+      - name: Run STCA on itself (self-scan / dogfooding)
+        run: |
+          # v4.6: Dogfooding gate — run STCA on its own source.
+          # Fails the build if any scanner errors occur (--strict-scanners).
+          # Historical debt is tracked but doesn't fail CI.
+          stca check --repo . --full --strict-scanners --json > self-scan.json || true
+          # Check for scanner errors (the --strict-scanners flag would exit 3)
+          python3 -c "
+          import json, sys
+          with open('self-scan.json') as f:
+              text = f.read()
+          start = text.find('{')
+          if start < 0:
+              print('No JSON output from STCA self-scan')
+              sys.exit(1)
+          import json
+          decoder = json.JSONDecoder()
+          data, _ = decoder.raw_decode(text[start:])
+          errors = data.get('scanner_error_count', 0)
+          if errors > 0:
+              print(f'STCA self-scan: {errors} scanner errors — failing build')
+              for e in data.get('scanner_health', []):
+                  if e.get('level') == 'warning':
+                      print(f'  {e.get(\"scanner\")}: {e.get(\"error\")[:100]}')
+              sys.exit(1)
+          findings = len(data.get('findings', []))
+          print(f'STCA self-scan: {findings} findings, 0 scanner errors — OK')
+          "
+      - name: Upload self-scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stca-self-scan
+          path: self-scan.json

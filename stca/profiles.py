@@ -29,10 +29,6 @@ Or use built-in profiles via CLI:
 """
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.profiles")
-
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Set, Optional
@@ -154,8 +150,8 @@ class ProfileManager:
             raw = yaml.safe_load(self.config_path.read_text(encoding="utf-8")) or {}
             for name, data in (raw.get("profiles") or {}).items():
                 self.profiles[name] = Profile.from_dict(name, data)
-        except Exception as e:
-            logger.warning("Failed to load custom profiles from %s: %s", self.config_path, e)
+        except Exception:
+            pass
 
     def get_profile(self, name: str) -> Optional[Profile]:
         """Get a profile by name, resolving 'extends' inheritance."""

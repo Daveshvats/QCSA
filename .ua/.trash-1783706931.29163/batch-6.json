@@ -1,0 +1,303 @@
+{
+  "nodes": [
+    {
+      "id": "file:.github/actions/stca-action/action.yml",
+      "type": "infra",
+      "name": "stca-action",
+      "filePath": ".github/actions/stca-action/action.yml",
+      "summary": "Composite GitHub Action that installs STCA, runs static analysis on PRs, checks for blocking severities, and uploads SARIF results to GitHub Code Scanning.",
+      "tags": ["github-action", "ci-cd", "sarif", "static-analysis"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.github/workflows/stca.yml",
+      "type": "infra",
+      "name": "stca-workflow",
+      "filePath": ".github/workflows/stca.yml",
+      "summary": "GitHub Actions workflow that runs STCA on pull requests (diff-only) and pushes (full scan), uploads SARIF, and fails the build on critical findings.",
+      "tags": ["github-actions", "ci-cd", "sarif", "pull-request", "push"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:examples/rules/custom.semgrep.yml",
+      "type": "config",
+      "name": "custom-semgrep-rules",
+      "filePath": "examples/rules/custom.semgrep.yml",
+      "summary": "Example custom Semgrep rules demonstrating how to extend STCA with user-defined patterns for Python (secret leakage, SQL injection, hardcoded passwords).",
+      "tags": ["semgrep", "example", "custom-rules", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:examples/sample-python-repo/.stca.yaml",
+      "type": "config",
+      "name": "sample-stca-config",
+      "filePath": "examples/sample-python-repo/.stca.yaml",
+      "summary": "Example STCA pipeline configuration showing layer toggles, critical/concurrency paths, block/warn severity levels, LLM settings, and output directories.",
+      "tags": ["stca-config", "example", "yaml", "layers"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:pyproject.toml",
+      "type": "config",
+      "name": "pyproject",
+      "filePath": "pyproject.toml",
+      "summary": "Python project configuration defining package metadata (stca-pipeline v0.1.0), dependencies (tree-sitter, numpy, scikit-fuzzy), optional extras (LLM, fuzz, mutation, property), CLI entry point, and pytest settings.",
+      "tags": ["python", "packaging", "dependencies", "setuptools", "entry-point"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:README.md",
+      "type": "document",
+      "name": "README",
+      "filePath": "README.md",
+      "summary": "Project documentation covering STCA Pipeline's architecture (15 analysis layers + 6 detection engines + IT2-FIS aggregation brain), CLI commands, CPG queries, typestate analysis, metamorphic/differential testing, LLM-as-oracle, detection depth comparison with commercial tools, quick start guide, and honest limits.",
+      "tags": ["documentation", "architecture", "readme", "getting-started"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:worklog.md",
+      "type": "document",
+      "name": "worklog",
+      "filePath": "worklog.md",
+      "summary": "Development worklog documenting P0/P1 follow-up fixes: nullness analyzer bug fix (bare function calls), silent error swallowing audit across 25 files (44 patterns replaced with logged warnings), scanner health tracking system, and CLI flags (--strict-scanners, --verbose).",
+      "tags": ["worklog", "development", "bug-fix", "refactoring"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca_pipeline.egg-info/entry_points.txt",
+      "type": "config",
+      "name": "entry-points",
+      "filePath": "stca_pipeline.egg-info/entry_points.txt",
+      "summary": "Package entry points registering the `stca` console script pointing to stca.cli:main.",
+      "tags": ["entry-point", "cli", "egg-info"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca_pipeline.egg-info/requires.txt",
+      "type": "config",
+      "name": "requires",
+      "filePath": "stca_pipeline.egg-info/requires.txt",
+      "summary": "Auto-generated dependency list for the stca-pipeline package including core deps (click, rich, pyyaml, tree-sitter, numpy, scikit-fuzzy) and optional extras.",
+      "tags": ["dependencies", "egg-info", "requirements"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca_pipeline.egg-info/SOURCES.txt",
+      "type": "config",
+      "name": "sources",
+      "filePath": "stca_pipeline.egg-info/SOURCES.txt",
+      "summary": "Auto-generated manifest of all source files included in the stca-pipeline package distribution.",
+      "tags": ["manifest", "egg-info", "package-listing"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca_pipeline.egg-info/top_level.txt",
+      "type": "config",
+      "name": "top-level",
+      "filePath": "stca_pipeline.egg-info/top_level.txt",
+      "summary": "Auto-generated top-level package name (stca) for the installed distribution.",
+      "tags": ["package-name", "egg-info"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca_pipeline.egg-info/dependency_links.txt",
+      "type": "config",
+      "name": "dependency-links",
+      "filePath": "stca_pipeline.egg-info/dependency_links.txt",
+      "summary": "Empty dependency links file (no external package repositories configured).",
+      "tags": ["dependency-links", "egg-info"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/cpp-security.yml",
+      "type": "config",
+      "name": "cpp-security",
+      "filePath": "stca/rules/packs/cpp-security.yml",
+      "summary": "Semgrep rule pack for C/C++ security: 12 rules covering buffer overflows (gets, strcpy, sprintf), command injection (system), use-after-free, format string attacks, unchecked malloc, and raw pointer misuse.",
+      "tags": ["rule-pack", "semgrep", "c-cpp", "security", "owasp"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/detekt-ported.yml",
+      "type": "config",
+      "name": "detekt-ported",
+      "filePath": "stca/rules/packs/detekt-ported.yml",
+      "summary": "Semgrep rule pack ported from detekt (Kotlin linter) to Python: covers complexity rules (complex conditions, long methods, too many parameters), style rules (return count, naming), and potential-bugs patterns adapted from Kotlin to Python.",
+      "tags": ["rule-pack", "semgrep", "python", "detekt", "complexity", "style"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/go-security.yml",
+      "type": "config",
+      "name": "go-security",
+      "filePath": "stca/rules/packs/go-security.yml",
+      "summary": "Semgrep rule pack for Go security: 12 rules covering shell injection (exec.Command), SQL injection (fmt.Sprintf), TLS bypass (InsecureSkipVerify), broken crypto (MD5/SHA1), hardcoded secrets, insecure randomness (math/rand), path traversal, defer-in-loop, error shadowing, and swallowed errors.",
+      "tags": ["rule-pack", "semgrep", "go", "security", "owasp"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/java-frameworks.yml",
+      "type": "config",
+      "name": "java-frameworks",
+      "filePath": "stca/rules/packs/java-frameworks.yml",
+      "summary": "Semgrep rule pack for Java framework security: covers Spring (CSRF disabled, permitAll, actuator exposure, RequestMapping without auth), Hibernate (HQL injection, N+1 queries, lazy loading), and JPA (open-in-view) patterns.",
+      "tags": ["rule-pack", "semgrep", "java", "spring", "hibernate", "frameworks"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/java-security.yml",
+      "type": "config",
+      "name": "java-security",
+      "filePath": "stca/rules/packs/java-security.yml",
+      "summary": "Semgrep rule pack for Java security: 12 rules covering command injection (Runtime.exec, ProcessBuilder), SQL injection, XXE, unsafe deserialization (ObjectInputStream), broken crypto (MD5/SHA1), trust-all certs, hardcoded passwords, printStackTrace leaks, busy-wait, and empty catch blocks.",
+      "tags": ["rule-pack", "semgrep", "java", "security", "owasp"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/javascript-frameworks.yml",
+      "type": "config",
+      "name": "javascript-frameworks",
+      "filePath": "stca/rules/packs/javascript-frameworks.yml",
+      "summary": "Semgrep rule pack for JavaScript/TypeScript framework security: covers Express.js (helmet, CORS wildcard, CSRF, body parser limits), React (dangerouslySetInnerHTML, prop drilling), Next.js (getServerSideProps SSR issues, API routes), and NestJS patterns.",
+      "tags": ["rule-pack", "semgrep", "javascript", "react", "express", "nextjs", "frameworks"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/javascript-security.yml",
+      "type": "config",
+      "name": "javascript-security",
+      "filePath": "stca/rules/packs/javascript-security.yml",
+      "summary": "Semgrep rule pack for JavaScript/TypeScript security: 21 rules covering injection (eval, new Function, child_process.exec), XSS (innerHTML, document.write, dangerouslySetInnerHTML), prototype pollution, TLS bypass, hardcoded secrets, JWT bypass, path traversal, SQL injection, ReDoS, info disclosure, and performance bugs.",
+      "tags": ["rule-pack", "semgrep", "javascript", "typescript", "security", "owasp"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/lintr-ported.yml",
+      "type": "config",
+      "name": "lintr-ported",
+      "filePath": "stca/rules/packs/lintr-ported.yml",
+      "summary": "Semgrep rule pack ported from lintr (R linter) to Python: covers assignment operators, brace spacing, operator spacing, quotes, semicolons, line length, indentation, naming conventions, deprecated patterns, and function complexity.",
+      "tags": ["rule-pack", "semgrep", "python", "lintr", "style", "linting"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/luacheck-ported.yml",
+      "type": "config",
+      "name": "luacheck-ported",
+      "filePath": "stca/rules/packs/luacheck-ported.yml",
+      "summary": "Semgrep rule pack ported from luacheck (Lua linter) to Python: covers undefined globals, global access in functions, read-only violations (builtin modification), unused variables, recursive calls, redefined variables, and variable shadowing.",
+      "tags": ["rule-pack", "semgrep", "python", "luacheck", "code-quality"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/python-frameworks.yml",
+      "type": "config",
+      "name": "python-frameworks",
+      "filePath": "stca/rules/packs/python-frameworks.yml",
+      "summary": "Semgrep rule pack for Python framework security: covers Django (raw SQL, debug mode, ALLOWED_HOSTS, CSRF, SQL injection in ORM), Flask (debug mode, Markup XSS, secret key in source), and FastAPI (dependency injection, middleware) patterns.",
+      "tags": ["rule-pack", "semgrep", "python", "django", "flask", "fastapi", "frameworks"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/python-security.yml",
+      "type": "config",
+      "name": "python-security",
+      "filePath": "stca/rules/packs/python-security.yml",
+      "summary": "Semgrep rule pack for Python security: 25 rules covering injection (eval, exec, subprocess shell=True, os.system), SQL injection (f-string, string concat, %), deserialization (pickle, yaml.load, JWT), auth (hardcoded passwords/secrets, broken crypto), SSRF, path traversal, XSS (Flask Markup, Django mark_safe), info disclosure, race conditions, and business logic antipatterns.",
+      "tags": ["rule-pack", "semgrep", "python", "security", "owasp"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/react-security.yml",
+      "type": "config",
+      "name": "react-security",
+      "filePath": "stca/rules/packs/react-security.yml",
+      "summary": "Semgrep rule pack for React/JavaScript application security: 30 rules addressing specific audit findings including JWT in localStorage (CWE-922), JSX template XSS, dangerouslySetInnerHTML, AES-ECB mode, hardcoded encryption keys, window.open without noopener, test URLs in production, hardcoded UUIDs, missing CSP, console.log sensitive data, CORS wildcard, missing auth guards, privilege escalation via default-allow, and more.",
+      "tags": ["rule-pack", "semgrep", "react", "javascript", "security", "audit-driven"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/rules/packs/spotbugs-ported.yml",
+      "type": "config",
+      "name": "spotbugs-ported",
+      "filePath": "stca/rules/packs/spotbugs-ported.yml",
+      "summary": "Semgrep rule pack ported from SpotBugs (Java linter) to Python: covers bad practice (__eq__ without __hash__, finalize without super), correctness (empty except, bare except), malicious code (mutable default args), multi-threading (GIL, race conditions), performance (unnecessary list comprehension), and security patterns.",
+      "tags": ["rule-pack", "semgrep", "python", "spotbugs", "code-quality", "security"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:README.md",
+      "target": "file:pyproject.toml",
+      "type": "documents",
+      "label": "describes project configuration"
+    },
+    {
+      "source": "file:README.md",
+      "target": "file:.github/workflows/stca.yml",
+      "type": "documents",
+      "label": "references CI workflow"
+    },
+    {
+      "source": "file:README.md",
+      "target": "file:.github/actions/stca-action/action.yml",
+      "type": "documents",
+      "label": "references GitHub Action"
+    },
+    {
+      "source": "file:README.md",
+      "target": "file:examples/sample-python-repo/.stca.yaml",
+      "type": "documents",
+      "label": "shows example config"
+    },
+    {
+      "source": "file:README.md",
+      "target": "file:examples/rules/custom.semgrep.yml",
+      "type": "documents",
+      "label": "shows custom rules example"
+    },
+    {
+      "source": "file:README.md",
+      "target": "file:stca/rules/packs/python-security.yml",
+      "type": "documents",
+      "label": "documents bundled rule packs"
+    },
+    {
+      "source": "file:pyproject.toml",
+      "target": "file:stca_pipeline.egg-info/entry_points.txt",
+      "type": "configures",
+      "label": "defines CLI entry point"
+    },
+    {
+      "source": "file:pyproject.toml",
+      "target": "file:stca_pipeline.egg-info/requires.txt",
+      "type": "configures",
+      "label": "specifies dependencies"
+    },
+    {
+      "source": "file:.github/workflows/stca.yml",
+      "target": "file:.github/actions/stca-action/action.yml",
+      "type": "calls",
+      "label": "can invoke composite action"
+    },
+    {
+      "source": "file:examples/sample-python-repo/.stca.yaml",
+      "target": "file:pyproject.toml",
+      "type": "configures",
+      "label": "example project config for pipeline"
+    },
+    {
+      "source": "file:examples/rules/custom.semgrep.yml",
+      "target": "file:stca/rules/packs/python-security.yml",
+      "type": "extends",
+      "label": "custom rules extend bundled pack"
+    },
+    {
+      "source": "file:worklog.md",
+      "target": "file:README.md",
+      "type": "documents",
+      "label": "development history for project"
+    }
+  ]
+}

@@ -201,7 +201,7 @@ GITHUB_ACTIONS_RULES = [
 
 
 class L0eIaC(LayerBase):
-    id = LayerID.L0_FAST
+    id = LayerID.L0E_IAC  # v4.11: use own LayerID
     name = "IaC Scanning"
     description = "Dockerfile, Kubernetes, Terraform, CloudFormation, GitHub Actions misconfig detection"
     LAYER_TAG = "L0e_iac"
@@ -222,6 +222,11 @@ class L0eIaC(LayerBase):
         elif self.is_tool_available("kics"):
             findings += self._run_kics(repo_root)
         # 3. Built-in rules
+        # v4.34: l0e_iac.py focuses on the L0e.* rule namespace (built-in Dockerfile/K8s/Terraform/GHA rules).
+        # The orchestrator also runs iac_scanner.scan_iac() which produces L0.iac.* findings —
+        # the two were duplicating work. Now l0e_iac.py only scans files in the diff (or all_iac_files
+        # if checkov/kics unavailable), while iac_scanner handles the repo-wide sweep.
+        # Both run, but they target different rule_id prefixes and don't duplicate findings.
         findings += self._scan_dockerfiles(repo_root, all_files)
         findings += self._scan_k8s(repo_root, all_files)
         findings += self._scan_terraform(repo_root, all_files)
@@ -264,9 +269,28 @@ class L0eIaC(LayerBase):
             except Exception:
                 continue
             has_healthcheck = bool(re.search(r"^\s*HEALTHCHECK", text, re.MULTILINE))
+
+            # v4.33: docker-no-healthcheck is a FILE-LEVEL absence check.
+            # v4.32 ran it inside the per-line loop, so a 4-line Dockerfile
+            # without HEALTHCHECK fired 4 times. Now fire exactly once per file.
+            if not has_healthcheck:
+                no_hc_rule = next(r for r in DOCKERFILE_RULES if r["id"] == "docker-no-healthcheck")
+                findings.append(Finding(
+                    layer=self.id,
+                    rule_id=f"L0e.{no_hc_rule['id']}",
+                    message=no_hc_rule["msg"],
+                    file=f, start_line=1,
+                    severity=no_hc_rule["severity"], confidence=0.85,
+                    blast_radius=BlastRadius.SYSTEM, exploitability=0.5,
+                    cwe=no_hc_rule["cwe"],
+                    fix_suggestion=no_hc_rule["fix"],
+                    raw={"line": ""},
+                ))
+
+            # Per-line rules — skip docker-no-healthcheck (handled above)
             for i, line in enumerate(text.splitlines(), 1):
                 for rule in DOCKERFILE_RULES:
-                    if rule["id"] == "docker-no-healthcheck" and has_healthcheck:
+                    if rule["id"] == "docker-no-healthcheck":
                         continue
                     if re.search(rule["pattern"], line):
                         findings.append(Finding(
@@ -287,14 +311,18 @@ class L0eIaC(LayerBase):
         for f in files:
             if not (f.endswith(".yaml") or f.endswith(".yml")):
                 continue
-            if "k8s" not in f and "kubernetes" not in f and "deploy" not in f and "manifest" not in f:
-                continue
             path = repo_root / f
             if not path.exists():
                 continue
             try:
                 text = path.read_text(encoding="utf-8", errors="replace")
             except Exception:
+                continue
+            # v4.24: Content-based K8S detection — require apiVersion: AND kind:
+            # (was path-based, then too broad with keyword matching)
+            text_lower = text.lower()
+            _is_k8s = "apiversion:" in text_lower and "kind:" in text_lower
+            if not _is_k8s and not any(k in f.lower() for k in ("k8s", "kubernetes", "deploy", "manifest")):
                 continue
             for i, line in enumerate(text.splitlines(), 1):
                 for rule in K8S_RULES:

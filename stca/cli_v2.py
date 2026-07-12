@@ -191,19 +191,105 @@ def dashboard_cmd(repo: str, input_path: str, output: str):
 
 @click.command("watch")
 @click.option("--repo", default=".", help="Repository root")
-@click.option("--debounce", default=1.0, help="Debounce seconds")
-def watch_cmd(repo: str, debounce: float):
-    """Watch the repo for changes and re-scan on save."""
+@click.option("--debounce", default=0.5, help="Debounce seconds (default: 0.5 for sub-second feedback)")
+@click.option("--strictness", default=5, type=int, help="Strictness level 1-9")
+@click.option("--quiet", is_flag=True, help="Only show counts, not individual findings")
+@click.option("--json", "as_json", is_flag=True, help="Output JSON per scan (for IDE integration)")
+def watch_cmd(repo: str, debounce: float, strictness: int, quiet: bool, as_json: bool):
+    """Watch the repo for changes and re-scan on save (sub-second feedback).
+
+    v4.36: Upgraded from just printing changed files to actually re-running
+    STCA on changed files and reporting new findings. Designed for IDE-like
+    feedback loops — keep this running in a terminal while you code.
+
+    Examples:
+      stca watch                              # default: 0.5s debounce
+      stca watch --debounce 0.2               # faster feedback
+      stca watch --strictness 7               # more findings
+      stca watch --json                       # machine-readable (for editor integration)
+      stca watch --quiet                      # only show counts
+    """
     from . import incremental
+    from .config import STCAConfig, find_config
+    from .orchestrator import Orchestrator
+    import time
+
     repo_root = Path(repo).resolve()
+    config = STCAConfig.from_file(find_config(repo_root))
+    orch = Orchestrator(repo_root, config, strictness=strictness)
+
+    # Cache the last scan's findings to compute deltas
+    last_findings: dict = {}  # file -> set of rule_ids
 
     def on_change(changed: List[Path]) -> None:
-        click.echo(f"\n[watch] {len(changed)} file(s) changed:")
-        for p in changed:
-            click.echo(f"  - {p}")
+        t0 = time.time()
+        # Filter to source files only
+        source_exts = {".py", ".js", ".jsx", ".ts", ".tsx", ".go", ".java",
+                       ".rs", ".c", ".cpp", ".cc", ".h", ".hpp", ".php",
+                       ".rb", ".cs", ".swift", ".scala", ".kt", ".sql",
+                       ".sh", ".bash", ".dart", ".lua", ".r", ".hs", ".ex", ".exs"}
+        source_files = [p for p in changed if p.suffix.lower() in source_exts]
+        if not source_files:
+            return
+
+        if not quiet and not as_json:
+            click.echo(f"\n[watch] {len(source_files)} source file(s) changed — scanning...")
+
+        # Run STCA on the changed files (treating them as a synthetic diff)
+        try:
+            result = orch.run_full()
+            elapsed = time.time() - t0
+
+            # Compute delta (new findings vs last scan)
+            current_by_file: dict = {}
+            for f in result.findings:
+                if f.file not in current_by_file:
+                    current_by_file[f.file] = set()
+                current_by_file[f.file].add(f.rule_id)
+
+            new_findings = []
+            for f in result.findings:
+                prev = last_findings.get(f.file, set())
+                if f.rule_id not in prev:
+                    new_findings.append(f)
+
+            # Update cache
+            last_findings.clear()
+            last_findings.update(current_by_file)
+
+            if as_json:
+                import json
+                report = {
+                    "timestamp": time.time(),
+                    "elapsed_seconds": round(elapsed, 3),
+                    "files_changed": len(source_files),
+                    "total_findings": len(result.findings),
+                    "new_findings": len(new_findings),
+                    "findings": [
+                        {"rule_id": f.rule_id, "file": f.file,
+                         "line": f.start_line, "severity": f.severity.value,
+                         "message": f.message, "confidence": f.confidence}
+                        for f in new_findings[:20]  # cap at 20 for performance
+                    ],
+                }
+                click.echo(json.dumps(report))
+            elif quiet:
+                click.echo(f"[watch] {len(result.findings)} findings ({len(new_findings)} new) in {elapsed:.2f}s")
+            else:
+                click.echo(f"[watch] {len(result.findings)} total findings, {len(new_findings)} new (in {elapsed:.2f}s)")
+                for f in new_findings[:10]:
+                    sev_marker = {"critical": "!!", "high": "!", "medium": "?", "low": "-", "info": " "}.get(f.severity.value, " ")
+                    click.echo(f"  {sev_marker} {f.rule_id} @ {f.file}:{f.start_line} — {f.message[:80]}")
+                if len(new_findings) > 10:
+                    click.echo(f"  ... and {len(new_findings) - 10} more")
+
+        except Exception as e:
+            click.echo(f"[watch] scan error: {e}", err=True)
 
     watcher = incremental.WatchMode(repo_root, on_change, debounce_seconds=debounce)
-    click.echo(f"Watching {repo_root} ... (Ctrl-C to stop)")
+    click.echo(f"STCA watch mode — watching {repo_root}")
+    click.echo(f"  debounce: {debounce}s, strictness: {strictness}")
+    click.echo(f"  Press Ctrl-C to stop.\n")
     try:
         watcher.start()
     except KeyboardInterrupt:
@@ -218,12 +304,15 @@ def watch_cmd(repo: str, debounce: float):
 @click.option("--repo", default=".", help="Repository root")
 def lsp_cmd(repo: str):
     """Run the STCA language-server (diagnostics in your editor)."""
+    # v4.33: Use the real LSPServer entry point (v4.32 imported a non-existent symbol).
     try:
-        from .lsp import run_server  # type: ignore
-    except Exception:
-        click.echo("LSP server not yet bundled. See docs/lsp.md for setup.")
+        from .lsp.server import LSPServer
+    except ImportError as e:
+        click.echo(f"LSP server module not available: {e}", err=True)
         return
-    run_server()
+    server = LSPServer(Path(repo).resolve())
+    click.echo(f"STCA LSP server running on {server.repo_root} (stdin/stdout) — Ctrl-C to stop.", err=True)
+    server.run()
 
 
 # =============================================================================
@@ -498,6 +587,57 @@ def source_discovery_cmd(repo: str):
 
 
 # =============================================================================
+# 21b. mine (v4.36)
+# =============================================================================
+
+@click.command("mine")
+@click.option("--repo", default=".", help="Repository root")
+@click.option("--max-commits", default=500, help="Max commits to scan")
+@click.option("--no-verify", is_flag=True, help="Skip Semgrep verification (faster, more false positives)")
+@click.option("--dest", default=".stca-rules/mined", help="Destination dir for mined rules")
+def mine_cmd(repo: str, max_commits: int, no_verify: bool, dest: str):
+    """Mine rules from git history — auto-derive rules from bug-fix commits.
+
+    v4.36: Wires rule_miner.py into the CLI. Scans git log for commits with
+    "fix", "bug", "patch", "CVE", "security" in the message, diffs the
+    before/after code, and generates Semgrep rules that match the buggy
+    pattern. Rules are saved to .stca-rules/mined/ and auto-loaded on
+    the next `stca check`.
+
+    This is "learning from your own mistakes" — every bug you've ever
+    fixed becomes a permanent rule that prevents the same bug from
+    recurring.
+
+    Examples:
+      stca mine                              # default: 500 commits, verify
+      stca mine --max-commits 1000           # scan more history
+      stca mine --no-verify                  # skip Semgrep verification
+      stca mine --dest ~/.stca/rules/mined   # custom destination
+    """
+    from .rule_miner import mine_rules_from_history, save_mined_rules
+    repo_root = Path(repo).resolve()
+    dest_dir = Path(dest).resolve()
+    if not dest_dir.is_absolute():
+        dest_dir = repo_root / dest
+
+    click.echo(f"Mining rules from {repo_root} (max {max_commits} commits)...")
+    rules = mine_rules_from_history(repo_root, max_commits=max_commits,
+                                     verify=not no_verify)
+    if not rules:
+        click.echo("No bug-fix patterns found. Try --max-commits 1000 for more history.")
+        return
+
+    click.echo(f"Mined {len(rules)} candidate rules.")
+    saved = save_mined_rules(rules, dest_dir)
+    click.echo(f"Saved {len(saved)} verified rules to {dest_dir}")
+    for path in saved[:5]:
+        click.echo(f"  - {path}")
+    if len(saved) > 5:
+        click.echo(f"  ... and {len(saved) - 5} more")
+    click.echo(f"\nNext: run `stca check` — mined rules will be auto-loaded.")
+
+
+# =============================================================================
 # 22. js-quality
 # =============================================================================
 
@@ -561,6 +701,25 @@ def js_multiline_cmd(repo: str):
 # Registration
 # =============================================================================
 
+# v4.37: Import bot_cmd from stca.bot (must be before _V2_COMMANDS list)
+try:
+    from .bot import bot_cmd
+except ImportError:
+    bot_cmd = None  # type: ignore
+
+# v4.37: Import playground_cmd from stca.playground
+try:
+    from .playground import playground_cmd
+except ImportError:
+    playground_cmd = None  # type: ignore
+
+# v4.38: Import spec_cmd from stca.spec_mining
+try:
+    from .spec_mining_cmd import spec_cmd
+except ImportError:
+    spec_cmd = None  # type: ignore
+
+
 _V2_COMMANDS = [
     symbolic_cmd, concurrency_cmd, business_logic_cmd, crypto_cmd,
     iac_cmd, modern_cmd, supply_chain_cmd, dashboard_cmd, watch_cmd,
@@ -568,6 +727,10 @@ _V2_COMMANDS = [
     trace_cmd, code_quality_cmd, config_scan_cmd, maven_cve_cmd,
     ast_analysis_cmd, taint_analysis_cmd, source_discovery_cmd,
     js_quality_cmd, optimize_cmd, js_multiline_cmd, update_cves_cmd,
+    mine_cmd,        # v4.36: auto-rule mining from git history
+    bot_cmd,         # v4.37: PR comment bot
+    playground_cmd,  # v4.37: online rule playground
+    spec_cmd,        # v4.38: spec mining
 ]
 
 

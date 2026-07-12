@@ -1,0 +1,252 @@
+# STCA Kotlin Security Rules — 50 rules
+rules:
+  - id: kotlin-runtime-exec
+    pattern: "\\bRuntime\\.getRuntime\\(\\)\\.exec\\s*\\("
+    severity: high
+    message: "Runtime.exec — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: kotlin-process-builder
+    pattern: "\\bProcessBuilder\\s*\\("
+    severity: high
+    message: "ProcessBuilder — verify input not user-controlled"
+    metadata: {cwe: "CWE-78"}
+  - id: kotlin-md5
+    pattern: "\\bMessageDigest\\.getInstance\\s*\\(\\s*[\\\"']MD5[\\\"']"
+    severity: high
+    message: "MD5 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: kotlin-sha1
+    pattern: "\\bMessageDigest\\.getInstance\\s*\\(\\s*[\\\"']SHA-?1[\\\"']"
+    severity: high
+    message: "SHA1 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: kotlin-des
+    pattern: "\\bCipher\\.getInstance\\s*\\(\\s*[\\\"']DES[\\\"']"
+    severity: critical
+    message: "DES broken — 56-bit key"
+    metadata: {cwe: "CWE-327"}
+  - id: kotlin-ecb-mode
+    pattern: "\\bCipher\\.getInstance\\s*\\(\\s*[\\\"']AES/ECB"
+    severity: critical
+    message: "AES-ECB — deterministic, leaks patterns"
+    metadata: {cwe: "CWE-327"}
+  - id: kotlin-random-not-secure
+    pattern: "\\bRandom\\s*\\(\\s*\\)|Math\\.random\\s*\\(\\s*\\)"
+    severity: high
+    message: "Random not CSPRNG — use SecureRandom"
+    metadata: {cwe: "CWE-338"}
+  - id: kotlin-hardcoded-secret
+    pattern: "\\b(?:val|var)\\s+(?:password|secret|api[_-]?key|auth[_-]?token)\\s*[:=]\\s*[\\\"'][^\\\"']{8,}[\\\"']"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: kotlin-jdbc-string-template
+    pattern: "\\b(?:createStatement|prepareStatement)\\s*\\(\\s*\\\"[^\\\"]*\\$\\{"
+    severity: high
+    message: "JDBC with string template — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: kotlin-jdbc-concat
+    pattern: "\\b(?:createStatement|prepareStatement)\\s*\\(\\s*[\\\"'][^\\\"']*\\s*\\+\\s*\\w"
+    severity: high
+    message: "JDBC with concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: kotlin-room-string
+    pattern: "\\b@Query\\s*\\(\\s*\\\"[^\\\"]*\\$\\{"
+    severity: high
+    message: "Room @Query with template — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: kotlin-objectinputstream
+    pattern: "\\bObjectInputStream\\b"
+    severity: critical
+    message: "ObjectInputStream — RCE on deserialization"
+    metadata: {cwe: "CWE-502"}
+  - id: kotlin-read-object
+    pattern: "\\.readObject\\s*\\("
+    severity: critical
+    message: "readObject — RCE on untrusted data"
+    metadata: {cwe: "CWE-502"}
+  - id: kotlin-xml-load
+    pattern: "\\bDocumentBuilderFactory\\.newInstance|SAXParserFactory\\.newInstance"
+    severity: medium
+    message: "XML parser — verify XXE protection"
+    metadata: {cwe: "CWE-611"}
+  - id: kotlin-printstacktrace
+    pattern: "\\.printStackTrace\\s*\\("
+    severity: medium
+    message: "printStackTrace — use proper logging"
+    metadata: {cwe: "CWE-532"}
+  - id: kotlin-println-prod
+    pattern: "\\bprintln\\s*\\("
+    severity: low
+    message: "println in production — use timber/logback"
+    metadata: {cwe: "CWE-532"}
+  - id: kotlin-assert-not-null
+    pattern: "\\b\\w+!!\\s*(?:[\\.\\[(]|$)"
+    severity: medium
+    message: "!! — NullPointerException risk, use safe call"
+    metadata: {cwe: "CWE-690"}
+  - id: kotlin-force-cast
+    pattern: "\\bas\\s+\\w+\\s*$"
+    severity: medium
+    message: "as cast — ClassCastException risk, use as?"
+    metadata: {cwe: "CWE-754"}
+  - id: kotlin-try-catch-fatal
+    pattern: "\\bcatch\\s*\\(\\s*\\w+\\s*:\\s*Throwable"
+    severity: medium
+    message: "catch Throwable — too broad, masks fatal errors"
+    metadata: {cwe: "CWE-396"}
+  - id: kotlin-throwable-print
+    pattern: "\\bcatch\\s*\\(\\s*\\w+\\s*:\\s*Throwable[^)]*\\)\\s*\\{[^}]*printStackTrace"
+    severity: medium
+    message: "catch Throwable + printStackTrace — masks bugs"
+    metadata: {cwe: "CWE-755"}
+  - id: kotlin-unsafe-cast
+    pattern: "\\bas\\s+!!"
+    severity: high
+    message: "as!! — unsafe cast, will throw"
+    metadata: {cwe: "CWE-754"}
+  - id: kotlin-allow-weak-crypto
+    pattern: "\\bCipher\\.getInstance\\s*\\(\\s*[\\\"']AES\\b(?!/GCM)"
+    severity: medium
+    message: "AES without GCM — verify mode is secure"
+    metadata: {cwe: "CWE-327"}
+  - id: kotlin-url-http
+    pattern: "\\bURL\\s*\\(\\s*[\\\"']http://"
+    severity: medium
+    message: "HTTP (not HTTPS) URL"
+    metadata: {cwe: "CWE-319"}
+  - id: kotlin-okhttp-http
+    pattern: "\\bHttpUrl\\.parse\\s*\\(\\s*[\\\"']http://|\\.url\\s*\\(\\s*[\\\"']http://"
+    severity: medium
+    message: "OkHttp HTTP request — use HTTPS"
+    metadata: {cwe: "CWE-319"}
+  - id: kotlin-trust-all-certs
+    pattern: "\\bTrustAllCerts|ALLOW_ALL_HOSTNAME_VERIFIER|setHostnameVerifier\\s*\\(\\s*AllowAllHostnameVerifier"
+    severity: critical
+    message: "SSL verification disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: kotlin-trust-manager-x509-no-verify
+    pattern: "\\bcheckServerTrusted\\s*\\([^)]*\\)\\s*\\{[^}]*(?:return|//)"
+    severity: critical
+    message: "X509TrustManager checkServerTrusted empty"
+    metadata: {cwe: "CWE-295"}
+  - id: kotlin-sharedpreferences-secret
+    pattern: "\\bSharedPreferences\\b.*putString\\s*\\(\\s*[\\\"']\\w*(?:password|secret|token)\\w*[\\\"']"
+    severity: high
+    message: "SharedPreferences for secret — use EncryptedSharedPreferences"
+    metadata: {cwe: "CWE-312"}
+  - id: kotlin-log-secret
+    pattern: "\\bLog\\.(d|e|i|v|w)\\s*\\([^)]*(?:password|secret|token|api[_-]?key)"
+    severity: high
+    message: "Log of secret — info leak"
+    metadata: {cwe: "CWE-532"}
+  - id: kotlin-toast-secret
+    pattern: "\\bToast\\.makeText\\s*\\([^)]*(?:password|secret|token)"
+    severity: high
+    message: "Toast of secret — info leak"
+    metadata: {cwe: "CWE-200"}
+  - id: kotlin-intent-extra-secret
+    pattern: "\\bintent\\.putExtra\\s*\\(\\s*[\\\"']\\w*(?:password|secret|token)\\w*[\\\"']"
+    severity: medium
+    message: "Intent extra for secret — use EncryptedSharedPreferences"
+    metadata: {cwe: "CWE-312"}
+  - id: kotlin-foreach-index
+    pattern: "\\bfor\\s*\\(\\s*\\(\\w+,\\s*\\w+\\)\\s+in\\s+\\w+\\.withIndex"
+    severity: low
+    message: "withIndex in for-each — verify index is needed"
+    metadata: {cwe: "CWE-697"}
+  - id: kotlin-var-mutable
+    pattern: "\\bclass\\s+\\w+[^{]*\\{[^}]*\\bvar\\s+\\w+"
+    severity: low
+    message: "class with var — mutable state, prefer val"
+    metadata: {cwe: "CWE-754"}
+  - id: kotlin-companion-object-const
+    pattern: "\\bcompanion\\s+object\\s*\\{[^}]*\\bval\\s+\\w+\\s*=\\s*[\\\"']"
+    severity: low
+    message: "companion val without const — use const val"
+    metadata: {cwe: "CWE-697"}
+  - id: kotlin-lateinit-var
+    pattern: "\\blateinit\\s+var"
+    severity: medium
+    message: "lateinit var — UninitializedPropertyAccessException risk"
+    metadata: {cwe: "CWE-457"}
+  - id: kotlin-not-null-assertion
+    pattern: "\\b\\w+\\.let\\s*\\{[^}]*\\}!!"
+    severity: medium
+    message: "!! after let — NPE risk"
+    metadata: {cwe: "CWE-690"}
+  - id: kotlin-apply-side-effect
+    pattern: "\\b\\w+\\.apply\\s*\\{[^}]*\\b(?:send|write|delete|remove)"
+    severity: low
+    message: "apply with side-effects — verify intent"
+    metadata: {cwe: "CWE-754"}
+  - id: kotlin-static-mutable
+    pattern: "\\bcompanion\\s+object\\s*\\{[^}]*\\bvar\\s+\\w+"
+    severity: medium
+    message: "companion var — global mutable state, thread-safety risk"
+    metadata: {cwe: "CWE-362"}
+  - id: kotlin-coroutine-runblocking
+    pattern: "\\brunBlocking\\s*\\{"
+    severity: high
+    message: "runBlocking — blocks thread, defeats coroutines"
+    metadata: {cwe: "CWE-833"}
+  - id: kotlin-coroutine-global-scope
+    pattern: "\\bGlobalScope\\.launch|GlobalScope\\.async"
+    severity: high
+    message: "GlobalScope — structured concurrency violation"
+    metadata: {cwe: "CWE-754"}
+  - id: kotlin-thread-sleep
+    pattern: "\\bThread\\.sleep\\s*\\("
+    severity: low
+    message: "Thread.sleep — use delay() in coroutines"
+    metadata: {cwe: "CWE-833"}
+  - id: kotlin-notify-all
+    pattern: "\\bnotifyAll\\s*\\(\\s*\\)|notify\\s*\\(\\s*\\)"
+    severity: medium
+    message: "notify/notifyAll — verify locking protocol"
+    metadata: {cwe: "CWE-667"}
+  - id: kotlin-synchronized-block
+    pattern: "\\bsynchronized\\s*\\("
+    severity: medium
+    message: "synchronized — deadlock risk, prefer coroutines"
+    metadata: {cwe: "CWE-667"}
+  - id: kotlin-volatile-field
+    pattern: "\\b@Volatile"
+    severity: low
+    message: "@Volatile — verify memory model usage"
+    metadata: {cwe: "CWE-662"}
+  - id: kotlin-atomic-bug
+    pattern: "\\b@Atomic\\b|AtomicInteger|AtomicReference"
+    severity: low
+    message: "Atomic — verify it's the right primitive"
+    metadata: {cwe: "CWE-662"}
+  - id: kotlin-todo
+    pattern: "\\bTODO\\s*\\("
+    severity: medium
+    message: "TODO — will throw NotImplementedError"
+    metadata: {cwe: "CWE-754"}
+  - id: kotlin-not-implemented
+    pattern: "\\bnotImplemented\\s*\\(\\s*\\)|throw\\s+NotImplementedError"
+    severity: medium
+    message: "NotImplementedError — will throw at runtime"
+    metadata: {cwe: "CWE-754"}
+  - id: kotlin-assertion
+    pattern: "\\bassert\\s*\\("
+    severity: low
+    message: "assert — disabled in production"
+    metadata: {cwe: "CWE-749"}
+  - id: kotlin-require-null
+    pattern: "\\brequireNotNull\\s*\\([^)]+\\)\\s*\\{[^}]*throw"
+    severity: low
+    message: "requireNotNull — verify error handling"
+    metadata: {cwe: "CWE-754"}
+  - id: kotlin-internal-leak
+    pattern: "\\b@Internal\\b"
+    severity: low
+    message: "@Internal — API contract leak risk"
+    metadata: {cwe: "CWE-749"}
+  - id: kotlin-deprecated-api
+    pattern: "\\b@Deprecated\\b"
+    severity: low
+    message: "@Deprecated — replace usage"
+    metadata: {cwe: "CWE-477"}

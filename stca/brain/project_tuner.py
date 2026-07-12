@@ -1,3 +1,7 @@
+# v4.9: TODO — Wire into feedback loop. This module provides per-rule
+# confidence tuning that the current per-layer tuner.py cannot provide.
+
+
 """Per-project FIS tuning via feedback.
 
 The global FIS uses hand-tuned membership functions that work reasonably
@@ -11,10 +15,6 @@ Two convenience functions cover the 80% use case:
     apply to that rule's confidence score
 """
 from __future__ import annotations
-
-import logging
-
-logger = logging.getLogger("stca.brain.project_tuner")
 
 import json
 from dataclasses import asdict, dataclass, field
@@ -135,8 +135,8 @@ class FeedbackStore:
                 "entries": [asdict(e) for e in self.entries],
             }
             self.store_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-        except Exception as e:
-            logger.warning("Failed to save project tuner feedback: %s", e)
+        except Exception:
+            pass
 
     def add(self, entry: FeedbackEntry) -> None:
         if not entry.labeled_at:

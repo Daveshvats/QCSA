@@ -35,14 +35,30 @@ SUPPRESSION_PATTERNS = [
 ]
 
 
-def find_suppressions(file_path: Path) -> List[Suppression]:
-    """Find all inline suppressions in a file."""
+def find_suppressions(file_path: Path, repo_root: Path = None) -> List[Suppression]:
+    """Find all inline suppressions in a file.
+
+    v4.14 BUG #3 FIX: Store RELATIVE path (not absolute) so it matches
+    finding.file which is relative to repo_root. Previously stored
+    str(file_path) (absolute) but findings use relative paths, so
+    is_suppressed() never matched — every # stca: ignore was silently
+    skipped.
+    """
     if not file_path.exists():
         return []
     try:
         lines = file_path.read_text(encoding="utf-8", errors="replace").splitlines()
     except Exception:
         return []
+
+    # v4.14: Store relative path if repo_root is available, else absolute
+    if repo_root:
+        try:
+            rel_path = str(file_path.relative_to(repo_root))
+        except ValueError:
+            rel_path = str(file_path)
+    else:
+        rel_path = str(file_path)
 
     suppressions: List[Suppression] = []
     for i, line in enumerate(lines, start=1):
@@ -52,7 +68,7 @@ def find_suppressions(file_path: Path) -> List[Suppression]:
                 rule_id = m.group(1) if m.lastindex and m.lastindex >= 1 else None
                 reason = m.group(2) if m.lastindex and m.lastindex >= 2 else None
                 suppressions.append(Suppression(
-                    file=str(file_path),
+                    file=rel_path,
                     line=i,
                     rule_id=rule_id,
                     reason=reason,
@@ -72,9 +88,10 @@ def is_suppressed(finding_file: str, finding_line: int, finding_rule_id: str,
     """
     for sup in suppressions:
         if sup.file != finding_file:
-            # compare just filenames for robustness
-            if Path(sup.file).name != Path(finding_file).name:
-                continue
+            # v4.8: Require full path equality, not just basename.
+            # Previously, frontend/utils/auth.py matched backend/admin/auth.py
+            # because basenames were equal. This caused cross-module suppression.
+            continue
         if sup.line == finding_line or sup.line == finding_line - 1:
             if sup.rule_id is None:
                 return True, sup
@@ -93,7 +110,7 @@ def filter_suppressed(findings: list, repo_root: Path) -> Tuple[list, list]:
     for f in findings:
         file_path = repo_root / f.file
         if str(file_path) not in sup_by_file and file_path.exists():
-            sup_by_file[str(file_path)] = find_suppressions(file_path)
+            sup_by_file[str(file_path)] = find_suppressions(file_path, repo_root)
 
     kept = []
     suppressed = []

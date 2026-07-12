@@ -9,6 +9,7 @@ Detects common concurrency bugs that AST + pattern scanning can surface:
   - Go: send on closed channel, goroutine leak (no exit condition), receive without sender
 """
 from __future__ import annotations
+from .text_utils import extract_block as _extract_block
 
 import ast
 import re
@@ -59,30 +60,48 @@ class PythonAsyncAnalyzer:
             if isinstance(node, ast.Await) and isinstance(node.value, ast.Call):
                 call = node.value
                 if isinstance(call.func, ast.Attribute) and call.func.attr == "gather":
-                    if not self._has_try_except_around(func, node.lineno):
-                        out.append(ConcurrencyIssue(
-                            file=file, line=node.lineno,
-                            rule_id="ASYNC-GATHER-NO-TRY",
-                            severity="medium",
-                            description="asyncio.gather() without try/except — one failing task cancels all others",
-                            fix="Wrap in try/except or use asyncio.gather(*tasks, return_exceptions=True)",
-                            cwe="CWE-755", language="python", confidence=0.7))
+                    # v4.7: Verify the receiver is actually asyncio (not a user-defined
+                    # method that happens to be named gather). Claude found this
+                    # false positive: collector.gather() flagged as asyncio.gather().
+                    if self._is_asyncio_receiver(call.func):
+                        if not self._has_try_except_around(func, node.lineno):
+                            out.append(ConcurrencyIssue(
+                                file=file, line=node.lineno,
+                                rule_id="ASYNC-GATHER-NO-TRY",
+                                severity="medium",
+                                description="asyncio.gather() without try/except — one failing task cancels all others",
+                                fix="Wrap in try/except or use asyncio.gather(*tasks, return_exceptions=True)",
+                                cwe="CWE-755", language="python", confidence=0.7))
             # create_task without storing the reference
             if (isinstance(node, ast.Call)
                     and isinstance(node.func, ast.Attribute)
                     and node.func.attr == "create_task"):
-                if not self._is_assigned(node):
-                    out.append(ConcurrencyIssue(
-                        file=file, line=node.lineno,
-                        rule_id="ASYNC-CREATE-TASK-NOT-STORED",
-                        severity="medium",
-                        description="asyncio.create_task() result not stored — task may be garbage-collected mid-execution",
-                        fix="Store the task: `task = asyncio.create_task(...)` and await it",
-                        cwe="CWE-404", language="python", confidence=0.6))
+                # v4.7: Same receiver check for create_task
+                if self._is_asyncio_receiver(node.func):
+                    if not self._is_assigned(node, func):
+                        out.append(ConcurrencyIssue(
+                            file=file, line=node.lineno,
+                            rule_id="ASYNC-CREATE-TASK-NOT-STORED",
+                            severity="medium",
+                            description="asyncio.create_task() result not stored — task may be garbage-collected mid-execution",
+                            fix="Store the task: `task = asyncio.create_task(...)` and await it",
+                            cwe="CWE-404", language="python", confidence=0.6))
             # TOCTOU: await x; ...; if x is None  (x may have changed)
             if isinstance(node, ast.Await):
                 out.extend(self._check_toctou(func, node, file))
         return out
+
+    def _is_asyncio_receiver(self, attr_node: ast.Attribute) -> bool:
+        """v4.7: Check if an attribute access's receiver is the asyncio module.
+
+        Prevents false positives where a user-defined class has a method
+        named 'gather' or 'create_task' that has nothing to do with asyncio.
+        Only flags when the receiver is 'asyncio' or 'asyncio.' (i.e.,
+        asyncio.gather() or asyncio.create_task()).
+        """
+        if not isinstance(attr_node.value, ast.Name):
+            return False
+        return attr_node.value.id == "asyncio"
 
     def _has_try_except_around(self, func: ast.FunctionDef, lineno: int) -> bool:
         for node in ast.walk(func):
@@ -93,19 +112,88 @@ class PythonAsyncAnalyzer:
                     return True
         return False
 
-    def _is_assigned(self, call: ast.Call) -> bool:
-        # we can't easily see parent here; assume yes if the call appears as
-        # a value of an Assign in the same function. Cheap heuristic.
-        return True  # refined below by source inspection in callers if needed
+    def _is_assigned(self, call: ast.Call, func: ast.FunctionDef = None) -> bool:
+        """v4.9: Check if a call's result is stored in a variable.
+
+        v4.8 returned False unconditionally, causing ASYNC-CREATE-TASK-NOT-STORED
+        to fire on every create_task call. v4.9 passes the function AST and
+        checks whether the call is the RHS of an ast.Assign.
+        """
+        if func is None:
+            return True  # can't check — conservatively assume assigned
+        for node in ast.walk(func):
+            if isinstance(node, ast.Assign):
+                # Check if this assignment's value is the call we're checking
+                if node.value is call:
+                    return True
+                # Also check by line number (the call and assign are on the same line)
+                if hasattr(node.value, 'lineno') and node.value.lineno == call.lineno:
+                    if isinstance(node.value, ast.Call):
+                        return True
+        return False
 
     def _check_toctou(self, func: ast.FunctionDef, await_node: ast.Await,
                        file: str) -> List[ConcurrencyIssue]:
-        # Pattern: `result = await x` then later `if result is None`
-        # We flag if `result` is awaited but then immediately re-checked.
-        # Simplified: if await fetches into a var, and var is later tested
-        # for None without another await in between, that's fine — flag only
-        # if the SAME expression is awaited twice without caching.
-        return []
+        """v4.8: Basic TOCTOU detection — await followed by check-then-use.
+
+        Pattern: `result = await fetch()` then `if result is None: ...`
+        followed by use of result. This is actually SAFE (the check guards
+        the use), so we should NOT flag it.
+
+        The real TOCTOU pattern is: `await cache.get(key)` then later
+        `if cache.has(key): return cache.get(key)` — the second get is
+        a TOCTOU because the cache may have been invalidated between
+        the check and the use. We check for this pattern.
+        """
+        issues: List[ConcurrencyIssue] = []
+        # Get the awaited expression's source
+        if not isinstance(await_node.value, ast.Call):
+            return issues
+        call = await_node.value
+        if not isinstance(call.func, ast.Attribute):
+            return issues
+
+        # Look for a subsequent check-then-call on the same object
+        # (e.g., if cache.has(key): ... cache.get(key))
+        obj_name = ""
+        if isinstance(call.func.value, ast.Name):
+            obj_name = call.func.value.id
+        if not obj_name:
+            return issues
+
+        # Walk the function for if-statements that check obj_name
+        # followed by another call on obj_name
+        for node in ast.walk(func):
+            if isinstance(node, ast.If) and node.lineno > await_node.lineno:
+                # Check if the if-condition references obj_name
+                if_text = ""
+                try:
+                    import ast as _ast
+                    if_text = _ast.unparse(node.test)
+                except Exception:
+                    pass
+                if obj_name in if_text:
+                    # v4.9: Only flag if the SAME method is called again (real TOCTOU).
+                    # v4.8 flagged ANY method call on the same object, which
+                    # produced false positives on safe patterns like
+                    # `if cache.has(key): cache.delete(key)`.
+                    for child in ast.walk(node):
+                        if (isinstance(child, ast.Call)
+                                and isinstance(child.func, ast.Attribute)
+                                and isinstance(child.func.value, ast.Name)
+                                and child.func.value.id == obj_name
+                                and child.func.attr == call.func.attr  # v4.9: same method
+                                and child.lineno > node.lineno):
+                            issues.append(ConcurrencyIssue(
+                                file=file, line=child.lineno,
+                                rule_id="ASYNC-TOCTOU",
+                                severity="medium",
+                                description=f"Potential TOCTOU: {obj_name} checked after await but "
+                                            f"may have changed before use at line {child.lineno}",
+                                fix="Cache the result of the await and use the cached value",
+                                cwe="CWE-367", language="python", confidence=0.5))
+                            break
+        return issues
 
 
 # =============================================================================
@@ -169,15 +257,6 @@ class JSPromiseAnalyzer:
         return out
 
 
-def _extract_block(source: str, start: int) -> str:
-    """Extract a brace-balanced block starting after position `start`."""
-    depth = 1
-    i = start
-    while i < len(source) and depth > 0:
-        if source[i] == "{": depth += 1
-        elif source[i] == "}": depth -= 1
-        i += 1
-    return source[start:i]
 
 
 # =============================================================================

@@ -20,15 +20,18 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install STCA
-        run: pip install --user git+https://github.com/Daveshvats/QCSA.git
+        run: pip install --user .
+        # Install from the repo's local copy (checked out by actions/checkout above).
+        # To install from PyPI: pip install --user stca-pipeline
+        # To install from GitHub: pip install --user git+https://github.com/YOUR_ORG/stca-pipeline.git
       - name: Run STCA on PR diff
         if: github.event_name == 'pull_request'
         run: |
-          stca check --sarif --output stca.sarif --strictness 5 .
+          stca check --sarif --output stca.sarif --strictness 5
       - name: Run STCA on full repo (push)
         if: github.event_name == 'push'
         run: |
-          stca check --sarif --output stca.sarif --full --strictness 5 .
+          stca check --sarif --output stca.sarif --full --strictness 5
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:

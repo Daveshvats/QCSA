@@ -24,6 +24,25 @@ Patterns are organized by audit finding they address:
 from __future__ import annotations
 
 import re
+
+# v4.42: Use fast_regex (re2-backed) if available for ReDoS protection
+try:
+    from .fast_regex import compile as _fast_compile, is_re2_available
+    _FAST_REGEX = is_re2_available()
+    if _FAST_REGEX:
+        _compiled_cache: dict = {}
+        def _re_search(pattern, text, flags=0):
+            """Use fast_regex (re2) with caching, fall back to re."""
+            key = (pattern, flags)
+            if key not in _compiled_cache:
+                _compiled_cache[key] = _fast_compile(pattern, flags)
+            m = _compiled_cache[key].search(text)
+            return m
+    else:
+        _re_search = re.search
+except ImportError:
+    _FAST_REGEX = False
+    _re_search = re.search
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple
@@ -330,22 +349,6 @@ JS_PATTERNS: List[Tuple[str, str, str, str, str, str]] = [
         "high", "CWE-862",
         "Add role check: if (!hasRole('REPORTING_ADMIN')) redirect to /login",
     ),
-    # === CryptoJS usage ===
-    (
-        "js-cryptojs-usage",
-        r'\bCryptoJS\.',
-        "Client-side crypto (CryptoJS) — key ships in bundle, anyone can decrypt (CWE-327)",
-        "high", "CWE-327",
-        "Move all encryption to server-side. Remove CryptoJS from client bundle.",
-    ),
-    # === Role from localStorage ===
-    (
-        "js-role-from-localstorage",
-        r'localStorage\.getItem\s*\(\s*["\'](?:ROLE|ROLES|USER_ROLE|ROLE_ID)',
-        "User role read from localStorage — user can forge any role (CWE-863)",
-        "critical", "CWE-863",
-        "Get role from server-side JWT claims, not localStorage",
-    ),
     # === Unrestricted file upload ===
     (
         "js-unrestricted-upload",
@@ -442,7 +445,7 @@ def scan_js_patterns(file_path: Path, repo_root: Path = None) -> List[JSPatternH
             # Per-pattern path/content suppression
             if rule_id in suppressed_by_pattern:
                 continue
-            if re.search(pattern, line, re.IGNORECASE if rule_id.startswith("js-default") else 0):
+            if _re_search(pattern, line, re.IGNORECASE if rule_id.startswith("js-default") else 0):
                 key = (rule_id, i, line.strip()[:100])
                 if key in seen:
                     continue

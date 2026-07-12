@@ -1,0 +1,279 @@
+{
+    "projectRoot":  "C:\\Users\\deves\\Downloads\\stca-pipeline-complete-v2.6\\stca-pipeline",
+    "batchImportData":  {
+                            "stca/suppressions.py":  [
+
+                                                     ],
+                            "stca/nullness.py":  [
+
+                                                 ],
+                            "stca/orchestrator.py":  [
+                                                         "stca/advanced_secrets.py",
+                                                         "stca/architecture.py",
+                                                         "stca/audit.py",
+                                                         "stca/baseline.py",
+                                                         "stca/brain/aggregator.py",
+                                                         "stca/bug_seeds.py",
+                                                         "stca/cache.py",
+                                                         "stca/config.py",
+                                                         "stca/consistency.py",
+                                                         "stca/contracts.py",
+                                                         "stca/coverage.py",
+                                                         "stca/cpg_queries.py",
+                                                         "stca/cpg.py",
+                                                         "stca/diff_slicer.py",
+                                                         "stca/differential.py",
+                                                         "stca/doc_audit.py",
+                                                         "stca/feedback/stats.py",
+                                                         "stca/flawfinder_db.py",
+                                                         "stca/hotspots.py",
+                                                         "stca/html_scanner.py",
+                                                         "stca/impact_analysis.py",
+                                                         "stca/issue_store.py",
+                                                         "stca/js_cpg.py",
+                                                         "stca/js_pattern_scanner.py",
+                                                         "stca/layers/__init__.py",
+                                                         "stca/layers/l0b_supply_chain.py",
+                                                         "stca/layers/l0c_dependencies.py",
+                                                         "stca/layers/l0d_behavioral.py",
+                                                         "stca/layers/l0e_iac.py",
+                                                         "stca/layers/l0f_commit_risk.py",
+                                                         "stca/layers/l8_autofix.py",
+                                                         "stca/llm/client.py",
+                                                         "stca/llm/prm.py",
+                                                         "stca/malicious_patterns.py",
+                                                         "stca/metamorphic.py",
+                                                         "stca/missing_patches.py",
+                                                         "stca/models.py",
+                                                         "stca/nullness.py",
+                                                         "stca/pii_detection.py",
+                                                         "stca/precision.py",
+                                                         "stca/pysa_integration.py",
+                                                         "stca/root_cause.py",
+                                                         "stca/strictness.py",
+                                                         "stca/suppressions.py",
+                                                         "stca/taint_cross_file.py",
+                                                         "stca/typestate.py"
+                                                     ],
+                            "stca/report/html.py":  [
+                                                        "stca/models.py"
+                                                    ],
+                            "stca/report/dashboard.py":  [
+                                                             "stca/report/html.py"
+                                                         ],
+                            "stca/pii_detection.py":  [
+
+                                                      ],
+                            "stca/state_machine.py":  [
+
+                                                      ],
+                            "stca/source_discovery.py":  [
+                                                             "stca/multi_lang.py"
+                                                         ],
+                            "stca/report/sarif.py":  [
+                                                         "stca/models.py"
+                                                     ],
+                            "stca/profiles.py":  [
+
+                                                 ],
+                            "stca/report/__init__.py":  [
+                                                            "stca/report/html.py",
+                                                            "stca/report/sarif.py",
+                                                            "stca/report/tui.py"
+                                                        ],
+                            "stca/modern_attacks.py":  [
+
+                                                       ],
+                            "stca/rule_config.py":  [
+
+                                                    ],
+                            "stca/rule_miner.py":  [
+
+                                                   ],
+                            "stca/supply_chain.py":  [
+
+                                                     ],
+                            "stca/multi_lang.py":  [
+
+                                                   ],
+                            "stca/rule_dsl.py":  [
+
+                                                 ],
+                            "stca/pysa_integration.py":  [
+                                                             "stca/models.py"
+                                                         ],
+                            "stca/root_cause.py":  [
+
+                                                   ],
+                            "stca/rule_compiler.py":  [
+
+                                                      ],
+                            "stca/strictness.py":  [
+
+                                                   ],
+                            "stca/report/tui.py":  [
+                                                       "stca/models.py"
+                                                   ],
+                            "stca/pre_commit.py":  [
+
+                                                   ],
+                            "stca/precision.py":  [
+
+                                                  ],
+                            "stca/rules/__init__.py":  [
+
+                                                       ]
+                        },
+    "batchFiles":  [
+                       {
+                           "path":  "stca/modern_attacks.py",
+                           "language":  "python",
+                           "sizeLines":  220,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/multi_lang.py",
+                           "language":  "python",
+                           "sizeLines":  384,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/nullness.py",
+                           "language":  "python",
+                           "sizeLines":  317,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/orchestrator.py",
+                           "language":  "python",
+                           "sizeLines":  1592,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/pii_detection.py",
+                           "language":  "python",
+                           "sizeLines":  232,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/pre_commit.py",
+                           "language":  "python",
+                           "sizeLines":  84,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/precision.py",
+                           "language":  "python",
+                           "sizeLines":  384,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/profiles.py",
+                           "language":  "python",
+                           "sizeLines":  239,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/pysa_integration.py",
+                           "language":  "python",
+                           "sizeLines":  141,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/report/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  6,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/report/dashboard.py",
+                           "language":  "python",
+                           "sizeLines":  314,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/report/html.py",
+                           "language":  "python",
+                           "sizeLines":  112,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/report/sarif.py",
+                           "language":  "python",
+                           "sizeLines":  133,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/report/tui.py",
+                           "language":  "python",
+                           "sizeLines":  164,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/root_cause.py",
+                           "language":  "python",
+                           "sizeLines":  165,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/rule_compiler.py",
+                           "language":  "python",
+                           "sizeLines":  297,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/rule_config.py",
+                           "language":  "python",
+                           "sizeLines":  163,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/rule_dsl.py",
+                           "language":  "python",
+                           "sizeLines":  329,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/rule_miner.py",
+                           "language":  "python",
+                           "sizeLines":  334,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/rules/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  224,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/source_discovery.py",
+                           "language":  "python",
+                           "sizeLines":  90,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/state_machine.py",
+                           "language":  "python",
+                           "sizeLines":  310,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/strictness.py",
+                           "language":  "python",
+                           "sizeLines":  186,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/supply_chain.py",
+                           "language":  "python",
+                           "sizeLines":  272,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/suppressions.py",
+                           "language":  "python",
+                           "sizeLines":  108,
+                           "fileCategory":  "code"
+                       }
+                   ]
+}

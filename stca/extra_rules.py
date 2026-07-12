@@ -130,21 +130,6 @@ EXTRA_IDOR: Dict[str, List[Tuple]] = {
     "java": [
         ("IDOR-JAVA-PATHVARIABLE", r'@PathVariable\s*(?:\([^)]*\))?\s*(?:Long|String|Integer|UUID)\s+(?:userId|employeeId|patientId|accountId|orderId|serviceId|corpId|invoiceId|voucherId|id)\b', "medium", "@PathVariable with sensitive ID", "Check user access", "CWE-639", 0.6),
         ("IDOR-JAVA-ID-PATH", r'@(?:GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)\s*\(\s*["\'][^"\']*\{(?:id|userId|employeeId|patientId|accountId|orderId|serviceId|corpId|invoiceId|voucherId)\}', "medium", "Spring route with ID", "Check via @PreAuthorize", "CWE-639", 0.5),
-        ("UPLOAD-JAVA-CONTENT-TYPE-TRUST", r'\.getContentType\s*\(\s*\)', "high", "getContentType() client-controlled — XSS", "Use magic-byte sniffing", "CWE-434", 0.85),
-        ("COUPON-JAVA-NO-RATE-LIMIT", r'@(?:GetMapping|PostMapping|RequestMapping)\s*\(\s*(?:value\s*=\s*)?["\'][^"\']*coupon', "medium", "Coupon endpoint — verify rate limit", "Add @RateLimit", "CWE-799", 0.6),
-        ("REFUND-JAVA-METHOD", r'\b(?:public|private)\s+\w+\s+(?:initiate|process|create|issue)?Refund\w*\s*\(', "medium", "Refund method — verify ownership", "Check user owns payment", "CWE-602", 0.5),
     ],
     "cpp": [],
 }
-
-
-def merge_patterns(base: Dict, extra: Dict) -> Dict:
-    """Merge extra patterns into base, avoiding duplicates by rule_id."""
-    for lang, rules in extra.items():
-        if lang not in base:
-            base[lang] = []
-        existing_ids = {r[0] for r in base[lang]}
-        for rule in rules:
-            if rule[0] not in existing_ids:
-                base[lang].append(rule)
-    return base

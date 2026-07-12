@@ -6,6 +6,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from .multi_lang import get_language, ALL_SOURCE_EXTS
 
+import logging
+_logger = logging.getLogger(__name__.replace('stca.', ''))
+
 @dataclass
 class SourceInfo:
     file: str; line: int; param_name: str; source_type: str; framework: str; method_name: str = ""
@@ -77,7 +80,7 @@ def discover_sources_in_repo(repo_root, max_files=600):
         if not p.is_file() or any(part in skip_dirs for part in p.parts): continue
         if p.suffix.lower() in ALL_SOURCE_EXTS:
             try: all_sources += discover_sources_in_file(p, repo_root)
-            except: pass
+            except Exception: pass  # v4.5: suppressed — add logging
             count += 1
             if count >= max_files: break
     return all_sources

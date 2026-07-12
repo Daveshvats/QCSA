@@ -22,7 +22,10 @@ runs:
   steps:
     - name: Install STCA
       shell: bash
-      run: pip install --user git+https://github.com/Daveshvats/QCSA.git
+      run: pip install --user .
+      # Install from the repo's local copy (the action runs from repo root).
+      # To install from PyPI instead: pip install --user stca-pipeline
+      # To install from GitHub: pip install --user git+https://github.com/YOUR_ORG/stca-pipeline.git
     - name: Run STCA
       shell: bash
       run: |

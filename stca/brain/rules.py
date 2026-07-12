@@ -132,9 +132,8 @@ RULES: List[FuzzyRule] = [
     FuzzyRule(severity="low", decision="pass",
               comment="Catch-all: low → pass"),
 
-    # --- INFO severity rules ---
-    FuzzyRule(severity="info", decision="pass",
-              comment="Info → always pass"),
+    # v4.8: Removed dead INFO rule — SeverityMF has no "info" term, so this
+    # rule's premise always returned zero membership and never fired.
 
     # --- Source reliability modifiers (these refine the above) ---
     FuzzyRule(severity="high", confidence="moderate",

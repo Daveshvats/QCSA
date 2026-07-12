@@ -147,13 +147,24 @@ def compute_halstead(func_node: ast.FunctionDef) -> HalsteadMetrics:
             operands.append(repr(node.value))
 
         def visit_Call(self, node):
+            # v4.8: Don't recurse into node.func to avoid double-counting.
+            # Previously, visit_Call appended func.attr, then generic_visit
+            # recursed into node.func (the Attribute), and visit_Attribute
+            # appended attr again — N2 was roughly 2× too high.
             if isinstance(node.func, ast.Name):
                 operands.append(node.func.id)
             elif isinstance(node.func, ast.Attribute):
                 operands.append(node.func.attr)
-            self.generic_visit(node)
+            # Only visit args, NOT node.func (which we already handled above)
+            for arg in node.args:
+                self.visit(arg)
+            for kw in node.keywords:
+                self.visit(kw.value)
 
         def visit_Attribute(self, node):
+            # v4.8: Only count attributes that aren't part of a Call
+            # (Call.visit handles its own func attribute). This prevents
+            # the double-count where foo.bar() counts "bar" twice.
             operands.append(node.attr)
             self.generic_visit(node)
 

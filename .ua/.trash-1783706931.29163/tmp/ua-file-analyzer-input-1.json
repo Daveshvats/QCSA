@@ -1,0 +1,244 @@
+{
+    "projectRoot":  "C:\\Users\\deves\\Downloads\\stca-pipeline-complete-v2.6\\stca-pipeline",
+    "batchImportData":  {
+                            "stca/cpg_queries.py":  [
+                                                        "stca/cpg.py"
+                                                    ],
+                            "stca/code_quality.py":  [
+                                                         "stca/multi_lang.py"
+                                                     ],
+                            "stca/consistency.py":  [
+
+                                                    ],
+                            "stca/concurrency.py":  [
+
+                                                    ],
+                            "stca/differential.py":  [
+
+                                                     ],
+                            "stca/diff_slicer.py":  [
+                                                        "stca/models.py"
+                                                    ],
+                            "stca/coverage.py":  [
+
+                                                 ],
+                            "stca/cache.py":  [
+
+                                              ],
+                            "stca/business_logic.py":  [
+
+                                                       ],
+                            "stca/brain/rules.py":  [
+
+                                                    ],
+                            "stca/cli.py":  [
+                                                "stca/baseline.py",
+                                                "stca/bootstrap/harness_gen.py",
+                                                "stca/bootstrap/invariant_inference.py",
+                                                "stca/bootstrap/property_gen.py",
+                                                "stca/cache.py",
+                                                "stca/config.py",
+                                                "stca/feedback/rule_capture.py",
+                                                "stca/feedback/stats.py",
+                                                "stca/installer.py",
+                                                "stca/llm/client.py",
+                                                "stca/orchestrator.py",
+                                                "stca/report/tui.py",
+                                                "stca/rules/__init__.py"
+                                            ],
+                            "stca/brain/membership.py":  [
+
+                                                         ],
+                            "stca/cli_v2.py":  [
+
+                                               ],
+                            "stca/config_scanner.py":  [
+
+                                                       ],
+                            "stca/cpg.py":  [
+
+                                            ],
+                            "stca/brain/project_tuner.py":  [
+
+                                                            ],
+                            "stca/complexity_metrics.py":  [
+
+                                                           ],
+                            "stca/counterfactual.py":  [
+
+                                                       ],
+                            "stca/contracts.py":  [
+
+                                                  ],
+                            "stca/brain/tuner.py":  [
+
+                                                    ],
+                            "stca/deadcode.py":  [
+
+                                                 ],
+                            "stca/crypto_audit.py":  [
+                                                         "stca/multi_lang.py"
+                                                     ],
+                            "stca/codebase_miner.py":  [
+
+                                                       ],
+                            "stca/config.py":  [
+
+                                               ],
+                            "stca/bug_seeds.py":  [
+
+                                                  ]
+                        },
+    "batchFiles":  [
+                       {
+                           "path":  "stca/brain/membership.py",
+                           "language":  "python",
+                           "sizeLines":  209,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/brain/project_tuner.py",
+                           "language":  "python",
+                           "sizeLines":  267,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/brain/rules.py",
+                           "language":  "python",
+                           "sizeLines":  169,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/brain/tuner.py",
+                           "language":  "python",
+                           "sizeLines":  114,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/bug_seeds.py",
+                           "language":  "python",
+                           "sizeLines":  253,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/business_logic.py",
+                           "language":  "python",
+                           "sizeLines":  451,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/cache.py",
+                           "language":  "python",
+                           "sizeLines":  102,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/cli_v2.py",
+                           "language":  "python",
+                           "sizeLines":  577,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/cli.py",
+                           "language":  "python",
+                           "sizeLines":  2074,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/code_quality.py",
+                           "language":  "python",
+                           "sizeLines":  396,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/codebase_miner.py",
+                           "language":  "python",
+                           "sizeLines":  261,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/complexity_metrics.py",
+                           "language":  "python",
+                           "sizeLines":  355,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/concurrency.py",
+                           "language":  "python",
+                           "sizeLines":  278,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/config_scanner.py",
+                           "language":  "python",
+                           "sizeLines":  82,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/config.py",
+                           "language":  "python",
+                           "sizeLines":  147,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/consistency.py",
+                           "language":  "python",
+                           "sizeLines":  242,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/contracts.py",
+                           "language":  "python",
+                           "sizeLines":  286,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/counterfactual.py",
+                           "language":  "python",
+                           "sizeLines":  202,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/coverage.py",
+                           "language":  "python",
+                           "sizeLines":  293,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/cpg_queries.py",
+                           "language":  "python",
+                           "sizeLines":  208,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/cpg.py",
+                           "language":  "python",
+                           "sizeLines":  329,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/crypto_audit.py",
+                           "language":  "python",
+                           "sizeLines":  210,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/deadcode.py",
+                           "language":  "python",
+                           "sizeLines":  199,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/diff_slicer.py",
+                           "language":  "python",
+                           "sizeLines":  256,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/differential.py",
+                           "language":  "python",
+                           "sizeLines":  214,
+                           "fileCategory":  "code"
+                       }
+                   ]
+}

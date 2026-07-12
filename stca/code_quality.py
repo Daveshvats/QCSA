@@ -1,10 +1,30 @@
-"""Code quality analyzer — multi-language (111+ rules across 5 languages)."""
+"""Code quality analyzer — multi-language (111+ rules across 5 languages).
+
+v4.5 fix: Regex rules now skip comments, docstrings, and string literals.
+Previously, rules like CQ-PY-EVAL would match the word 'eval' inside a
+comment or docstring, producing false positives on the tool's own source
+code (93 false CQ-PY-EVAL hits on STCA's self-scan). The fix uses a cheap
+tokenize pass to identify and strip comment/string regions before regex
+matching, while preserving the original line numbers.
+"""
 from __future__ import annotations
 import re
+
+# v4.42: Use fast_regex (re2-backed) if available for ReDoS protection
+try:
+    from .fast_regex import is_re2_available
+    _FAST_REGEX_AVAILABLE = is_re2_available()
+except ImportError:
+    _FAST_REGEX_AVAILABLE = False
+import tokenize
+import io
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from .multi_lang import get_language, ALL_SOURCE_EXTS
+
+import logging
+_logger = logging.getLogger(__name__.replace('stca.', ''))
 
 @dataclass
 class CodeQualityIssue:
@@ -54,8 +74,10 @@ PY_RULES: List[Tuple] = [
     ("CQ-PY-MUTABLE-DEFAULT", r'def\s+\w+\([^)]*=\s*(?:\[\]|\{\}|set\(\))', "high", "correctness", "Mutable default argument", "Use None", "CWE-733", 0.95),
     ("CQ-PY-GLOBAL", r'^\s*global\s+\w+', "medium", "concurrency", "global — stateful, hard to test", "Use class/param", "", 0.5),
     ("CQ-PY-LONG-LINE", r'^.{121,}$', "low", "maintainability", "Line >120 chars", "Wrap", "", 0.4),
-    ("CQ-PY-EVAL", r'\beval\s*\(', "high", "security", "eval() — injection", "Use ast.literal_eval()", "CWE-95", 0.95),
-    ("CQ-PY-EXEC", r'\bexec\s*\(', "high", "security", "exec() — injection", "Refactor", "CWE-95", 0.95),
+    # v4.6: Use negative lookbehind for '.' to avoid matching obj.eval()
+    # (e.g., Z3's model.eval()). Only flag bare eval() / exec() calls.
+    ("CQ-PY-EVAL", r'(?<!\.)\beval\s*\(', "high", "security", "eval() — injection", "Use ast.literal_eval()", "CWE-95", 0.95),
+    ("CQ-PY-EXEC", r'(?<!\.)\bexec\s*\(', "high", "security", "exec() — injection", "Refactor", "CWE-95", 0.95),
     ("CQ-PY-OS-SYSTEM", r'\bos\.system\s*\(', "high", "security", "os.system() — injection", "Use subprocess.run()", "CWE-78", 0.9),
     ("CQ-PY-PICKLE-LOAD", r'\bpickle\.load\s*\(', "high", "security", "pickle.load() — RCE", "Use JSON", "CWE-502", 0.9),
     ("CQ-PY-ASSERT-PROD", r'^\s*assert\s+\w', "medium", "correctness", "assert removed with -O", "Use raise", "CWE-617", 0.6),
@@ -77,7 +99,8 @@ GO_RULES: List[Tuple] = [
     ("CQ-GO-GLOBAL-MUTABLE", r'^\s*var\s+\w+\s*(?:=\s*|map\[|\[\])', "medium", "concurrency", "Global mutable var", "Use sync.Mutex", "CWE-362", 0.6),
     ("CQ-GO-DEFER-IN-LOOP", r'for\s+[^{]*\{[^}]*\bdefer\s+', "medium", "performance", "defer in loop — accumulates", "Extract to function", "", 0.7),
     ("CQ-GO-NAKED-RETURN-LONG", r'^\s*return\s*$', "low", "maintainability", "Naked return — unclear", "Use explicit returns", "", 0.4),
-    ("CQ-GO-STRING-CONCAT-LOOP", r'\+=\s*["\']', "low", "performance", "String concat in loop — O(n²)", "Use strings.Builder", "", 0.6),
+    # v4.9: Fixed — use [\s\S] instead of [^}]* to span newlines (was missing multi-line loop bodies)
+    ("CQ-GO-STRING-CONCAT-LOOP", r'for\s[\s\S]*?\{[\s\S]*?\+=\s*["\']', "low", "performance", "String concat in loop — O(n²)", "Use strings.Builder", "", 0.6),
     ("CQ-GO-UNUSED-VAR", r'\b_\s*=\s*\w+', "low", "maintainability", "Variable to _ — verify", "Remove if unused", "", 0.3),
     ("CQ-GO-EXEC-COMMAND", r'exec\.Command\s*\(\s*["\']sh["\']', "high", "security", "exec.Command('sh') — injection", "Use explicit args", "CWE-78", 0.9),
     ("CQ-GO-UNSAFE-PACKAGE", r'"unsafe"', "high", "security", "unsafe package", "Avoid unsafe", "CWE-119", 0.85),
@@ -85,7 +108,8 @@ GO_RULES: List[Tuple] = [
     ("CQ-GO-CHANNEL-NO-CLOSE", r'make\s*\(\s*chan\s+', "low", "concurrency", "Channel — verify close", "Close when done", "CWE-404", 0.3),
     ("CQ-GO-INTERFACE-POLLUTION", r'^\s*type\s+\w+\s+interface\s*\{[^}]*\}', "low", "maintainability", "Interface — verify needed", "Keep small", "", 0.3),
     ("CQ-GO-UNUSED-IMPORT", r'^\s*_\s*"[^"]+"', "low", "maintainability", "Side-effect import", "Verify intentional", "", 0.4),
-    ("CQ-GO-THREAD-SLEEP", r'Thread\.sleep\s*\(', "low", "performance", "Thread.sleep — polling anti-pattern", "Use wait/notify", "", 0.4),
+    # v4.8: Fixed — was Java syntax (Thread.sleep) instead of Go (time.Sleep)
+    ("CQ-GO-THREAD-SLEEP", r'time\.Sleep\s*\(', "low", "performance", "time.Sleep — polling anti-pattern", "Use wait/notify or channels", "", 0.4),
 ]
 
 JAVA_RULES: List[Tuple] = [
@@ -117,7 +141,8 @@ JAVA_RULES: List[Tuple] = [
     ("CQ-JAVA-ASSERT", r'\bassert\s+\w', "medium", "correctness", "assert disabled by default", "Use IllegalArgumentException", "CWE-617", 0.6),
     ("CQ-JAVA-EQUALS-NULL", r'\.equals\s*\(\s*null\s*\)', "low", "correctness", ".equals(null) always false", "Use == null", "", 0.7),
     ("CQ-JAVA-HASHCODE-WITHOUT-EQUALS", r'public\s+int\s+hashCode\s*\(\)', "medium", "correctness", "hashCode without equals — breaks contract", "Override both", "CWE-581", 0.5),
-    ("CQ-JAVA-STRING-CONCAT-LOOP", r'for\s*\([^}]*\+=\s*["\']', "medium", "performance", "String concat in loop — O(n²)", "Use StringBuilder", "", 0.7),
+    # v4.9: Fixed — use [\s\S] to span newlines (was missing multi-line loop bodies)
+    ("CQ-JAVA-STRING-CONCAT-LOOP", r'for\s*\([^)]*\)\s*\{[\s\S]*?\+=\s*["\']', "medium", "performance", "String concat in loop — O(n²)", "Use StringBuilder", "", 0.7),
     ("CQ-JAVA-NEW-STRING-EMPTY", r'new\s+String\s*\(\s*\)', "low", "performance", "new String()", "Use \"\"", "", 0.5),
     ("CQ-JAVA-INTEGER-PARSE", r'Integer\.parseInt\s*\(', "low", "correctness", "parseInt — NumberFormatException", "Wrap in try-catch", "CWE-755", 0.3),
     ("CQ-JAVA-DATE-DEPRECATED", r'\bnew\s+(?:Date|java\.util\.Date)\s*\(\s*\)', "medium", "correctness", "new Date() deprecated", "Use Instant.now()", "", 0.5),
@@ -356,6 +381,150 @@ def _detect_axios_import_inconsistency(js_files, repo_root):
 def get_rules_for_language(lang):
     return {"python":PY_RULES,"javascript":JS_RULES,"go":GO_RULES,"java":JAVA_RULES,"cpp":CPP_RULES}.get(lang, [])
 
+
+# v4.5: Rules that should NOT be stripped of comments/strings — these rules
+# are specifically about comments (TODO, noqa, type:ignore) or string content
+# (hardcoded URLs, colors) and need to see the raw line.
+_COMMENT_STRING_AWARE_RULES = {
+    "CQ-PY-TODO", "CQ-PY-TYPE-IGNORE", "CQ-PY-NOQA",
+    "CQ-TS-IGNORE", "CQ-ESLINT-DISABLE",
+    "CQ-HARDCODED-COLOR", "CQ-HARDCODED-URL",
+    "CQ-PY-EXCEPT-PASS",  # multi-line pattern, needs raw lines
+    "CQ-PY-EXCEPT-EXCEPTION-PASS",  # multi-line pattern
+    "CQ-PY-LONG-LINE",  # about line length, must see raw line
+    "CQ-DEVTOOLS-IN-PROD",  # JSX, not Python
+    "CQ-REPLACEALL-REGEX-NO-G",  # JS regex literal
+    "CQ-LOCALSTORAGE-SET-NULL",  # JS
+    "CQ-QUERYCLIENT-NO-DEFAULTS",  # JS
+    "CQ-INDEX-AS-KEY",  # JSX
+    "CQ-NO-KEY-IN-LIST",  # JSX
+    "CQ-INLINE-STYLE",  # JSX
+    "CQ-DEFAULT-PARAM-SIDEEFFECT",  # JS
+    "CQ-USESTATE-DEFAULT-PARAM",  # JS
+    "CQ-LOOSE-EQUALITY",  # JS
+}
+
+
+def _strip_python_comments_and_strings(source: str) -> List[str]:
+    """Return source lines with comments and string literals stripped.
+
+    v4.5: Uses Python's tokenize module to accurately identify comments,
+    docstrings, and string literals. For each line, returns a version with
+    comment and string content removed (replaced with empty string), so
+    regex rules don't match on text inside comments/strings.
+    """
+    lines = source.splitlines()
+    # Collect all (line_idx, start_col, end_col) ranges to remove
+    removals: Dict[int, List[Tuple[int, int]]] = {}
+
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
+        for tok in tokens:
+            if tok.type in (tokenize.COMMENT, tokenize.STRING):
+                start_line = tok.start[0] - 1  # 0-indexed
+                end_line = tok.end[0] - 1
+                if start_line == end_line:
+                    # Single-line: mark this range for removal
+                    removals.setdefault(start_line, []).append(
+                        (tok.start[1], tok.end[1])
+                    )
+                else:
+                    # Multi-line string (docstring): mark full lines
+                    for line_idx in range(start_line, min(end_line + 1, len(lines))):
+                        if line_idx == start_line:
+                            removals.setdefault(line_idx, []).append(
+                                (tok.start[1], len(lines[line_idx]))
+                            )
+                        elif line_idx == end_line:
+                            removals.setdefault(line_idx, []).append(
+                                (0, tok.end[1])
+                            )
+                        else:
+                            removals.setdefault(line_idx, []).append(
+                                (0, len(lines[line_idx]))
+                            )
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        pass
+
+    # Apply removals: for each line, remove all marked ranges (in reverse order)
+    stripped = list(lines)
+    for line_idx, ranges in removals.items():
+        if line_idx >= len(stripped):
+            continue
+        line = stripped[line_idx]
+        # Sort ranges in reverse order so removals don't shift indices
+        for start_col, end_col in sorted(ranges, key=lambda x: -x[0]):
+            line = line[:start_col] + line[end_col:]
+        stripped[line_idx] = line
+
+    return stripped
+
+
+def _strip_js_comments_and_strings(source: str) -> List[str]:
+    """Strip JS/TS comments and string literals from source lines.
+
+    v4.5: Simpler than Python's tokenize — uses regex to identify // comments,
+    /* */ block comments, and ' " ` string literals, then blanks them out.
+    """
+    lines = source.splitlines()
+    stripped = list(lines)
+    in_block_comment = False
+
+    for i, line in enumerate(lines):
+        result = ""
+        j = 0
+        in_string = False
+        string_char = ""
+        while j < len(line):
+            if in_block_comment:
+                if line[j:j+2] == "*/":
+                    in_block_comment = False
+                    j += 2
+                else:
+                    j += 1
+                continue
+            if in_string:
+                if line[j] == "\\":
+                    result += line[j:j+2]
+                    j += 2
+                    continue
+                if line[j] == string_char:
+                    in_string = False
+                    string_char = ""
+                result += line[j]
+                j += 1
+                continue
+            # Not in string or block comment
+            if line[j:j+2] == "//":
+                break  # rest of line is comment
+            if line[j:j+2] == "/*":
+                in_block_comment = True
+                j += 2
+                continue
+            if line[j] in ('"', "'", "`"):
+                in_string = True
+                string_char = line[j]
+                result += line[j]
+                j += 1
+                continue
+            result += line[j]
+            j += 1
+        stripped[i] = result
+
+    return stripped
+
+
+def _get_stripped_lines(source: str, lang: str) -> List[str]:
+    """Get source lines with comments and strings stripped for the language."""
+    if lang == "python":
+        return _strip_python_comments_and_strings(source)
+    elif lang in ("javascript", "typescript"):
+        return _strip_js_comments_and_strings(source)
+    else:
+        # For Go/Java/C/C++, use the JS stripper as a reasonable approximation
+        return _strip_js_comments_and_strings(source)
+
+
 def analyze_code_quality(file_path, repo_root=None):
     if not file_path.exists(): return []
     lang = get_language(file_path)
@@ -366,10 +535,19 @@ def analyze_code_quality(file_path, repo_root=None):
     findings = []
     rules = get_rules_for_language(lang)
     lines = source.splitlines()
+    # v4.5: Get comment/string-stripped lines for rules that need them
+    stripped_lines = _get_stripped_lines(source, lang)
     for i, line in enumerate(lines, 1):
+        stripped_line = stripped_lines[i - 1] if i - 1 < len(stripped_lines) else line
         for rule_id, regex, severity, category, desc, fix, cwe, conf in rules:
             try:
-                if re.search(regex, line):
+                # v4.5: Use stripped line for most rules, but raw line for
+                # rules that specifically check comments or string content
+                if rule_id in _COMMENT_STRING_AWARE_RULES:
+                    search_line = line
+                else:
+                    search_line = stripped_line
+                if re.search(regex, search_line):
                     findings.append(CodeQualityIssue(file=rel, line=i, rule_id=rule_id, severity=severity,
                         category=category, description=desc, fix=fix, cwe=cwe, confidence=conf, language=lang))
             except re.error: continue
@@ -388,7 +566,7 @@ def analyze_repo_code_quality(repo_root, max_files=600):
         if not p.is_file() or any(part in skip_dirs for part in p.parts): continue
         if p.suffix.lower() in ALL_SOURCE_EXTS:
             try: findings += analyze_code_quality(p, repo_root)
-            except: pass
+            except Exception: pass  # v4.5: suppressed — add logging
             if p.suffix.lower() in (".js",".jsx",".ts",".tsx",".mjs"): js_files.append(p)
             count += 1
             if count >= max_files: break

@@ -31,7 +31,7 @@ from ..models import Finding, DiffHunk, LayerID, Severity, BlastRadius
 
 
 class L0dBehavioral(LayerBase):
-    id = LayerID.L0_FAST
+    id = LayerID.L0D_BEHAVIORAL  # v4.11: use own LayerID
     name = "Behavioral Analysis"
     description = "CodeScene-style hotspot detection, complexity trends, knowledge drift"
     LAYER_TAG = "L0d_behavioral"

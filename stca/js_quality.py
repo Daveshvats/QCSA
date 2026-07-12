@@ -6,6 +6,7 @@ without requiring a JS parser. Numbers are approximate but useful for
 relative ranking.
 """
 from __future__ import annotations
+from .text_utils import extract_block as _extract_block
 
 import math
 import re
@@ -54,23 +55,6 @@ _FUNC_RE = re.compile(
     re.MULTILINE)
 
 
-def _extract_block(source: str, start: int) -> str:
-    """Extract a brace-balanced JS block starting after position `start`."""
-    depth = 1
-    i = start
-    while i < len(source) and depth > 0:
-        c = source[i]
-        if c == "{": depth += 1
-        elif c == "}": depth -= 1
-        elif c == '"' or c == "'" or c == "`":
-            # skip strings
-            quote = c
-            i += 1
-            while i < len(source) and source[i] != quote:
-                if source[i] == "\\": i += 1
-                i += 1
-        i += 1
-    return source[start:i]
 
 
 # =============================================================================

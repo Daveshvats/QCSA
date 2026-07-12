@@ -1,0 +1,246 @@
+{
+    "projectRoot":  "C:\\Users\\deves\\Downloads\\stca-pipeline-complete-v2.6\\stca-pipeline",
+    "batchImportData":  {
+                            "stca/llm/__init__.py":  [
+                                                         "stca/llm/client.py",
+                                                         "stca/llm/prm.py"
+                                                     ],
+                            "stca/layers/l6_symbolic.py":  [
+                                                               "stca/layers/base.py",
+                                                               "stca/models.py"
+                                                           ],
+                            "stca/maven_cve_db.py":  [
+
+                                                     ],
+                            "stca/metamorphic.py":  [
+
+                                                    ],
+                            "stca/layers/l3_invariants.py":  [
+                                                                 "stca/layers/base.py",
+                                                                 "stca/models.py"
+                                                             ],
+                            "stca/lsp/server.py":  [
+
+                                                   ],
+                            "stca/layers/l0e_iac.py":  [
+                                                           "stca/layers/base.py",
+                                                           "stca/models.py"
+                                                       ],
+                            "stca/layers/l2_mutation.py":  [
+                                                               "stca/layers/base.py",
+                                                               "stca/models.py"
+                                                           ],
+                            "stca/llm_verify.py":  [
+
+                                                   ],
+                            "stca/llm/client.py":  [
+
+                                                   ],
+                            "stca/malicious_patterns.py":  [
+
+                                                           ],
+                            "stca/layers/l4_fuzz.py":  [
+                                                           "stca/layers/base.py",
+                                                           "stca/models.py"
+                                                       ],
+                            "stca/layers/l0d_behavioral.py":  [
+                                                                  "stca/layers/base.py",
+                                                                  "stca/models.py"
+                                                              ],
+                            "stca/layers/l5_policy.py":  [
+                                                             "stca/layers/base.py",
+                                                             "stca/models.py"
+                                                         ],
+                            "stca/layers/l8_autofix.py":  [
+                                                              "stca/layers/base.py",
+                                                              "stca/models.py"
+                                                          ],
+                            "stca/layers/l1_property.py":  [
+                                                               "stca/layers/base.py",
+                                                               "stca/models.py"
+                                                           ],
+                            "stca/lsp/__init__.py":  [
+
+                                                     ],
+                            "stca/layers/l7_simulation.py":  [
+                                                                 "stca/layers/base.py",
+                                                                 "stca/models.py"
+                                                             ],
+                            "stca/learning.py":  [
+
+                                                 ],
+                            "stca/models.py":  [
+
+                                               ],
+                            "stca/layers/l0c_dependencies.py":  [
+                                                                    "stca/layers/base.py",
+                                                                    "stca/models.py"
+                                                                ],
+                            "stca/layers/l0b_supply_chain.py":  [
+                                                                    "stca/layers/base.py",
+                                                                    "stca/models.py"
+                                                                ],
+                            "stca/layers/l0f_commit_risk.py":  [
+                                                                   "stca/layers/base.py",
+                                                                   "stca/models.py"
+                                                               ],
+                            "stca/missing_patches.py":  [
+
+                                                        ],
+                            "stca/llm/prm.py":  [
+
+                                                ]
+                        },
+    "batchFiles":  [
+                       {
+                           "path":  "stca/layers/l0b_supply_chain.py",
+                           "language":  "python",
+                           "sizeLines":  412,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l0c_dependencies.py",
+                           "language":  "python",
+                           "sizeLines":  203,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l0d_behavioral.py",
+                           "language":  "python",
+                           "sizeLines":  235,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l0e_iac.py",
+                           "language":  "python",
+                           "sizeLines":  430,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l0f_commit_risk.py",
+                           "language":  "python",
+                           "sizeLines":  313,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l1_property.py",
+                           "language":  "python",
+                           "sizeLines":  101,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l2_mutation.py",
+                           "language":  "python",
+                           "sizeLines":  117,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l3_invariants.py",
+                           "language":  "python",
+                           "sizeLines":  127,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l4_fuzz.py",
+                           "language":  "python",
+                           "sizeLines":  136,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l5_policy.py",
+                           "language":  "python",
+                           "sizeLines":  138,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l6_symbolic.py",
+                           "language":  "python",
+                           "sizeLines":  76,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l7_simulation.py",
+                           "language":  "python",
+                           "sizeLines":  106,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l8_autofix.py",
+                           "language":  "python",
+                           "sizeLines":  277,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/learning.py",
+                           "language":  "python",
+                           "sizeLines":  299,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/llm_verify.py",
+                           "language":  "python",
+                           "sizeLines":  221,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/llm/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  14,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/llm/client.py",
+                           "language":  "python",
+                           "sizeLines":  105,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/llm/prm.py",
+                           "language":  "python",
+                           "sizeLines":  128,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/lsp/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  1,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/lsp/server.py",
+                           "language":  "python",
+                           "sizeLines":  148,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/malicious_patterns.py",
+                           "language":  "python",
+                           "sizeLines":  231,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/maven_cve_db.py",
+                           "language":  "python",
+                           "sizeLines":  259,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/metamorphic.py",
+                           "language":  "python",
+                           "sizeLines":  304,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/missing_patches.py",
+                           "language":  "python",
+                           "sizeLines":  296,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/models.py",
+                           "language":  "python",
+                           "sizeLines":  236,
+                           "fileCategory":  "code"
+                       }
+                   ]
+}

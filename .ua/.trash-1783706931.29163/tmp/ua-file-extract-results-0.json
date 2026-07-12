@@ -1,0 +1,3329 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 25,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": ".mimocode/.cron-lock",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 1,
+      "metrics": {}
+    },
+    {
+      "path": ".ua/.understandignore",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 49,
+      "nonEmptyLines": 43,
+      "metrics": {}
+    },
+    {
+      "path": "examples/policies/no_secrets_in_logs.rego",
+      "language": "rego",
+      "fileCategory": "code",
+      "totalLines": 36,
+      "nonEmptyLines": 31,
+      "metrics": {}
+    },
+    {
+      "path": "examples/sample-python-repo/app.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 137,
+      "nonEmptyLines": 106,
+      "functions": [
+        {
+          "name": "process_payment",
+          "startLine": 7,
+          "endLine": 18,
+          "params": [
+            "amount",
+            "card_number"
+          ]
+        },
+        {
+          "name": "calculate_discount",
+          "startLine": 21,
+          "endLine": 29,
+          "params": [
+            "price",
+            "discount_percent"
+          ]
+        },
+        {
+          "name": "authenticate_user",
+          "startLine": 32,
+          "endLine": 41,
+          "params": [
+            "username",
+            "password"
+          ]
+        },
+        {
+          "name": "parse_config",
+          "startLine": 44,
+          "endLine": 48,
+          "params": [
+            "config_str"
+          ]
+        },
+        {
+          "name": "get_user_data",
+          "startLine": 51,
+          "endLine": 59,
+          "params": [
+            "user_id"
+          ]
+        },
+        {
+          "name": "render_template",
+          "startLine": 62,
+          "endLine": 68,
+          "params": [
+            "template",
+            "context"
+          ]
+        },
+        {
+          "name": "new_buggy_auth",
+          "startLine": 71,
+          "endLine": 76,
+          "params": [
+            "username",
+            "password"
+          ]
+        },
+        {
+          "name": "new_buggy_auth",
+          "startLine": 79,
+          "endLine": 84,
+          "params": [
+            "username",
+            "password"
+          ]
+        },
+        {
+          "name": "suppressed_eval",
+          "startLine": 87,
+          "endLine": 89,
+          "params": [
+            "user_input"
+          ]
+        },
+        {
+          "name": "new_buggy_auth",
+          "startLine": 92,
+          "endLine": 97,
+          "params": [
+            "username",
+            "password"
+          ]
+        },
+        {
+          "name": "new_buggy_auth",
+          "startLine": 100,
+          "endLine": 105,
+          "params": [
+            "username",
+            "password"
+          ]
+        },
+        {
+          "name": "new_buggy_auth",
+          "startLine": 108,
+          "endLine": 113,
+          "params": [
+            "username",
+            "password"
+          ]
+        },
+        {
+          "name": "new_buggy_auth",
+          "startLine": 116,
+          "endLine": 121,
+          "params": [
+            "username",
+            "password"
+          ]
+        },
+        {
+          "name": "new_buggy_auth",
+          "startLine": 124,
+          "endLine": 129,
+          "params": [
+            "username",
+            "password"
+          ]
+        },
+        {
+          "name": "new_buggy_auth",
+          "startLine": 132,
+          "endLine": 137,
+          "params": [
+            "username",
+            "password"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "process_payment",
+          "line": 7,
+          "isDefault": false
+        },
+        {
+          "name": "calculate_discount",
+          "line": 21,
+          "isDefault": false
+        },
+        {
+          "name": "authenticate_user",
+          "line": 32,
+          "isDefault": false
+        },
+        {
+          "name": "parse_config",
+          "line": 44,
+          "isDefault": false
+        },
+        {
+          "name": "get_user_data",
+          "line": 51,
+          "isDefault": false
+        },
+        {
+          "name": "render_template",
+          "line": 62,
+          "isDefault": false
+        },
+        {
+          "name": "new_buggy_auth",
+          "line": 71,
+          "isDefault": false
+        },
+        {
+          "name": "new_buggy_auth",
+          "line": 79,
+          "isDefault": false
+        },
+        {
+          "name": "suppressed_eval",
+          "line": 87,
+          "isDefault": false
+        },
+        {
+          "name": "new_buggy_auth",
+          "line": 92,
+          "isDefault": false
+        },
+        {
+          "name": "new_buggy_auth",
+          "line": 100,
+          "isDefault": false
+        },
+        {
+          "name": "new_buggy_auth",
+          "line": 108,
+          "isDefault": false
+        },
+        {
+          "name": "new_buggy_auth",
+          "line": 116,
+          "isDefault": false
+        },
+        {
+          "name": "new_buggy_auth",
+          "line": 124,
+          "isDefault": false
+        },
+        {
+          "name": "new_buggy_auth",
+          "line": 132,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "process_payment",
+          "callee": "print",
+          "lineNumber": 13
+        },
+        {
+          "caller": "calculate_discount",
+          "callee": "ValueError",
+          "lineNumber": 28
+        },
+        {
+          "caller": "authenticate_user",
+          "callee": "print",
+          "lineNumber": 39
+        },
+        {
+          "caller": "parse_config",
+          "callee": "eval",
+          "lineNumber": 48
+        },
+        {
+          "caller": "render_template",
+          "callee": "context.items",
+          "lineNumber": 66
+        },
+        {
+          "caller": "render_template",
+          "callee": "template.replace",
+          "lineNumber": 67
+        },
+        {
+          "caller": "render_template",
+          "callee": "str",
+          "lineNumber": 67
+        },
+        {
+          "caller": "render_template",
+          "callee": "eval",
+          "lineNumber": 68
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "print",
+          "lineNumber": 73
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "eval",
+          "lineNumber": 74
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "print",
+          "lineNumber": 81
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "eval",
+          "lineNumber": 82
+        },
+        {
+          "caller": "suppressed_eval",
+          "callee": "eval",
+          "lineNumber": 88
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "print",
+          "lineNumber": 94
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "eval",
+          "lineNumber": 95
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "print",
+          "lineNumber": 102
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "eval",
+          "lineNumber": 103
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "print",
+          "lineNumber": 110
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "eval",
+          "lineNumber": 111
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "print",
+          "lineNumber": 118
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "eval",
+          "lineNumber": 119
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "print",
+          "lineNumber": 126
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "eval",
+          "lineNumber": 127
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "print",
+          "lineNumber": 134
+        },
+        {
+          "caller": "new_buggy_auth",
+          "callee": "eval",
+          "lineNumber": 135
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 15,
+        "functionCount": 15,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "examples/sample-python-repo/test_app.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 24,
+      "nonEmptyLines": 18,
+      "functions": [
+        {
+          "name": "test_calculate_discount_never_negative",
+          "startLine": 14,
+          "endLine": 17,
+          "params": [
+            "price",
+            "discount_percent"
+          ]
+        },
+        {
+          "name": "test_get_user_data_returns_dict",
+          "startLine": 21,
+          "endLine": 24,
+          "params": [
+            "user_id"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "test_calculate_discount_never_negative",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "test_get_user_data_returns_dict",
+          "line": 20,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "test_calculate_discount_never_negative",
+          "callee": "calculate_discount",
+          "lineNumber": 16
+        },
+        {
+          "caller": "test_get_user_data_returns_dict",
+          "callee": "get_user_data",
+          "lineNumber": 23
+        },
+        {
+          "caller": "test_get_user_data_returns_dict",
+          "callee": "isinstance",
+          "lineNumber": 24
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/find_bad_loggers.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 40,
+      "nonEmptyLines": 36,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/fix_silent_except_v2.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 431,
+      "nonEmptyLines": 417,
+      "functions": [
+        {
+          "name": "insert_logger",
+          "startLine": 346,
+          "endLine": 374,
+          "params": [
+            "src",
+            "module_name"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "insert_logger",
+          "line": 346,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "insert_logger",
+          "callee": "src.splitlines",
+          "lineNumber": 351
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "lines[0].lstrip().startswith",
+          "lineNumber": 354
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "lines[0].lstrip",
+          "lineNumber": 354
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "range",
+          "lineNumber": 356
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "len",
+          "lineNumber": 356
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "range",
+          "lineNumber": 361
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "len",
+          "lineNumber": 361
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "lines[i].strip",
+          "lineNumber": 362
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "stripped.startswith",
+          "lineNumber": 363
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "stripped.startswith",
+          "lineNumber": 365
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "len",
+          "lineNumber": 370
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "lines[insert_idx].strip",
+          "lineNumber": 370
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "LOGGER_TEMPLATE.format",
+          "lineNumber": 372
+        },
+        {
+          "caller": "insert_logger",
+          "callee": "\"\".join",
+          "lineNumber": 374
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/fix_silent_except.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 123,
+      "nonEmptyLines": 117,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/rewire_scanner_errors.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 39,
+      "nonEmptyLines": 32,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/show_silent_context.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 27,
+      "nonEmptyLines": 25,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/survey_silent_except.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 39,
+      "nonEmptyLines": 34,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "stca_pipeline.egg-info/PKG-INFO",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 235,
+      "nonEmptyLines": 200,
+      "metrics": {}
+    },
+    {
+      "path": "stca/__init__.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 8,
+      "nonEmptyLines": 6,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "stca/advanced_secrets.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 319,
+      "nonEmptyLines": 274,
+      "functions": [
+        {
+          "name": "shannon_entropy",
+          "startLine": 64,
+          "endLine": 75,
+          "params": [
+            "s"
+          ]
+        },
+        {
+          "name": "detect_secrets_entropy",
+          "startLine": 78,
+          "endLine": 119,
+          "params": [
+            "text",
+            "file"
+          ]
+        },
+        {
+          "name": "_classify_prefix",
+          "startLine": 122,
+          "endLine": 137,
+          "params": [
+            "prefix"
+          ]
+        },
+        {
+          "name": "_mask",
+          "startLine": 140,
+          "endLine": 144,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "run_trufflehog",
+          "startLine": 147,
+          "endLine": 185,
+          "params": [
+            "repo_root",
+            "files"
+          ]
+        },
+        {
+          "name": "scan_git_history",
+          "startLine": 188,
+          "endLine": 263,
+          "params": [
+            "repo_root",
+            "max_commits"
+          ]
+        },
+        {
+          "name": "detect_secrets_advanced",
+          "startLine": 266,
+          "endLine": 319,
+          "params": [
+            "repo_root",
+            "files",
+            "scan_history"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "SecretDetection",
+          "startLine": 54,
+          "endLine": 61,
+          "methods": [],
+          "properties": [
+            "file",
+            "line",
+            "secret_type",
+            "value_preview",
+            "confidence",
+            "verified"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "SecretDetection",
+          "line": 53,
+          "isDefault": false
+        },
+        {
+          "name": "shannon_entropy",
+          "line": 64,
+          "isDefault": false
+        },
+        {
+          "name": "detect_secrets_entropy",
+          "line": 78,
+          "isDefault": false
+        },
+        {
+          "name": "_classify_prefix",
+          "line": 122,
+          "isDefault": false
+        },
+        {
+          "name": "_mask",
+          "line": 140,
+          "isDefault": false
+        },
+        {
+          "name": "run_trufflehog",
+          "line": 147,
+          "isDefault": false
+        },
+        {
+          "name": "scan_git_history",
+          "line": 188,
+          "isDefault": false
+        },
+        {
+          "name": "detect_secrets_advanced",
+          "line": 266,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "shannon_entropy",
+          "callee": "Counter",
+          "lineNumber": 69
+        },
+        {
+          "caller": "shannon_entropy",
+          "callee": "len",
+          "lineNumber": 70
+        },
+        {
+          "caller": "shannon_entropy",
+          "callee": "counts.values",
+          "lineNumber": 72
+        },
+        {
+          "caller": "shannon_entropy",
+          "callee": "math.log2",
+          "lineNumber": 74
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "enumerate",
+          "lineNumber": 86
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "text.splitlines",
+          "lineNumber": 86
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "line.find",
+          "lineNumber": 89
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "min",
+          "lineNumber": 92
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "len",
+          "lineNumber": 92
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "len",
+          "lineNumber": 93
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "len",
+          "lineNumber": 96
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "_classify_prefix",
+          "lineNumber": 97
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "detections.append",
+          "lineNumber": 98
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "SecretDetection",
+          "lineNumber": 98
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "_mask",
+          "lineNumber": 100
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "line.find",
+          "lineNumber": 103
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "re.finditer",
+          "lineNumber": 107
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "match.group",
+          "lineNumber": 108
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "shannon_entropy",
+          "lineNumber": 109
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "any",
+          "lineNumber": 112
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "value.startswith",
+          "lineNumber": 112
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "detections.append",
+          "lineNumber": 113
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "SecretDetection",
+          "lineNumber": 113
+        },
+        {
+          "caller": "detect_secrets_entropy",
+          "callee": "_mask",
+          "lineNumber": 115
+        },
+        {
+          "caller": "_classify_prefix",
+          "callee": "prefix.startswith",
+          "lineNumber": 123
+        },
+        {
+          "caller": "_classify_prefix",
+          "callee": "prefix.startswith",
+          "lineNumber": 125
+        },
+        {
+          "caller": "_classify_prefix",
+          "callee": "prefix.startswith",
+          "lineNumber": 127
+        },
+        {
+          "caller": "_classify_prefix",
+          "callee": "prefix.startswith",
+          "lineNumber": 131
+        },
+        {
+          "caller": "_mask",
+          "callee": "len",
+          "lineNumber": 142
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "shutil.which",
+          "lineNumber": 149
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "subprocess.run",
+          "lineNumber": 155
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "str",
+          "lineNumber": 157
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "str",
+          "lineNumber": 159
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "proc.stdout.splitlines",
+          "lineNumber": 161
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "line.strip",
+          "lineNumber": 162
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "json.loads",
+          "lineNumber": 165
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get",
+          "lineNumber": 166
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get",
+          "lineNumber": 166
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get",
+          "lineNumber": 167
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "findings.append",
+          "lineNumber": 168
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "Finding",
+          "lineNumber": 168
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get",
+          "lineNumber": 171
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get(\"SourceMetadata\", {}).get(\"Data\", {}).get(\"Filesystem\", {}).get",
+          "lineNumber": 172
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get(\"SourceMetadata\", {}).get(\"Data\", {}).get",
+          "lineNumber": 172
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get(\"SourceMetadata\", {}).get",
+          "lineNumber": 172
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get",
+          "lineNumber": 172
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get(\"SourceMetadata\", {}).get(\"Data\", {}).get(\"Filesystem\", {}).get",
+          "lineNumber": 173
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get(\"SourceMetadata\", {}).get(\"Data\", {}).get",
+          "lineNumber": 173
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get(\"SourceMetadata\", {}).get",
+          "lineNumber": 173
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get",
+          "lineNumber": 173
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get",
+          "lineNumber": 174
+        },
+        {
+          "caller": "run_trufflehog",
+          "callee": "data.get",
+          "lineNumber": 175
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "subprocess.run",
+          "lineNumber": 206
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "str",
+          "lineNumber": 207
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "str",
+          "lineNumber": 207
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "proc.stdout.strip().splitlines",
+          "lineNumber": 210
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "proc.stdout.strip",
+          "lineNumber": 210
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "set",
+          "lineNumber": 215
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "subprocess.run",
+          "lineNumber": 219
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "str",
+          "lineNumber": 220
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "subprocess.run",
+          "lineNumber": 224
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "str",
+          "lineNumber": 225
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "str",
+          "lineNumber": 227
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "diff.splitlines",
+          "lineNumber": 237
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "line.startswith",
+          "lineNumber": 238
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "line.startswith",
+          "lineNumber": 241
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "line.startswith",
+          "lineNumber": 241
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "detect_secrets_entropy",
+          "lineNumber": 244
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "seen_secrets.add",
+          "lineNumber": 249
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "findings.append",
+          "lineNumber": 250
+        },
+        {
+          "caller": "scan_git_history",
+          "callee": "Finding",
+          "lineNumber": 250
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "run_trufflehog",
+          "lineNumber": 284
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "findings.extend",
+          "lineNumber": 285
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "str",
+          "lineNumber": 293
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "file_path.relative_to",
+          "lineNumber": 293
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "file_path.is_relative_to",
+          "lineNumber": 293
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "str",
+          "lineNumber": 293
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "file_path.read_text",
+          "lineNumber": 297
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "detect_secrets_entropy",
+          "lineNumber": 298
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "findings.append",
+          "lineNumber": 300
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "Finding",
+          "lineNumber": 300
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "findings.extend",
+          "lineNumber": 317
+        },
+        {
+          "caller": "detect_secrets_advanced",
+          "callee": "scan_git_history",
+          "lineNumber": 317
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 8,
+        "functionCount": 7,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "stca/architecture.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 185,
+      "nonEmptyLines": 162,
+      "classes": [
+        {
+          "name": "ArchitectureLayer",
+          "startLine": 37,
+          "endLine": 42,
+          "methods": [],
+          "properties": [
+            "name",
+            "paths",
+            "may_import",
+            "may_not_import"
+          ]
+        },
+        {
+          "name": "ArchitectureViolation",
+          "startLine": 46,
+          "endLine": 54,
+          "methods": [],
+          "properties": [
+            "file",
+            "line",
+            "importing_layer",
+            "imported_module",
+            "imported_layer",
+            "violation",
+            "description"
+          ]
+        },
+        {
+          "name": "ArchitectureEnforcer",
+          "startLine": 92,
+          "endLine": 185,
+          "methods": [
+            "__init__",
+            "_get_layer_for_file",
+            "_get_layer_for_import",
+            "check_file",
+            "check_repo",
+            "stats"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ArchitectureLayer",
+          "line": 36,
+          "isDefault": false
+        },
+        {
+          "name": "ArchitectureViolation",
+          "line": 45,
+          "isDefault": false
+        },
+        {
+          "name": "ArchitectureEnforcer",
+          "line": 92,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "_get_layer_for_file",
+          "callee": "pattern.replace",
+          "lineNumber": 106
+        },
+        {
+          "caller": "_get_layer_for_file",
+          "callee": "fnmatch",
+          "lineNumber": 107
+        },
+        {
+          "caller": "_get_layer_for_file",
+          "callee": "fnmatch",
+          "lineNumber": 107
+        },
+        {
+          "caller": "_get_layer_for_file",
+          "callee": "Path",
+          "lineNumber": 107
+        },
+        {
+          "caller": "_get_layer_for_import",
+          "callee": "import_path.replace",
+          "lineNumber": 115
+        },
+        {
+          "caller": "_get_layer_for_import",
+          "callee": "self._get_layer_for_file",
+          "lineNumber": 116
+        },
+        {
+          "caller": "check_file",
+          "callee": "file_path.exists",
+          "lineNumber": 120
+        },
+        {
+          "caller": "check_file",
+          "callee": "str",
+          "lineNumber": 123
+        },
+        {
+          "caller": "check_file",
+          "callee": "file_path.relative_to",
+          "lineNumber": 123
+        },
+        {
+          "caller": "check_file",
+          "callee": "self._get_layer_for_file",
+          "lineNumber": 124
+        },
+        {
+          "caller": "check_file",
+          "callee": "file_path.read_text",
+          "lineNumber": 129
+        },
+        {
+          "caller": "check_file",
+          "callee": "ast.parse",
+          "lineNumber": 130
+        },
+        {
+          "caller": "check_file",
+          "callee": "ast.walk",
+          "lineNumber": 136
+        },
+        {
+          "caller": "check_file",
+          "callee": "isinstance",
+          "lineNumber": 137
+        },
+        {
+          "caller": "check_file",
+          "callee": "self._get_layer_for_import",
+          "lineNumber": 139
+        },
+        {
+          "caller": "check_file",
+          "callee": "violations.append",
+          "lineNumber": 142
+        },
+        {
+          "caller": "check_file",
+          "callee": "ArchitectureViolation",
+          "lineNumber": 142
+        },
+        {
+          "caller": "check_file",
+          "callee": "isinstance",
+          "lineNumber": 150
+        },
+        {
+          "caller": "check_file",
+          "callee": "self._get_layer_for_import",
+          "lineNumber": 152
+        },
+        {
+          "caller": "check_file",
+          "callee": "violations.append",
+          "lineNumber": 155
+        },
+        {
+          "caller": "check_file",
+          "callee": "ArchitectureViolation",
+          "lineNumber": 155
+        },
+        {
+          "caller": "check_repo",
+          "callee": "self.repo_root.rglob",
+          "lineNumber": 172
+        },
+        {
+          "caller": "check_repo",
+          "callee": "any",
+          "lineNumber": 173
+        },
+        {
+          "caller": "check_repo",
+          "callee": "violations.extend",
+          "lineNumber": 175
+        },
+        {
+          "caller": "check_repo",
+          "callee": "self.check_file",
+          "lineNumber": 175
+        },
+        {
+          "caller": "stats",
+          "callee": "len",
+          "lineNumber": 183
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 0,
+        "classCount": 3
+      }
+    },
+    {
+      "path": "stca/audit.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 142,
+      "nonEmptyLines": 121,
+      "classes": [
+        {
+          "name": "AuditEntry",
+          "startLine": 31,
+          "endLine": 39,
+          "methods": [],
+          "properties": [
+            "timestamp",
+            "action",
+            "user",
+            "hostname",
+            "details",
+            "prev_hash",
+            "this_hash"
+          ]
+        },
+        {
+          "name": "AuditLogger",
+          "startLine": 42,
+          "endLine": 142,
+          "methods": [
+            "__init__",
+            "_get_last_hash",
+            "_compute_hash",
+            "log",
+            "verify_chain",
+            "tail",
+            "stats"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "AuditEntry",
+          "line": 30,
+          "isDefault": false
+        },
+        {
+          "name": "AuditLogger",
+          "line": 42,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "_get_last_hash",
+          "callee": "self.log_file.exists",
+          "lineNumber": 50
+        },
+        {
+          "caller": "_get_last_hash",
+          "callee": "self.log_file.read_text(encoding=\"utf-8\").strip().splitlines",
+          "lineNumber": 53
+        },
+        {
+          "caller": "_get_last_hash",
+          "callee": "self.log_file.read_text(encoding=\"utf-8\").strip",
+          "lineNumber": 53
+        },
+        {
+          "caller": "_get_last_hash",
+          "callee": "self.log_file.read_text",
+          "lineNumber": 53
+        },
+        {
+          "caller": "_get_last_hash",
+          "callee": "json.loads",
+          "lineNumber": 56
+        },
+        {
+          "caller": "_get_last_hash",
+          "callee": "last.get",
+          "lineNumber": 57
+        },
+        {
+          "caller": "_compute_hash",
+          "callee": "hashlib.sha256(content.encode(\"utf-8\")).hexdigest",
+          "lineNumber": 64
+        },
+        {
+          "caller": "_compute_hash",
+          "callee": "hashlib.sha256",
+          "lineNumber": 64
+        },
+        {
+          "caller": "_compute_hash",
+          "callee": "content.encode",
+          "lineNumber": 64
+        },
+        {
+          "caller": "log",
+          "callee": "datetime.now().isoformat",
+          "lineNumber": 68
+        },
+        {
+          "caller": "log",
+          "callee": "datetime.now",
+          "lineNumber": 68
+        },
+        {
+          "caller": "log",
+          "callee": "getpass.getuser",
+          "lineNumber": 70
+        },
+        {
+          "caller": "log",
+          "callee": "os.environ.get",
+          "lineNumber": 72
+        },
+        {
+          "caller": "log",
+          "callee": "socket.gethostname",
+          "lineNumber": 74
+        },
+        {
+          "caller": "log",
+          "callee": "json.dumps",
+          "lineNumber": 78
+        },
+        {
+          "caller": "log",
+          "callee": "self._get_last_hash",
+          "lineNumber": 79
+        },
+        {
+          "caller": "log",
+          "callee": "self._compute_hash",
+          "lineNumber": 80
+        },
+        {
+          "caller": "log",
+          "callee": "AuditEntry",
+          "lineNumber": 82
+        },
+        {
+          "caller": "log",
+          "callee": "open",
+          "lineNumber": 87
+        },
+        {
+          "caller": "log",
+          "callee": "f.write",
+          "lineNumber": 88
+        },
+        {
+          "caller": "log",
+          "callee": "json.dumps",
+          "lineNumber": 88
+        },
+        {
+          "caller": "log",
+          "callee": "asdict",
+          "lineNumber": 88
+        },
+        {
+          "caller": "verify_chain",
+          "callee": "self.log_file.exists",
+          "lineNumber": 95
+        },
+        {
+          "caller": "verify_chain",
+          "callee": "self.log_file.read_text(encoding=\"utf-8\").strip().splitlines",
+          "lineNumber": 98
+        },
+        {
+          "caller": "verify_chain",
+          "callee": "self.log_file.read_text(encoding=\"utf-8\").strip",
+          "lineNumber": 98
+        },
+        {
+          "caller": "verify_chain",
+          "callee": "self.log_file.read_text",
+          "lineNumber": 98
+        },
+        {
+          "caller": "verify_chain",
+          "callee": "enumerate",
+          "lineNumber": 100
+        },
+        {
+          "caller": "verify_chain",
+          "callee": "json.loads",
+          "lineNumber": 101
+        },
+        {
+          "caller": "verify_chain",
+          "callee": "self._compute_hash",
+          "lineNumber": 104
+        },
+        {
+          "caller": "verify_chain",
+          "callee": "len",
+          "lineNumber": 111
+        },
+        {
+          "caller": "tail",
+          "callee": "self.log_file.exists",
+          "lineNumber": 117
+        },
+        {
+          "caller": "tail",
+          "callee": "self.log_file.read_text(encoding=\"utf-8\").strip().splitlines",
+          "lineNumber": 120
+        },
+        {
+          "caller": "tail",
+          "callee": "self.log_file.read_text(encoding=\"utf-8\").strip",
+          "lineNumber": 120
+        },
+        {
+          "caller": "tail",
+          "callee": "self.log_file.read_text",
+          "lineNumber": 120
+        },
+        {
+          "caller": "tail",
+          "callee": "json.loads",
+          "lineNumber": 121
+        },
+        {
+          "caller": "stats",
+          "callee": "self.log_file.exists",
+          "lineNumber": 127
+        },
+        {
+          "caller": "stats",
+          "callee": "self.log_file.read_text(encoding=\"utf-8\").strip().splitlines",
+          "lineNumber": 130
+        },
+        {
+          "caller": "stats",
+          "callee": "self.log_file.read_text(encoding=\"utf-8\").strip",
+          "lineNumber": 130
+        },
+        {
+          "caller": "stats",
+          "callee": "self.log_file.read_text",
+          "lineNumber": 130
+        },
+        {
+          "caller": "stats",
+          "callee": "Counter",
+          "lineNumber": 132
+        },
+        {
+          "caller": "stats",
+          "callee": "json.loads",
+          "lineNumber": 132
+        },
+        {
+          "caller": "stats",
+          "callee": "Counter",
+          "lineNumber": 133
+        },
+        {
+          "caller": "stats",
+          "callee": "json.loads",
+          "lineNumber": 133
+        },
+        {
+          "caller": "stats",
+          "callee": "len",
+          "lineNumber": 135
+        },
+        {
+          "caller": "stats",
+          "callee": "dict",
+          "lineNumber": 136
+        },
+        {
+          "caller": "stats",
+          "callee": "dict",
+          "lineNumber": 137
+        },
+        {
+          "caller": "stats",
+          "callee": "str",
+          "lineNumber": 138
+        },
+        {
+          "caller": "stats",
+          "callee": "self.log_file.stat",
+          "lineNumber": 139
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 0,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "stca/baseline.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 166,
+      "nonEmptyLines": 140,
+      "classes": [
+        {
+          "name": "BaselineEntry",
+          "startLine": 40,
+          "endLine": 48,
+          "methods": [],
+          "properties": [
+            "fingerprint",
+            "rule_id",
+            "file",
+            "line",
+            "severity",
+            "first_seen",
+            "last_seen"
+          ]
+        },
+        {
+          "name": "Baseline",
+          "startLine": 51,
+          "endLine": 166,
+          "methods": [
+            "__init__",
+            "_load",
+            "_save",
+            "create",
+            "update",
+            "filter_new",
+            "remove_resolved",
+            "stats",
+            "exists"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "BaselineEntry",
+          "line": 39,
+          "isDefault": false
+        },
+        {
+          "name": "Baseline",
+          "line": 51,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "self._load",
+          "lineNumber": 58
+        },
+        {
+          "caller": "_load",
+          "callee": "self.baseline_file.exists",
+          "lineNumber": 61
+        },
+        {
+          "caller": "_load",
+          "callee": "json.loads",
+          "lineNumber": 64
+        },
+        {
+          "caller": "_load",
+          "callee": "self.baseline_file.read_text",
+          "lineNumber": 64
+        },
+        {
+          "caller": "_load",
+          "callee": "data.get",
+          "lineNumber": 65
+        },
+        {
+          "caller": "_load",
+          "callee": "BaselineEntry",
+          "lineNumber": 66
+        },
+        {
+          "caller": "_load",
+          "callee": "logger.warning",
+          "lineNumber": 69
+        },
+        {
+          "caller": "_save",
+          "callee": "datetime.now().isoformat",
+          "lineNumber": 74
+        },
+        {
+          "caller": "_save",
+          "callee": "datetime.now",
+          "lineNumber": 74
+        },
+        {
+          "caller": "_save",
+          "callee": "len",
+          "lineNumber": 75
+        },
+        {
+          "caller": "_save",
+          "callee": "self.entries.values",
+          "lineNumber": 77
+        },
+        {
+          "caller": "_save",
+          "callee": "self.baseline_file.write_text",
+          "lineNumber": 80
+        },
+        {
+          "caller": "_save",
+          "callee": "json.dumps",
+          "lineNumber": 80
+        },
+        {
+          "caller": "create",
+          "callee": "datetime.now().isoformat",
+          "lineNumber": 84
+        },
+        {
+          "caller": "create",
+          "callee": "datetime.now",
+          "lineNumber": 84
+        },
+        {
+          "caller": "create",
+          "callee": "self.entries.clear",
+          "lineNumber": 85
+        },
+        {
+          "caller": "create",
+          "callee": "BaselineEntry",
+          "lineNumber": 87
+        },
+        {
+          "caller": "create",
+          "callee": "self._save",
+          "lineNumber": 96
+        },
+        {
+          "caller": "create",
+          "callee": "len",
+          "lineNumber": 97
+        },
+        {
+          "caller": "update",
+          "callee": "datetime.now().isoformat",
+          "lineNumber": 104
+        },
+        {
+          "caller": "update",
+          "callee": "datetime.now",
+          "lineNumber": 104
+        },
+        {
+          "caller": "update",
+          "callee": "BaselineEntry",
+          "lineNumber": 108
+        },
+        {
+          "caller": "update",
+          "callee": "self._save",
+          "lineNumber": 120
+        },
+        {
+          "caller": "update",
+          "callee": "len",
+          "lineNumber": 121
+        },
+        {
+          "caller": "filter_new",
+          "callee": "baselined.append",
+          "lineNumber": 132
+        },
+        {
+          "caller": "filter_new",
+          "callee": "new.append",
+          "lineNumber": 134
+        },
+        {
+          "caller": "remove_resolved",
+          "callee": "self._save",
+          "lineNumber": 149
+        },
+        {
+          "caller": "remove_resolved",
+          "callee": "len",
+          "lineNumber": 150
+        },
+        {
+          "caller": "stats",
+          "callee": "Counter",
+          "lineNumber": 155
+        },
+        {
+          "caller": "stats",
+          "callee": "self.entries.values",
+          "lineNumber": 155
+        },
+        {
+          "caller": "stats",
+          "callee": "Counter",
+          "lineNumber": 156
+        },
+        {
+          "caller": "stats",
+          "callee": "self.entries.values",
+          "lineNumber": 156
+        },
+        {
+          "caller": "stats",
+          "callee": "len",
+          "lineNumber": 158
+        },
+        {
+          "caller": "stats",
+          "callee": "dict",
+          "lineNumber": 159
+        },
+        {
+          "caller": "stats",
+          "callee": "dict",
+          "lineNumber": 160
+        },
+        {
+          "caller": "stats",
+          "callee": "by_rule.most_common",
+          "lineNumber": 160
+        },
+        {
+          "caller": "stats",
+          "callee": "str",
+          "lineNumber": 161
+        },
+        {
+          "caller": "exists",
+          "callee": "len",
+          "lineNumber": 166
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 0,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "stca/bootstrap/__init__.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 11,
+      "nonEmptyLines": 9,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "stca/bootstrap/harness_gen.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 151,
+      "nonEmptyLines": 129,
+      "classes": [
+        {
+          "name": "HarnessGenerator",
+          "startLine": 19,
+          "endLine": 151,
+          "methods": [
+            "__init__",
+            "generate_for_file",
+            "_generate_one",
+            "_llm_generate",
+            "_template_generate"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "HarnessGenerator",
+          "line": 19,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "PRMScorer",
+          "lineNumber": 23
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "file_path.exists",
+          "lineNumber": 27
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "file_path.read_text",
+          "lineNumber": 30
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "ast.parse",
+          "lineNumber": 31
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "ast.walk",
+          "lineNumber": 36
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "isinstance",
+          "lineNumber": 37
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "node.name.startswith",
+          "lineNumber": 39
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "self._generate_one",
+          "lineNumber": 41
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "harnesses.append",
+          "lineNumber": 43
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "ast.unparse",
+          "lineNumber": 50
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "str",
+          "lineNumber": 51
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "file_path.relative_to",
+          "lineNumber": 51
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "rel_path.replace(\"/\", \".\").replace(\".py\", \"\").lstrip",
+          "lineNumber": 52
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "rel_path.replace(\"/\", \".\").replace",
+          "lineNumber": 52
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "rel_path.replace",
+          "lineNumber": 52
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "out_path.exists",
+          "lineNumber": 57
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "self.llm.is_available",
+          "lineNumber": 61
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "self._llm_generate",
+          "lineNumber": 62
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "self.prm.score_step",
+          "lineNumber": 65
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "out_dir.mkdir",
+          "lineNumber": 67
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "out_path.write_text",
+          "lineNumber": 68
+        },
+        {
+          "caller": "_generate_one",
+          "callee": "self._template_generate",
+          "lineNumber": 72
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "self.llm.generate",
+          "lineNumber": 92
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "raw.splitlines",
+          "lineNumber": 96
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "lines[0].startswith",
+          "lineNumber": 97
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "lines[-1].startswith",
+          "lineNumber": 99
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "\"\\n\".join",
+          "lineNumber": 101
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "len",
+          "lineNumber": 111
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "calls.append",
+          "lineNumber": 112
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "len",
+          "lineNumber": 113
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "calls.append",
+          "lineNumber": 114
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "calls.append",
+          "lineNumber": 115
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "len",
+          "lineNumber": 116
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "calls.append",
+          "lineNumber": 117
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "textwrap.dedent(f'''\n            \"\"\"Auto-generated Atheris fuzz harness for {func_name}.\n            Generated by `stca bootstrap harnesses` (template fallback).\n            Edit this file to improve the harness.\n            \"\"\"\n            import sys\n            import atheris\n\n            with atheris.instrument_imports():\n                try:\n                    from {module_path} import {func_name}\n                except Exception:\n                    sys.exit(0)\n\n            def test_one_input(data):\n                fdp = atheris.FuzzedDataProvider(data)\n                try:\n{chr(10).join(calls)}\n                except (TypeError, ValueError, KeyError, IndexError):\n                    pass\n                except Exception:\n                    raise  # unexpected — that's the bug\n\n            atheris.Setup(sys.argv, test_one_input)\n            atheris.Fuzz()\n        ''').strip",
+          "lineNumber": 122
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "textwrap.dedent",
+          "lineNumber": 122
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "chr(10).join",
+          "lineNumber": 139
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "chr",
+          "lineNumber": 139
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "out_dir.mkdir",
+          "lineNumber": 149
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "out_path.write_text",
+          "lineNumber": 150
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "stca/bootstrap/invariant_inference.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 192,
+      "nonEmptyLines": 161,
+      "classes": [
+        {
+          "name": "InvariantInferrer",
+          "startLine": 34,
+          "endLine": 192,
+          "methods": [
+            "__init__",
+            "infer_from_tests",
+            "_discover_source_files",
+            "_observe_functions",
+            "_static_observe_function",
+            "_infer_from_observations"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "InvariantInferrer",
+          "line": 34,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "infer_from_tests",
+          "callee": "self._discover_source_files",
+          "lineNumber": 52
+        },
+        {
+          "caller": "infer_from_tests",
+          "callee": "self._observe_functions",
+          "lineNumber": 57
+        },
+        {
+          "caller": "infer_from_tests",
+          "callee": "self._infer_from_observations",
+          "lineNumber": 60
+        },
+        {
+          "caller": "infer_from_tests",
+          "callee": "out_path.write_text",
+          "lineNumber": 64
+        },
+        {
+          "caller": "infer_from_tests",
+          "callee": "json.dumps",
+          "lineNumber": 64
+        },
+        {
+          "caller": "infer_from_tests",
+          "callee": "sum",
+          "lineNumber": 67
+        },
+        {
+          "caller": "infer_from_tests",
+          "callee": "len",
+          "lineNumber": 67
+        },
+        {
+          "caller": "infer_from_tests",
+          "callee": "observations.values",
+          "lineNumber": 67
+        },
+        {
+          "caller": "_discover_source_files",
+          "callee": "self.repo_root.rglob",
+          "lineNumber": 78
+        },
+        {
+          "caller": "_discover_source_files",
+          "callee": "any",
+          "lineNumber": 79
+        },
+        {
+          "caller": "_discover_source_files",
+          "callee": "p.name.startswith",
+          "lineNumber": 81
+        },
+        {
+          "caller": "_discover_source_files",
+          "callee": "p.name.endswith",
+          "lineNumber": 81
+        },
+        {
+          "caller": "_discover_source_files",
+          "callee": "files.append",
+          "lineNumber": 83
+        },
+        {
+          "caller": "_observe_functions",
+          "callee": "src_path.read_text",
+          "lineNumber": 99
+        },
+        {
+          "caller": "_observe_functions",
+          "callee": "ast.parse",
+          "lineNumber": 100
+        },
+        {
+          "caller": "_observe_functions",
+          "callee": "str",
+          "lineNumber": 104
+        },
+        {
+          "caller": "_observe_functions",
+          "callee": "src_path.relative_to",
+          "lineNumber": 104
+        },
+        {
+          "caller": "_observe_functions",
+          "callee": "ast.walk",
+          "lineNumber": 106
+        },
+        {
+          "caller": "_observe_functions",
+          "callee": "isinstance",
+          "lineNumber": 107
+        },
+        {
+          "caller": "_observe_functions",
+          "callee": "self._static_observe_function",
+          "lineNumber": 110
+        },
+        {
+          "caller": "_static_observe_function",
+          "callee": "ast.unparse",
+          "lineNumber": 132
+        },
+        {
+          "caller": "_static_observe_function",
+          "callee": "\"\\n\".join",
+          "lineNumber": 135
+        },
+        {
+          "caller": "_static_observe_function",
+          "callee": "ast.unparse",
+          "lineNumber": 136
+        },
+        {
+          "caller": "_static_observe_function",
+          "callee": "observations.append",
+          "lineNumber": 142
+        },
+        {
+          "caller": "_static_observe_function",
+          "callee": "observations.append",
+          "lineNumber": 147
+        },
+        {
+          "caller": "_static_observe_function",
+          "callee": "observations.append",
+          "lineNumber": 154
+        },
+        {
+          "caller": "_static_observe_function",
+          "callee": "observations.append",
+          "lineNumber": 161
+        },
+        {
+          "caller": "_infer_from_observations",
+          "callee": "observations.items",
+          "lineNumber": 171
+        },
+        {
+          "caller": "_infer_from_observations",
+          "callee": "enumerate",
+          "lineNumber": 173
+        },
+        {
+          "caller": "_infer_from_observations",
+          "callee": "{\n                    \"non_negative\": f\"{arg} >= 0\",\n                    \"always_positive\": f\"{arg} > 0\",\n                    \"non_empty\": f\"len({arg}) > 0\",\n                    \"never_none\": f\"{arg} != None\",\n                }.get",
+          "lineNumber": 176
+        },
+        {
+          "caller": "_infer_from_observations",
+          "callee": "invs.append",
+          "lineNumber": 182
+        },
+        {
+          "caller": "_infer_from_observations",
+          "callee": "kind.replace",
+          "lineNumber": 186
+        },
+        {
+          "caller": "_infer_from_observations",
+          "callee": "kind.replace",
+          "lineNumber": 188
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "stca/bootstrap/property_gen.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 129,
+      "nonEmptyLines": 109,
+      "classes": [
+        {
+          "name": "PropertyTestGenerator",
+          "startLine": 18,
+          "endLine": 129,
+          "methods": [
+            "__init__",
+            "generate_for_file",
+            "_llm_generate",
+            "_template_generate"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "PropertyTestGenerator",
+          "line": 18,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "PRMScorer",
+          "lineNumber": 22
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "file_path.exists",
+          "lineNumber": 25
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "file_path.read_text",
+          "lineNumber": 28
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "ast.parse",
+          "lineNumber": 29
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "ast.walk",
+          "lineNumber": 35
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "isinstance",
+          "lineNumber": 36
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "node.name.startswith",
+          "lineNumber": 37
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "functions.append",
+          "lineNumber": 38
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "str",
+          "lineNumber": 42
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "file_path.relative_to",
+          "lineNumber": 42
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "rel_path.replace(\"/\", \".\").replace(\".py\", \"\").lstrip",
+          "lineNumber": 43
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "rel_path.replace(\"/\", \".\").replace",
+          "lineNumber": 43
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "rel_path.replace",
+          "lineNumber": 43
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "out_path.exists",
+          "lineNumber": 47
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "self.llm.is_available",
+          "lineNumber": 51
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "self._llm_generate",
+          "lineNumber": 52
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "out_dir.mkdir",
+          "lineNumber": 54
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "out_path.write_text",
+          "lineNumber": 55
+        },
+        {
+          "caller": "generate_for_file",
+          "callee": "self._template_generate",
+          "lineNumber": 59
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "\"\\n\\n\".join",
+          "lineNumber": 63
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "', '.join",
+          "lineNumber": 64
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "self.llm.generate",
+          "lineNumber": 83
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "raw.splitlines",
+          "lineNumber": 87
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "lines[0].startswith",
+          "lineNumber": 88
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "lines[-1].startswith",
+          "lineNumber": 90
+        },
+        {
+          "caller": "_llm_generate",
+          "callee": "\"\\n\".join",
+          "lineNumber": 92
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "test_funcs.append",
+          "lineNumber": 104
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "textwrap.dedent(f'''\n                @given(st.integers(min_value=-1000, max_value=1000))\n                def test_{func.name}_does_not_crash({arg}):\n                    \"\"\"Property: {func.name} should not raise unexpected exceptions for any int input.\"\"\"\n                    try:\n                        {func.name}({arg})\n                    except (ValueError, TypeError):\n                        pass  # acceptable\n            ''').strip",
+          "lineNumber": 104
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "textwrap.dedent",
+          "lineNumber": 104
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "textwrap.dedent(f'''\n            \"\"\"Auto-generated property tests for {module_path}.\n            Generated by `stca bootstrap properties` (template fallback).\n            Edit to add real property tests.\n            \"\"\"\n            from hypothesis import given, strategies as st\n            from {module_path} import *\n\n        ''').strip",
+          "lineNumber": 117
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "textwrap.dedent",
+          "lineNumber": 117
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "\"\\n\\n\".join",
+          "lineNumber": 125
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "out_dir.mkdir",
+          "lineNumber": 127
+        },
+        {
+          "caller": "_template_generate",
+          "callee": "out_path.write_text",
+          "lineNumber": 128
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "stca/brain/__init__.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 6,
+      "nonEmptyLines": 5,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "stca/brain/aggregator.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 109,
+      "nonEmptyLines": 92,
+      "classes": [
+        {
+          "name": "Aggregator",
+          "startLine": 24,
+          "endLine": 109,
+          "methods": [
+            "__init__",
+            "_load_stats",
+            "get_reliability",
+            "aggregate_finding",
+            "aggregate"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Aggregator",
+          "line": 24,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "IT2FIS",
+          "lineNumber": 28
+        },
+        {
+          "caller": "__init__",
+          "callee": "self._load_stats",
+          "lineNumber": 31
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "self.stats_path.exists",
+          "lineNumber": 35
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "json.loads",
+          "lineNumber": 38
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "self.stats_path.read_text",
+          "lineNumber": 38
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "data.get(\"layers\", {}).items",
+          "lineNumber": 39
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "data.get",
+          "lineNumber": 39
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "LayerStats",
+          "lineNumber": 40
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "s.get",
+          "lineNumber": 42
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "s.get",
+          "lineNumber": 43
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "s.get",
+          "lineNumber": 44
+        },
+        {
+          "caller": "_load_stats",
+          "callee": "logger.warning",
+          "lineNumber": 47
+        },
+        {
+          "caller": "get_reliability",
+          "callee": "self.layer_stats.get",
+          "lineNumber": 51
+        },
+        {
+          "caller": "aggregate_finding",
+          "callee": "self.get_reliability",
+          "lineNumber": 58
+        },
+        {
+          "caller": "aggregate_finding",
+          "callee": "self.fis.evaluate",
+          "lineNumber": 59
+        },
+        {
+          "caller": "aggregate_finding",
+          "callee": "finding.severity_score",
+          "lineNumber": 60
+        },
+        {
+          "caller": "aggregate_finding",
+          "callee": "decision_from_score",
+          "lineNumber": 69
+        },
+        {
+          "caller": "aggregate_finding",
+          "callee": "Decision",
+          "lineNumber": 78
+        },
+        {
+          "caller": "aggregate_finding",
+          "callee": "AggregatedDecision",
+          "lineNumber": 80
+        },
+        {
+          "caller": "aggregate_finding",
+          "callee": "finding.severity_score",
+          "lineNumber": 84
+        },
+        {
+          "caller": "aggregate",
+          "callee": "self.aggregate_finding",
+          "lineNumber": 99
+        },
+        {
+          "caller": "aggregate",
+          "callee": "max",
+          "lineNumber": 108
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "stca/brain/bayesian.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 334,
+      "nonEmptyLines": 295,
+      "functions": [
+        {
+          "name": "_p_severity",
+          "startLine": 89,
+          "endLine": 99,
+          "params": [
+            "fis_score",
+            "exploitability"
+          ]
+        },
+        {
+          "name": "_p_trustworthy",
+          "startLine": 103,
+          "endLine": 109,
+          "params": [
+            "reliability",
+            "fp_history",
+            "corroboration"
+          ]
+        },
+        {
+          "name": "_multiplier",
+          "startLine": 137,
+          "endLine": 149,
+          "params": [
+            "name",
+            "value"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "BBNEvidence",
+          "startLine": 29,
+          "endLine": 37,
+          "methods": [],
+          "properties": [
+            "confidence",
+            "exploitability",
+            "reliability",
+            "fp_history",
+            "corroboration",
+            "test_exclusion",
+            "fis_score"
+          ]
+        },
+        {
+          "name": "BBNResult",
+          "startLine": 41,
+          "endLine": 48,
+          "methods": [],
+          "properties": [
+            "p_block",
+            "p_warn",
+            "p_pass",
+            "decision",
+            "confidence",
+            "evidence_summary"
+          ]
+        },
+        {
+          "name": "DecisionTrace",
+          "startLine": 52,
+          "endLine": 69,
+          "methods": [
+            "to_dict"
+          ],
+          "properties": [
+            "decision",
+            "confidence",
+            "posterior",
+            "signal_contributions",
+            "top_evidence",
+            "reasoning"
+          ]
+        },
+        {
+          "name": "BayesianSecondOpinion",
+          "startLine": 156,
+          "endLine": 250,
+          "methods": [
+            "__init__",
+            "evaluate",
+            "explain"
+          ],
+          "properties": []
+        },
+        {
+          "name": "AggregatedSecondOpinion",
+          "startLine": 258,
+          "endLine": 276,
+          "methods": [
+            "to_dict"
+          ],
+          "properties": [
+            "decision",
+            "confidence",
+            "fis_decision",
+            "bbn_decision",
+            "counterfactual_verified",
+            "reasoning",
+            "trace"
+          ]
+        },
+        {
+          "name": "ExplainableAggregator",
+          "startLine": 279,
+          "endLine": 334,
+          "methods": [
+            "__init__",
+            "aggregate"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "BBNEvidence",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "BBNResult",
+          "line": 40,
+          "isDefault": false
+        },
+        {
+          "name": "DecisionTrace",
+          "line": 51,
+          "isDefault": false
+        },
+        {
+          "name": "_p_severity",
+          "line": 89,
+          "isDefault": false
+        },
+        {
+          "name": "_p_trustworthy",
+          "line": 103,
+          "isDefault": false
+        },
+        {
+          "name": "_multiplier",
+          "line": 137,
+          "isDefault": false
+        },
+        {
+          "name": "BayesianSecondOpinion",
+          "line": 156,
+          "isDefault": false
+        },
+        {
+          "name": "AggregatedSecondOpinion",
+          "line": 257,
+          "isDefault": false
+        },
+        {
+          "name": "ExplainableAggregator",
+          "line": 279,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "to_dict",
+          "callee": "round",
+          "lineNumber": 64
+        },
+        {
+          "caller": "to_dict",
+          "callee": "round",
+          "lineNumber": 65
+        },
+        {
+          "caller": "to_dict",
+          "callee": "self.posterior.items",
+          "lineNumber": 65
+        },
+        {
+          "caller": "to_dict",
+          "callee": "round",
+          "lineNumber": 66
+        },
+        {
+          "caller": "to_dict",
+          "callee": "self.signal_contributions.items",
+          "lineNumber": 66
+        },
+        {
+          "caller": "to_dict",
+          "callee": "round",
+          "lineNumber": 67
+        },
+        {
+          "caller": "_p_trustworthy",
+          "callee": "max",
+          "lineNumber": 108
+        },
+        {
+          "caller": "_p_trustworthy",
+          "callee": "min",
+          "lineNumber": 108
+        },
+        {
+          "caller": "evaluate",
+          "callee": "_p_severity",
+          "lineNumber": 164
+        },
+        {
+          "caller": "evaluate",
+          "callee": "_p_trustworthy",
+          "lineNumber": 165
+        },
+        {
+          "caller": "evaluate",
+          "callee": "p_sev.items",
+          "lineNumber": 170
+        },
+        {
+          "caller": "evaluate",
+          "callee": "p_trust.items",
+          "lineNumber": 171
+        },
+        {
+          "caller": "evaluate",
+          "callee": "getattr",
+          "lineNumber": 184
+        },
+        {
+          "caller": "evaluate",
+          "callee": "_multiplier",
+          "lineNumber": 185
+        },
+        {
+          "caller": "evaluate",
+          "callee": "max",
+          "lineNumber": 205
+        },
+        {
+          "caller": "evaluate",
+          "callee": "BBNResult",
+          "lineNumber": 208
+        },
+        {
+          "caller": "explain",
+          "callee": "self.evaluate",
+          "lineNumber": 222
+        },
+        {
+          "caller": "explain",
+          "callee": "getattr",
+          "lineNumber": 228
+        },
+        {
+          "caller": "explain",
+          "callee": "_multiplier",
+          "lineNumber": 229
+        },
+        {
+          "caller": "explain",
+          "callee": "sorted",
+          "lineNumber": 235
+        },
+        {
+          "caller": "explain",
+          "callee": "contributions.items",
+          "lineNumber": 235
+        },
+        {
+          "caller": "explain",
+          "callee": "abs",
+          "lineNumber": 235
+        },
+        {
+          "caller": "explain",
+          "callee": "', '.join",
+          "lineNumber": 241
+        },
+        {
+          "caller": "explain",
+          "callee": "DecisionTrace",
+          "lineNumber": 243
+        },
+        {
+          "caller": "explain",
+          "callee": "\" \".join",
+          "lineNumber": 249
+        },
+        {
+          "caller": "to_dict",
+          "callee": "round",
+          "lineNumber": 270
+        },
+        {
+          "caller": "__init__",
+          "callee": "BayesianSecondOpinion",
+          "lineNumber": 292
+        },
+        {
+          "caller": "aggregate",
+          "callee": "self.bbn.evaluate",
+          "lineNumber": 299
+        },
+        {
+          "caller": "aggregate",
+          "callee": "Decision",
+          "lineNumber": 302
+        },
+        {
+          "caller": "aggregate",
+          "callee": "votes.count",
+          "lineNumber": 306
+        },
+        {
+          "caller": "aggregate",
+          "callee": "votes.count",
+          "lineNumber": 308
+        },
+        {
+          "caller": "aggregate",
+          "callee": "AggregatedSecondOpinion",
+          "lineNumber": 324
+        },
+        {
+          "caller": "aggregate",
+          "callee": "bool",
+          "lineNumber": 329
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 9,
+        "functionCount": 3,
+        "classCount": 6
+      }
+    },
+    {
+      "path": "stca/brain/it2_fis.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 158,
+      "nonEmptyLines": 134,
+      "functions": [
+        {
+          "name": "decision_from_score",
+          "startLine": 152,
+          "endLine": 158,
+          "params": [
+            "score"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "IT2FIS",
+          "startLine": 25,
+          "endLine": 149,
+          "methods": [
+            "__init__",
+            "evaluate",
+            "_evaluate_rule_premise"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "IT2FIS",
+          "line": 25,
+          "isDefault": false
+        },
+        {
+          "name": "decision_from_score",
+          "line": 152,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "get_rules",
+          "lineNumber": 29
+        },
+        {
+          "caller": "__init__",
+          "callee": "SeverityMF",
+          "lineNumber": 30
+        },
+        {
+          "caller": "__init__",
+          "callee": "ConfidenceMF",
+          "lineNumber": 31
+        },
+        {
+          "caller": "__init__",
+          "callee": "BlastRadiusMF",
+          "lineNumber": 32
+        },
+        {
+          "caller": "__init__",
+          "callee": "ExploitabilityMF",
+          "lineNumber": 33
+        },
+        {
+          "caller": "__init__",
+          "callee": "SourceReliabilityMF",
+          "lineNumber": 34
+        },
+        {
+          "caller": "__init__",
+          "callee": "DecisionMF",
+          "lineNumber": 35
+        },
+        {
+          "caller": "evaluate",
+          "callee": "self.severity_mf.evaluate",
+          "lineNumber": 55
+        },
+        {
+          "caller": "evaluate",
+          "callee": "self.confidence_mf.evaluate",
+          "lineNumber": 56
+        },
+        {
+          "caller": "evaluate",
+          "callee": "self.blast_mf.evaluate",
+          "lineNumber": 57
+        },
+        {
+          "caller": "evaluate",
+          "callee": "encode_blast_radius",
+          "lineNumber": 57
+        },
+        {
+          "caller": "evaluate",
+          "callee": "self.exploit_mf.evaluate",
+          "lineNumber": 58
+        },
+        {
+          "caller": "evaluate",
+          "callee": "self.reliability_mf.evaluate",
+          "lineNumber": 59
+        },
+        {
+          "caller": "evaluate",
+          "callee": "IT2Membership",
+          "lineNumber": 66
+        },
+        {
+          "caller": "evaluate",
+          "callee": "IT2Membership",
+          "lineNumber": 67
+        },
+        {
+          "caller": "evaluate",
+          "callee": "IT2Membership",
+          "lineNumber": 68
+        },
+        {
+          "caller": "evaluate",
+          "callee": "self._evaluate_rule_premise",
+          "lineNumber": 74
+        },
+        {
+          "caller": "evaluate",
+          "callee": "decision_outputs.items",
+          "lineNumber": 97
+        },
+        {
+          "caller": "evaluate",
+          "callee": "IT2Membership",
+          "lineNumber": 108
+        },
+        {
+          "caller": "evaluate",
+          "callee": "IT2Membership",
+          "lineNumber": 120
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "terms.append",
+          "lineNumber": 132
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "sev.get",
+          "lineNumber": 132
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "IT2Membership",
+          "lineNumber": 132
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "terms.append",
+          "lineNumber": 134
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "conf.get",
+          "lineNumber": 134
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "IT2Membership",
+          "lineNumber": 134
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "terms.append",
+          "lineNumber": 136
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "blast.get",
+          "lineNumber": 136
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "IT2Membership",
+          "lineNumber": 136
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "terms.append",
+          "lineNumber": 138
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "exploit.get",
+          "lineNumber": 138
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "IT2Membership",
+          "lineNumber": 138
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "terms.append",
+          "lineNumber": 140
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "rel.get",
+          "lineNumber": 140
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "IT2Membership",
+          "lineNumber": 140
+        },
+        {
+          "caller": "_evaluate_rule_premise",
+          "callee": "IT2Membership",
+          "lineNumber": 144
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 1
+      }
+    }
+  ]
+}

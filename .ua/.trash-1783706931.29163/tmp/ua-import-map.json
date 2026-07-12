@@ -1,0 +1,426 @@
+{
+  "scriptCompleted": true,
+  "stats": {
+    "filesScanned": 170,
+    "filesWithImports": 58,
+    "totalEdges": 188
+  },
+  "importMap": {
+    ".github/actions/stca-action/action.yml": [],
+    ".github/workflows/stca.yml": [],
+    ".mimocode/.cron-lock": [],
+    ".ua/.understandignore": [],
+    "examples/policies/no_secrets_in_logs.rego": [],
+    "examples/rules/custom.semgrep.yml": [],
+    "examples/sample-python-repo/.stca.yaml": [],
+    "examples/sample-python-repo/app.py": [],
+    "examples/sample-python-repo/test_app.py": [
+      "examples/sample-python-repo/app.py"
+    ],
+    "pyproject.toml": [],
+    "README.md": [],
+    "scripts/find_bad_loggers.py": [],
+    "scripts/fix_silent_except_v2.py": [],
+    "scripts/fix_silent_except.py": [],
+    "scripts/rewire_scanner_errors.py": [],
+    "scripts/show_silent_context.py": [],
+    "scripts/survey_silent_except.py": [],
+    "stca_pipeline.egg-info/dependency_links.txt": [],
+    "stca_pipeline.egg-info/entry_points.txt": [],
+    "stca_pipeline.egg-info/PKG-INFO": [],
+    "stca_pipeline.egg-info/requires.txt": [],
+    "stca_pipeline.egg-info/SOURCES.txt": [],
+    "stca_pipeline.egg-info/top_level.txt": [],
+    "stca/__init__.py": [],
+    "stca/advanced_secrets.py": [
+      "stca/models.py"
+    ],
+    "stca/architecture.py": [],
+    "stca/audit.py": [],
+    "stca/baseline.py": [],
+    "stca/bootstrap/__init__.py": [
+      "stca/bootstrap/harness_gen.py",
+      "stca/bootstrap/invariant_inference.py",
+      "stca/bootstrap/property_gen.py"
+    ],
+    "stca/bootstrap/harness_gen.py": [
+      "stca/llm/client.py",
+      "stca/llm/prm.py"
+    ],
+    "stca/bootstrap/invariant_inference.py": [],
+    "stca/bootstrap/property_gen.py": [
+      "stca/llm/client.py",
+      "stca/llm/prm.py"
+    ],
+    "stca/brain/__init__.py": [
+      "stca/brain/it2_fis.py",
+      "stca/brain/membership.py",
+      "stca/brain/rules.py"
+    ],
+    "stca/brain/aggregator.py": [
+      "stca/brain/it2_fis.py",
+      "stca/brain/membership.py",
+      "stca/models.py"
+    ],
+    "stca/brain/bayesian.py": [
+      "stca/models.py"
+    ],
+    "stca/brain/it2_fis.py": [
+      "stca/brain/membership.py",
+      "stca/brain/rules.py"
+    ],
+    "stca/brain/membership.py": [],
+    "stca/brain/project_tuner.py": [],
+    "stca/brain/rules.py": [],
+    "stca/brain/tuner.py": [],
+    "stca/bug_seeds.py": [],
+    "stca/business_logic.py": [],
+    "stca/cache.py": [],
+    "stca/cli_v2.py": [],
+    "stca/cli.py": [
+      "stca/baseline.py",
+      "stca/bootstrap/harness_gen.py",
+      "stca/bootstrap/invariant_inference.py",
+      "stca/bootstrap/property_gen.py",
+      "stca/cache.py",
+      "stca/config.py",
+      "stca/feedback/rule_capture.py",
+      "stca/feedback/stats.py",
+      "stca/installer.py",
+      "stca/llm/client.py",
+      "stca/orchestrator.py",
+      "stca/report/tui.py",
+      "stca/rules/__init__.py"
+    ],
+    "stca/code_quality.py": [
+      "stca/multi_lang.py"
+    ],
+    "stca/codebase_miner.py": [],
+    "stca/complexity_metrics.py": [],
+    "stca/concurrency.py": [],
+    "stca/config_scanner.py": [],
+    "stca/config.py": [],
+    "stca/consistency.py": [],
+    "stca/contracts.py": [],
+    "stca/counterfactual.py": [],
+    "stca/coverage.py": [],
+    "stca/cpg_queries.py": [
+      "stca/cpg.py"
+    ],
+    "stca/cpg.py": [],
+    "stca/crypto_audit.py": [
+      "stca/multi_lang.py"
+    ],
+    "stca/deadcode.py": [],
+    "stca/diff_slicer.py": [
+      "stca/models.py"
+    ],
+    "stca/differential.py": [],
+    "stca/doc_audit.py": [],
+    "stca/duplication.py": [],
+    "stca/extra_rules.py": [],
+    "stca/feedback/__init__.py": [
+      "stca/feedback/rule_capture.py",
+      "stca/feedback/stats.py"
+    ],
+    "stca/feedback/rule_capture.py": [],
+    "stca/feedback/stats.py": [
+      "stca/models.py"
+    ],
+    "stca/ffi_analyzer.py": [],
+    "stca/flawfinder_db.py": [],
+    "stca/hotspots.py": [],
+    "stca/html_scanner.py": [],
+    "stca/iac_scanner.py": [],
+    "stca/impact_analysis.py": [],
+    "stca/incremental.py": [],
+    "stca/installer.py": [],
+    "stca/interprocedural.py": [],
+    "stca/issue_store.py": [],
+    "stca/js_cpg.py": [],
+    "stca/js_multiline.py": [],
+    "stca/js_pattern_scanner.py": [],
+    "stca/js_quality.py": [],
+    "stca/jsx_auth.py": [
+      "stca/business_logic.py"
+    ],
+    "stca/knowledge_base.py": [],
+    "stca/layers/__init__.py": [
+      "stca/layers/base.py",
+      "stca/layers/l0_fast.py",
+      "stca/layers/l1_property.py",
+      "stca/layers/l2_mutation.py",
+      "stca/layers/l3_invariants.py",
+      "stca/layers/l4_fuzz.py",
+      "stca/layers/l5_policy.py",
+      "stca/layers/l6_symbolic.py",
+      "stca/layers/l7_simulation.py"
+    ],
+    "stca/layers/base.py": [
+      "stca/config.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l0_fast.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l0b_supply_chain.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l0c_dependencies.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l0d_behavioral.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l0e_iac.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l0f_commit_risk.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l1_property.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l2_mutation.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l3_invariants.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l4_fuzz.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l5_policy.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l6_symbolic.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l7_simulation.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/layers/l8_autofix.py": [
+      "stca/layers/base.py",
+      "stca/models.py"
+    ],
+    "stca/learning.py": [],
+    "stca/llm_verify.py": [],
+    "stca/llm/__init__.py": [
+      "stca/llm/client.py",
+      "stca/llm/prm.py"
+    ],
+    "stca/llm/client.py": [],
+    "stca/llm/prm.py": [],
+    "stca/lsp/__init__.py": [],
+    "stca/lsp/server.py": [],
+    "stca/malicious_patterns.py": [],
+    "stca/maven_cve_db.py": [],
+    "stca/metamorphic.py": [],
+    "stca/missing_patches.py": [],
+    "stca/models.py": [],
+    "stca/modern_attacks.py": [],
+    "stca/multi_lang.py": [],
+    "stca/nullness.py": [],
+    "stca/orchestrator.py": [
+      "stca/advanced_secrets.py",
+      "stca/architecture.py",
+      "stca/audit.py",
+      "stca/baseline.py",
+      "stca/brain/aggregator.py",
+      "stca/bug_seeds.py",
+      "stca/cache.py",
+      "stca/config.py",
+      "stca/consistency.py",
+      "stca/contracts.py",
+      "stca/coverage.py",
+      "stca/cpg_queries.py",
+      "stca/cpg.py",
+      "stca/diff_slicer.py",
+      "stca/differential.py",
+      "stca/doc_audit.py",
+      "stca/feedback/stats.py",
+      "stca/flawfinder_db.py",
+      "stca/hotspots.py",
+      "stca/html_scanner.py",
+      "stca/impact_analysis.py",
+      "stca/issue_store.py",
+      "stca/js_cpg.py",
+      "stca/js_pattern_scanner.py",
+      "stca/layers/__init__.py",
+      "stca/layers/l0b_supply_chain.py",
+      "stca/layers/l0c_dependencies.py",
+      "stca/layers/l0d_behavioral.py",
+      "stca/layers/l0e_iac.py",
+      "stca/layers/l0f_commit_risk.py",
+      "stca/layers/l8_autofix.py",
+      "stca/llm/client.py",
+      "stca/llm/prm.py",
+      "stca/malicious_patterns.py",
+      "stca/metamorphic.py",
+      "stca/missing_patches.py",
+      "stca/models.py",
+      "stca/nullness.py",
+      "stca/pii_detection.py",
+      "stca/precision.py",
+      "stca/pysa_integration.py",
+      "stca/root_cause.py",
+      "stca/strictness.py",
+      "stca/suppressions.py",
+      "stca/taint_cross_file.py",
+      "stca/typestate.py"
+    ],
+    "stca/pii_detection.py": [],
+    "stca/pre_commit.py": [],
+    "stca/precision.py": [],
+    "stca/profiles.py": [],
+    "stca/pysa_integration.py": [
+      "stca/models.py"
+    ],
+    "stca/report/__init__.py": [
+      "stca/report/html.py",
+      "stca/report/sarif.py",
+      "stca/report/tui.py"
+    ],
+    "stca/report/dashboard.py": [
+      "stca/report/html.py"
+    ],
+    "stca/report/html.py": [
+      "stca/models.py"
+    ],
+    "stca/report/sarif.py": [
+      "stca/models.py"
+    ],
+    "stca/report/tui.py": [
+      "stca/models.py"
+    ],
+    "stca/root_cause.py": [],
+    "stca/rule_compiler.py": [],
+    "stca/rule_config.py": [],
+    "stca/rule_dsl.py": [],
+    "stca/rule_miner.py": [],
+    "stca/rules/__init__.py": [],
+    "stca/rules/packs/cpp-security.yml": [],
+    "stca/rules/packs/detekt-ported.yml": [],
+    "stca/rules/packs/go-security.yml": [],
+    "stca/rules/packs/java-frameworks.yml": [],
+    "stca/rules/packs/java-security.yml": [],
+    "stca/rules/packs/javascript-frameworks.yml": [],
+    "stca/rules/packs/javascript-security.yml": [],
+    "stca/rules/packs/lintr-ported.yml": [],
+    "stca/rules/packs/luacheck-ported.yml": [],
+    "stca/rules/packs/python-frameworks.yml": [],
+    "stca/rules/packs/python-security.yml": [],
+    "stca/rules/packs/react-security.yml": [],
+    "stca/rules/packs/spotbugs-ported.yml": [],
+    "stca/source_discovery.py": [
+      "stca/multi_lang.py"
+    ],
+    "stca/state_machine.py": [],
+    "stca/strictness.py": [],
+    "stca/supply_chain.py": [],
+    "stca/suppressions.py": [],
+    "stca/symbolic.py": [],
+    "stca/taint_cross_file.py": [
+      "stca/cpg.py"
+    ],
+    "stca/taint_tracker.py": [],
+    "stca/tree_sitter_analyzer.py": [
+      "stca/multi_lang.py"
+    ],
+    "stca/typestate.py": [],
+    "stca/unified_cve_db.py": [],
+    "tests/test_advanced_layers.py": [
+      "stca/brain/tuner.py",
+      "stca/layers/l0d_behavioral.py",
+      "stca/layers/l0e_iac.py",
+      "stca/layers/l0f_commit_risk.py",
+      "stca/layers/l8_autofix.py",
+      "stca/models.py",
+      "stca/suppressions.py",
+      "stca/taint_tracker.py"
+    ],
+    "tests/test_cache.py": [
+      "stca/cache.py"
+    ],
+    "tests/test_detection_frontier.py": [
+      "stca/cpg_queries.py",
+      "stca/cpg.py",
+      "stca/differential.py",
+      "stca/metamorphic.py",
+      "stca/taint_cross_file.py",
+      "stca/typestate.py"
+    ],
+    "tests/test_diff_slicer.py": [
+      "stca/diff_slicer.py"
+    ],
+    "tests/test_enterprise_features.py": [
+      "stca/advanced_secrets.py",
+      "stca/audit.py",
+      "stca/coverage.py",
+      "stca/hotspots.py"
+    ],
+    "tests/test_installer.py": [
+      "stca/installer.py"
+    ],
+    "tests/test_it2_fis.py": [
+      "stca/brain/it2_fis.py",
+      "stca/brain/membership.py"
+    ],
+    "tests/test_new_detection.py": [
+      "stca/contracts.py",
+      "stca/deadcode.py",
+      "stca/flawfinder_db.py",
+      "stca/malicious_patterns.py",
+      "stca/missing_patches.py"
+    ],
+    "tests/test_orchestrator.py": [
+      "stca/brain/aggregator.py",
+      "stca/models.py"
+    ],
+    "tests/test_oss_inspired.py": [
+      "stca/baseline.py",
+      "stca/consistency.py",
+      "stca/issue_store.py",
+      "stca/models.py",
+      "stca/nullness.py",
+      "stca/strictness.py"
+    ],
+    "tests/test_ported_configs.py": [
+      "stca/models.py",
+      "stca/profiles.py",
+      "stca/rule_config.py"
+    ],
+    "tests/test_precision_engine.py": [
+      "stca/bug_seeds.py",
+      "stca/codebase_miner.py",
+      "stca/models.py",
+      "stca/precision.py",
+      "stca/rule_compiler.py",
+      "stca/rule_miner.py"
+    ],
+    "tests/test_scanner_health.py": [
+      "stca/config.py",
+      "stca/models.py",
+      "stca/orchestrator.py",
+      "stca/report/sarif.py"
+    ],
+    "tests/test_supply_chain.py": [
+      "stca/layers/l0b_supply_chain.py",
+      "stca/models.py"
+    ],
+    "worklog.md": []
+  }
+}

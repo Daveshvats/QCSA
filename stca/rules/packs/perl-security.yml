@@ -1,0 +1,152 @@
+# STCA Perl Security Rules — 30 rules
+rules:
+  - id: perl-eval-string
+    pattern: "\\beval\\s*\\{?\\s*\\\"[^\\\"]*\\$\\w+"
+    severity: critical
+    message: "eval with variable string — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: perl-eval-user
+    pattern: "\\beval\\s*\\{?\\s*\\$?\\w+\\s*\\(|\\beval\\s+\\\"[^\\\"]*\\$ARGV"
+    severity: critical
+    message: "eval on user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: perl-system-user
+    pattern: "\\bsystem\\s*\\(\\s*[^)]*\\$ARGV|system\\s*\\(\\s*\\\"[^\\\"]*\\$\\w+"
+    severity: critical
+    message: "system with user input — RCE"
+    metadata: {cwe: "CWE-78"}
+  - id: perl-exec-user
+    pattern: "\\bexec\\s*\\(\\s*[^)]*\\$ARGV|exec\\s*\\(\\s*\\\"[^\\\"]*\\$\\w+"
+    severity: critical
+    message: "exec with user input — RCE"
+    metadata: {cwe: "CWE-78"}
+  - id: perl-backtick-user
+    pattern: "\\`\\s*[^\\`]*\\$\\w+"
+    severity: high
+    message: "Backtick with variable — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: perl-open-pipe
+    pattern: "\\bopen\\s*\\([^,]+,\\s*[\\\"'`]\\s*\\|"
+    severity: high
+    message: "open with pipe — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: perl-open-pipe-2
+    pattern: "\\bopen\\s*\\([^,]+,\\s*\\\"-\\|\\\"|open\\s*\\([^,]+,\\s*\\\"\\|-\\\""
+    severity: high
+    message: "open with pipe — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: perl-open-user
+    pattern: "\\bopen\\s*\\(\\s*\\w+,\\s*[^,)]*\\$ARGV|open\\s*\\(\\s*\\w+,\\s*\\\"<\\\"[^,)]*\\$\\w+"
+    severity: high
+    message: "open with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: perl-2-arg-open
+    pattern: "\\bopen\\s*\\(\\s*\\w+,\\s*[^,)>]+[^,)]*\\)"
+    severity: high
+    message: "2-argument open — mode injection, use 3-arg"
+    metadata: {cwe: "CWE-78"}
+  - id: perl-require-user
+    pattern: "\\brequire\\s+\\\"\\$?\\w+|require\\s+\\$\\w+"
+    severity: high
+    message: "require with variable — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: perl-do-user
+    pattern: "\\bdo\\s+\\\"\\$?\\w+|do\\s+\\$\\w+"
+    severity: high
+    message: "do with variable — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: perl-md5
+    pattern: "\\bDigest::MD5::md5\\b|use\\s+Digest::MD5\\b"
+    severity: high
+    message: "MD5 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: perl-sha1
+    pattern: "\\bDigest::SHA1\\b|sha1\\s*\\("
+    severity: high
+    message: "SHA1 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: perl-rand-not-secure
+    pattern: "\\brand\\s*\\(\\s*\\)|srand\\s*\\("
+    severity: high
+    message: "rand NOT CSPRNG — use Bytes::Random::Secure"
+    metadata: {cwe: "CWE-338"}
+  - id: perl-hardcoded-secret
+    pattern: "\\b(?:my\\s+)?\\$(?:password|secret|api[_-]?key|auth[_-]?token)\\s*=\\s*['\\\"][^'\\\"]{8,}['\\\"]"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: perl-http-not-https
+    pattern: "\\bLWP::UserAgent.*get\\s*\\(\\s*['\\\"]http://|HTTP::Tiny.*get\\s*\\(\\s*['\\\"]http://"
+    severity: medium
+    message: "HTTP (not HTTPS) request"
+    metadata: {cwe: "CWE-319"}
+  - id: perl-ssl-verify-none
+    pattern: "\\bSSL_verify_mode\\s*=>\\s*0|verify_hostname\\s*=>\\s*0"
+    severity: critical
+    message: "SSL verification disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: perl-print-prod
+    pattern: "\\bprint\\s+(?:STDERR|STDOUT)\\s+"
+    severity: low
+    message: "print to STDERR/STDOUT in production — use Log::Any"
+    metadata: {cwe: "CWE-532"}
+  - id: perl-warn-prod
+    pattern: "\\bwarn\\s+"
+    severity: low
+    message: "warn in production — use logging"
+    metadata: {cwe: "CWE-532"}
+  - id: perl-die-no-msg
+    pattern: "\\bdie\\s*;"
+    severity: medium
+    message: "die without message — unhelpful"
+    metadata: {cwe: "CWE-754"}
+  - id: perl-cgi-param-html
+    pattern: "\\bprint\\s+param\\s*\\("
+    severity: high
+    message: "print param directly — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: perl-cgi-param-sql
+    pattern: "\\b(?:do|prepare)\\s*\\(\\s*\\\"[^\\\"]*\\\"[^)]*param\\s*\\("
+    severity: high
+    message: "SQL with CGI param — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: perl-cgi-param-system
+    pattern: "\\bsystem\\s*\\([^)]*param\\s*\\("
+    severity: critical
+    message: "system with CGI param — RCE"
+    metadata: {cwe: "CWE-78"}
+  - id: perl-cgi-param-eval
+    pattern: "\\beval\\s+\\{?\\s*param\\s*\\("
+    severity: critical
+    message: "eval with CGI param — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: perl-taint-off
+    pattern: "^\\s*#!.*perl\\s+-T(?!.*-t)"
+    severity: medium
+    message: "Taint mode off — use -T for CGI scripts"
+    metadata: {cwe: "CWE-20"}
+  - id: perl-undef-check-missing
+    pattern: "\\bif\\s*\\(\\s*\\$\\w+\\s*\\)\\s*\\{"
+    severity: low
+    message: "if ($var) — may be 0 or '' but defined, use defined()"
+    metadata: {cwe: "CWE-754"}
+  - id: perl-unpack-user
+    pattern: "\\bunpack\\s*\\(\\s*[^,)]*\\$ARGV|unpack\\s*\\(\\s*[^,)]*\\$\\w+"
+    severity: medium
+    message: "unpack with user template — format string risk"
+    metadata: {cwe: "CWE-134"}
+  - id: perl-sprintf-user
+    pattern: "\\bsprintf\\s*\\(\\s*[^,)]*\\$\\w+[^,)]*,"
+    severity: medium
+    message: "sprintf with user format — format string attack"
+    metadata: {cwe: "CWE-134"}
+  - id: perl-storable-retrieve
+    pattern: "\\bStorable::retrieve\\s*\\("
+    severity: critical
+    message: "Storable::retrieve — RCE on untrusted data"
+    metadata: {cwe: "CWE-502"}
+  - id: perl-data-uuid-old
+    pattern: "\\bData::UUID::new\\s*\\(\\s*\\)"
+    severity: low
+    message: "Data::UUID — not CSPRNG, use UUID::Tiny"
+    metadata: {cwe: "CWE-338"}

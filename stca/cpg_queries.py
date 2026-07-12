@@ -186,6 +186,156 @@ def query_function_complexity(cpg: CPG, threshold: int = 10) -> List[CPGQueryRes
     return results
 
 
+def query_def_use_chains(cpg: CPG, variable_name: str = None) -> List[CPGQueryResult]:
+    """v4.42: Query def-use chains on the CPG.
+
+    A def-use chain connects a variable definition (assignment) to all its
+    uses (reads). This is the last depth gap vs CodeQL — CodeQL can answer
+    "where is this variable used after being assigned?" across function
+    and file boundaries.
+
+    v4.42 FIX: The CPG uses node kind="variable" (not "def" or "assignment")
+    and edge kind="data_dep" (not "USE"/"DDG"). Fixed to match actual schema.
+
+    Args:
+        cpg: The code property graph
+        variable_name: If specified, only query chains for this variable.
+                      If None, query all variables.
+
+    Returns:
+        List of CPGQueryResult, one per def-use chain found.
+    """
+    results: List[CPGQueryResult] = []
+
+    # v4.42: CPG uses kind="variable" for both defs and uses
+    var_nodes = cpg.get_nodes(kind="variable")
+
+    for var_node in var_nodes:
+        # Filter by variable name if specified
+        if variable_name and var_node.name != variable_name:
+            continue
+
+        # v4.42: CPG uses edge kind="data_dep" for def-use edges
+        outgoing = []
+        for edge in cpg.edges:
+            if edge.src == var_node.id and edge.kind == "data_dep":
+                outgoing.append(edge)
+
+        incoming = []
+        for edge in cpg.edges:
+            if edge.dst == var_node.id and edge.kind == "data_dep":
+                incoming.append(edge)
+
+        if not outgoing and not incoming:
+            # Standalone variable with no data dep edges — skip
+            continue
+
+        if outgoing and not incoming:
+            # Variable defined (has outgoing data_dep edges) but no incoming
+            # = it's a root definition. Report each def-use chain.
+            for edge in outgoing[:5]:  # cap at 5 uses per def
+                use_node = cpg.nodes.get(edge.dst)
+                if use_node is None:
+                    continue
+                results.append(CPGQueryResult(
+                    file=use_node.file,
+                    line=use_node.line,
+                    description=f"Def-use chain: '{var_node.name}' defined at {var_node.file}:{var_node.line} used at {use_node.file}:{use_node.line}",
+                    matched_nodes=[var_node.id, use_node.id],
+                    cwe="",
+                    raw={
+                        "variable": var_node.name,
+                        "def_file": var_node.file,
+                        "def_line": var_node.line,
+                        "use_file": use_node.file,
+                        "use_line": use_node.line,
+                        "kind": "def_use",
+                    },
+                ))
+        elif not outgoing and incoming:
+            # Variable used (has incoming data_dep edges) but no outgoing
+            # = it's a leaf use. This is normal (the use doesn't define anything).
+            pass
+        else:
+            # Both incoming and outgoing = intermediate variable
+            for edge in outgoing[:3]:
+                use_node = cpg.nodes.get(edge.dst)
+                if use_node is None:
+                    continue
+                results.append(CPGQueryResult(
+                    file=use_node.file,
+                    line=use_node.line,
+                    description=f"Def-use chain: '{var_node.name}' at {var_node.file}:{var_node.line} → used at {use_node.file}:{use_node.line}",
+                    matched_nodes=[var_node.id, use_node.id],
+                    cwe="",
+                    raw={
+                        "variable": var_node.name,
+                        "def_file": var_node.file,
+                        "def_line": var_node.line,
+                        "use_file": use_node.file,
+                        "use_line": use_node.line,
+                        "kind": "def_use",
+                    },
+                ))
+
+    return results
+
+
+def query_cross_function_taint(cpg: CPG) -> List[CPGQueryResult]:
+    """v4.42: Query cross-function taint flows via data_dep edges.
+
+    This is the CodeQL-style "dataflow" query: find paths where a value
+    flows from a source (function parameter, env var, user input) through
+    assignments and function calls to a sink (eval, exec, SQL, etc.).
+
+    v4.42 FIX: The CPG uses edge kind="data_dep" (not "USE"/"DDG").
+    Fixed to match actual schema. Also fixed source detection to use
+    edge kind="param" (not "PARAM"/"SOURCE").
+    """
+    results: List[CPGQueryResult] = []
+
+    # Sinks that indicate code execution / injection
+    sink_patterns = {"eval", "exec", "system", "popen", "execute", "query",
+                     "render", "send", "write", "open", "include", "require"}
+
+    # Find all CALL nodes that are sinks
+    call_nodes = cpg.get_nodes(kind="call")
+    for call_node in call_nodes:
+        if call_node.name not in sink_patterns:
+            continue
+
+        # v4.42: Check if any variable feeds into this CALL via data_dep edges
+        for edge in cpg.edges:
+            if edge.dst == call_node.id and edge.kind == "data_dep":
+                def_node = cpg.nodes.get(edge.src)
+                if def_node is None:
+                    continue
+
+                # v4.42: Check if the def comes from a source (param edge)
+                source_edges = [e for e in cpg.edges
+                               if e.dst == def_node.id and e.kind in ("param", "param_cross_file")]
+
+                if source_edges:
+                    results.append(CPGQueryResult(
+                        file=call_node.file,
+                        line=call_node.line,
+                        description=f"Cross-function taint: source -> '{def_node.name}' -> sink '{call_node.name}'()",
+                        matched_nodes=[def_node.id, call_node.id],
+                        cwe="CWE-89",  # generic injection
+                        raw={
+                            "source_var": def_node.name,
+                            "sink": call_node.name,
+                            "def_file": def_node.file,
+                            "def_line": def_node.line,
+                            "sink_file": call_node.file,
+                            "sink_line": call_node.line,
+                            "kind": "cross_function_taint",
+                        },
+                    ))
+
+    return results
+
+
 def _reconstruct_path(parent: Dict[str, str], source: str, sink: str) -> List[str]:
     """Reconstruct the path from source to sink using parent pointers."""
     path = [sink]

@@ -23,7 +23,7 @@ rules:
     metadata: { cwe: "CWE-78", owasp: "A03" }
 
   - id: js-child-process-exec-shell
-    pattern: child_process.exec(..., { shell: true })
+    pattern: "child_process.exec(..., { shell: true })"
     message: child_process.exec with shell:true — shell injection
     languages: [javascript, typescript]
     severity: ERROR
@@ -60,7 +60,7 @@ rules:
     metadata: { cwe: "CWE-1321" }
 
   - id: js-merge-deep
-    pattern: $OBJ.merge(..., ..., { deep: true })
+    pattern: "$OBJ.merge(..., ..., { deep: true })"
     message: Deep merge — prototype pollution risk
     languages: [javascript, typescript]
     severity: INFO
@@ -75,7 +75,7 @@ rules:
     metadata: { cwe: "CWE-295", owasp: "A02" }
 
   - id: js-axios-no-verify
-    pattern: axios(..., { httpsAgent: ... rejectUnauthorized: false })
+    pattern: "axios(..., { httpsAgent: ... rejectUnauthorized: false })"
     message: Axios with TLS verification disabled
     languages: [javascript, typescript]
     severity: ERROR
@@ -83,21 +83,21 @@ rules:
 
   # === Authentication ===
   - id: js-hardcoded-secret
-    pattern-regex: '(?i)(api_key|secret|token|password)\s*[:=]\s*["\'][a-zA-Z0-9]{20,}["\']'
+    pattern-regex: "(?i)(api_key|secret|token|password)\\s*[:=]\\s*[\"'][a-zA-Z0-9]{20,}[\"']"
     message: Hardcoded secret
     languages: [javascript, typescript]
     severity: ERROR
     metadata: { cwe: "CWE-798", owasp: "A05" }
 
   - id: js-jwt-none-alg
-    pattern: jwt.verify(..., { algorithms: ["none"] })
+    pattern: "jwt.verify(..., { algorithms: [\"none\"] })"
     message: JWT alg:none — bypasses verification
     languages: [javascript, typescript]
     severity: ERROR
     metadata: { cwe: "CWE-345" }
 
   - id: js-jwt-sync-verify-false
-    pattern: jwt.verify(..., ..., { verify: false })
+    pattern: "jwt.verify(..., ..., { verify: false })"
     message: JWT verification disabled
     languages: [javascript, typescript]
     severity: ERROR
@@ -143,7 +143,7 @@ rules:
 
   # === Information Disclosure ===
   - id: js-console-log-secret
-    pattern-regex: 'console\.(log|error|warn)\(.*?(password|secret|token|api_key).*?\)'
+    pattern-regex: "console\\.(log|error|warn)\\(.*?(password|secret|token|api_key).*?\\)"
     message: console.log references secret/PII
     languages: [javascript, typescript]
     severity: WARNING

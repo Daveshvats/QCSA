@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stca.missing_patches import scan_missing_patches, patch_database_stats, PATCH_DATABASE
+from stca.version_vuln_checks import scan_version_vuln_checks, version_vuln_check_stats, VERSION_VULN_DATABASE
 from stca.contracts import extract_contracts, check_preconditions_at_call_sites, contract_stats
 from stca.deadcode import DeadCodeAnalyzer
 from stca.flawfinder_db import scan_dangerous_functions, scan_repo_dangerous_functions, database_stats, DANGEROUS_FUNCTIONS
@@ -16,10 +16,10 @@ from stca.malicious_patterns import scan_malicious_patterns, scan_repo_malicious
 # === Missing patches (Vanir-inspired) ===
 
 def test_patch_database_has_entries():
-    assert len(PATCH_DATABASE) >= 10
+    assert len(VERSION_VULN_DATABASE) >= 10
 
-def test_patch_database_stats():
-    stats = patch_database_stats()
+def test_version_vuln_check_stats():
+    stats = version_vuln_check_stats()
     assert stats["total_patches"] >= 10
     assert "critical" in stats["by_severity"]
 
@@ -27,7 +27,7 @@ def test_scan_finds_unpatched_pyyaml(tmp_path):
     """Should detect yaml.load() without SafeLoader (CVE-2020-14343)."""
     src = tmp_path / "app.py"
     src.write_text("import yaml\ndata = yaml.load(input_str)\n")
-    results = scan_missing_patches(tmp_path)
+    results = scan_version_vuln_checks(tmp_path)
     pyyaml_cves = [r for r in results if "CVE-2020-14343" in r.cve]
     assert len(pyyaml_cves) >= 1
 
@@ -35,7 +35,7 @@ def test_scan_finds_old_cryptography(tmp_path):
     """Should detect cryptography < 41.0.2 in requirements."""
     req = tmp_path / "requirements.txt"
     req.write_text("cryptography==2.3.0\n")
-    results = scan_missing_patches(tmp_path)
+    results = scan_version_vuln_checks(tmp_path)
     crypto_cves = [r for r in results if "cryptography" in r.package]
     assert len(crypto_cves) >= 1
 

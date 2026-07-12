@@ -1,0 +1,241 @@
+{
+    "projectRoot":  "C:\\Users\\deves\\Downloads\\stca-pipeline-complete-v2.6\\stca-pipeline",
+    "batchImportData":  {
+                            "scripts/survey_silent_except.py":  [
+
+                                                                ],
+                            "stca_pipeline.egg-info/PKG-INFO":  [
+
+                                                                ],
+                            ".mimocode/.cron-lock":  [
+
+                                                     ],
+                            "stca/baseline.py":  [
+
+                                                 ],
+                            "stca/__init__.py":  [
+
+                                                 ],
+                            "scripts/show_silent_context.py":  [
+
+                                                               ],
+                            "stca/brain/bayesian.py":  [
+                                                           "stca/models.py"
+                                                       ],
+                            "scripts/fix_silent_except_v2.py":  [
+
+                                                                ],
+                            "stca/bootstrap/__init__.py":  [
+                                                               "stca/bootstrap/harness_gen.py",
+                                                               "stca/bootstrap/invariant_inference.py",
+                                                               "stca/bootstrap/property_gen.py"
+                                                           ],
+                            "stca/bootstrap/invariant_inference.py":  [
+
+                                                                      ],
+                            ".ua/.understandignore":  [
+
+                                                      ],
+                            "stca/advanced_secrets.py":  [
+                                                             "stca/models.py"
+                                                         ],
+                            "stca/brain/__init__.py":  [
+                                                           "stca/brain/it2_fis.py",
+                                                           "stca/brain/membership.py",
+                                                           "stca/brain/rules.py"
+                                                       ],
+                            "scripts/fix_silent_except.py":  [
+
+                                                             ],
+                            "examples/policies/no_secrets_in_logs.rego":  [
+
+                                                                          ],
+                            "stca/architecture.py":  [
+
+                                                     ],
+                            "stca/brain/aggregator.py":  [
+                                                             "stca/brain/it2_fis.py",
+                                                             "stca/brain/membership.py",
+                                                             "stca/models.py"
+                                                         ],
+                            "examples/sample-python-repo/test_app.py":  [
+                                                                            "examples/sample-python-repo/app.py"
+                                                                        ],
+                            "examples/sample-python-repo/app.py":  [
+
+                                                                   ],
+                            "stca/brain/it2_fis.py":  [
+                                                          "stca/brain/membership.py",
+                                                          "stca/brain/rules.py"
+                                                      ],
+                            "scripts/find_bad_loggers.py":  [
+
+                                                            ],
+                            "scripts/rewire_scanner_errors.py":  [
+
+                                                                 ],
+                            "stca/audit.py":  [
+
+                                              ],
+                            "stca/bootstrap/property_gen.py":  [
+                                                                   "stca/llm/client.py",
+                                                                   "stca/llm/prm.py"
+                                                               ],
+                            "stca/bootstrap/harness_gen.py":  [
+                                                                  "stca/llm/client.py",
+                                                                  "stca/llm/prm.py"
+                                                              ]
+                        },
+    "batchFiles":  [
+                       {
+                           "path":  ".mimocode/.cron-lock",
+                           "language":  "unknown",
+                           "sizeLines":  0,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  ".ua/.understandignore",
+                           "language":  "unknown",
+                           "sizeLines":  49,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "examples/policies/no_secrets_in_logs.rego",
+                           "language":  "rego",
+                           "sizeLines":  36,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "examples/sample-python-repo/app.py",
+                           "language":  "python",
+                           "sizeLines":  137,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "examples/sample-python-repo/test_app.py",
+                           "language":  "python",
+                           "sizeLines":  24,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "scripts/find_bad_loggers.py",
+                           "language":  "python",
+                           "sizeLines":  40,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "scripts/fix_silent_except_v2.py",
+                           "language":  "python",
+                           "sizeLines":  431,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "scripts/fix_silent_except.py",
+                           "language":  "python",
+                           "sizeLines":  123,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "scripts/rewire_scanner_errors.py",
+                           "language":  "python",
+                           "sizeLines":  39,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "scripts/show_silent_context.py",
+                           "language":  "python",
+                           "sizeLines":  27,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "scripts/survey_silent_except.py",
+                           "language":  "python",
+                           "sizeLines":  39,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca_pipeline.egg-info/PKG-INFO",
+                           "language":  "unknown",
+                           "sizeLines":  235,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  8,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/advanced_secrets.py",
+                           "language":  "python",
+                           "sizeLines":  319,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/architecture.py",
+                           "language":  "python",
+                           "sizeLines":  185,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/audit.py",
+                           "language":  "python",
+                           "sizeLines":  142,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/baseline.py",
+                           "language":  "python",
+                           "sizeLines":  166,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/bootstrap/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  11,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/bootstrap/harness_gen.py",
+                           "language":  "python",
+                           "sizeLines":  151,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/bootstrap/invariant_inference.py",
+                           "language":  "python",
+                           "sizeLines":  192,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/bootstrap/property_gen.py",
+                           "language":  "python",
+                           "sizeLines":  129,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/brain/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  6,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/brain/aggregator.py",
+                           "language":  "python",
+                           "sizeLines":  109,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/brain/bayesian.py",
+                           "language":  "python",
+                           "sizeLines":  334,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/brain/it2_fis.py",
+                           "language":  "python",
+                           "sizeLines":  158,
+                           "fileCategory":  "code"
+                       }
+                   ]
+}

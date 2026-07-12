@@ -16,14 +16,14 @@
 rules:
   # === CRIT-4: JWT in localStorage ===
   - id: react-jwt-in-localstorage
-    pattern-regex: 'localStorage\.setItem\s*\(\s*["\']AUTHHEADER|localStorage\.setItem\s*\(\s*["\'].*TOKEN|localStorage\.setItem\s*\(\s*["\'].*JWT'
+    pattern-regex: "localStorage\\.setItem\\s*\\(\\s*[\"']AUTHHEADER|localStorage\\.setItem\\s*\\(\\s*[\"'].*TOKEN|localStorage\\.setItem\\s*\\(\\s*[\"'].*JWT"
     message: "JWT/token stored in localStorage (CWE-922) — XSS can steal it. Use httpOnly cookies or in-memory storage."
     languages: [javascript, typescript]
     severity: ERROR
     metadata: { cwe: "CWE-922", owasp: "A07" }
 
   - id: react-jwt-from-localstorage
-    pattern-regex: 'localStorage\.getItem\s*\(\s*["\']AUTHHEADER|localStorage\.getItem\s*\(\s*["\'].*TOKEN|localStorage\.getItem\s*\(\s*["\'].*JWT'
+    pattern-regex: "localStorage\\.getItem\\s*\\(\\s*[\"']AUTHHEADER|localStorage\\.getItem\\s*\\(\\s*[\"'].*TOKEN|localStorage\\.getItem\\s*\\(\\s*[\"'].*JWT"
     message: "JWT/token read from localStorage (CWE-922) — token is accessible to XSS. Use httpOnly cookies."
     languages: [javascript, typescript]
     severity: WARNING
@@ -31,14 +31,14 @@ rules:
 
   # === CRIT-9: JSX template string XSS ===
   - id: react-template-string-xss
-    pattern-regex: 'const\s+\w+\s*=\s*`[^`]*\$\{.*?\}[^`]*`.*?\.from\s*\('
+    pattern-regex: "const\\s+\\w+\\s*=\\s*`[^`]*\\$\\{.*?\\}[^`]*`.*?\\.from\\s*\\("
     message: "Template string with ${} interpolation passed to HTML/PDF renderer — XSS risk (CWE-79)"
     languages: [javascript, typescript]
     severity: ERROR
     metadata: { cwe: "CWE-79", owasp: "A03" }
 
   - id: react-html-template-interpolation
-    pattern-regex: '<td>\$\{|<div>\$\{|<span>\$\{|<p>\$\{'
+    pattern-regex: "<td>\\$\\{|<div>\\$\\{|<span>\\$\\{|<p>\\$\\{"
     message: "Unescaped ${} interpolation in HTML template — XSS risk (CWE-79). Use escape-html or DOMPurify."
     languages: [javascript, typescript]
     severity: ERROR
@@ -46,7 +46,7 @@ rules:
 
   # === MED-1: dangerouslySetInnerHTML ===
   - id: react-dangerously-set-inner-html
-    pattern: $EL.dangerouslySetInnerHTML = { __html: $X }
+    pattern: "$EL.dangerouslySetInnerHTML = { __html: $X }"
     message: "dangerouslySetInnerHTML — XSS risk if $X contains user data (CWE-79)"
     languages: [javascript, typescript]
     severity: WARNING
@@ -54,7 +54,7 @@ rules:
 
   # === HIGH-4: AES-ECB mode ===
   - id: crypto-aes-ecb
-    pattern-regex: 'CryptoJS\.mode\.ECB|mode:\s*["\']ecb["\']|AES.*ECB'
+    pattern-regex: "CryptoJS\\.mode\\.ECB|mode:\\s*[\"']ecb[\"']|AES.*ECB"
     message: "AES-ECB mode — cryptographically broken (CWE-327). Identical blocks produce identical ciphertext."
     languages: [javascript, typescript]
     severity: ERROR
@@ -62,7 +62,7 @@ rules:
 
   # === CRIT-1: Hardcoded encryption keys ===
   - id: crypto-hardcoded-key
-    pattern-regex: '(?:key|secret|password|token)\s*=\s*["\'][A-Za-z0-9+/=]{16,}["\']'
+    pattern-regex: "(?:key|secret|password|token)\\s*=\\s*[\"'][A-Za-z0-9+/=]{16,}[\"']"
     message: "Hardcoded encryption key/secret in source code (CWE-321) — extract to environment variable"
     languages: [javascript, typescript]
     severity: ERROR
@@ -70,7 +70,7 @@ rules:
 
   # === HIGH-15: window.open without noopener ===
   - id: js-window-open-no-noopener
-    pattern-regex: 'window\.open\s*\([^)]*["\']_blank["\'][^)]*\)'
+    pattern-regex: "window\\.open\\s*\\([^)]*[\"']_blank[\"'][^)]*\\)"
     message: "window.open(_blank) without noopener — tabnabbing + open redirect risk (CWE-1022)"
     languages: [javascript, typescript]
     severity: WARNING
@@ -78,7 +78,7 @@ rules:
 
   # === CRIT-2: Test URLs in production code ===
   - id: test-url-in-production
-    pattern-regex: 'https?://(?:api)?test\.|https?://localhost|https?://127\.0\.0\.1|https?://.*\.test\.'
+    pattern-regex: "https?://(?:api)?test\\.|https?://localhost|https?://127\\.0\\.0\\.1|https?://.*\\.test\\."
     message: "Test/localhost URL hardcoded in source — may route production traffic to test environment"
     languages: [javascript, typescript]
     severity: WARNING
@@ -94,7 +94,7 @@ rules:
 
   # === MED-4: console.log of sensitive data ===
   - id: console-log-sensitive
-    pattern-regex: 'console\.log\s*\(.*(?:token|password|secret|JWT|auth|payload|credential)'
+    pattern-regex: "console\\.log\\s*\\(.*(?:token|password|secret|JWT|auth|payload|credential)"
     message: "console.log of sensitive data (CWE-532) — remove or use debug logger"
     languages: [javascript, typescript]
     severity: WARNING
@@ -102,7 +102,7 @@ rules:
 
   # === HIGH-10: JSON.parse at module level ===
   - id: js-json-parse-module-level
-    pattern-regex: '^(?:const|let|var)\s+\w+\s*=\s*JSON\.parse\s*\(.*localStorage'
+    pattern-regex: "^(?:const|let|var)\\s+\\w+\\s*=\\s*JSON\\.parse\\s*\\(.*localStorage"
     message: "JSON.parse(localStorage) at module level — crashes entire bundle if stored value is malformed"
     languages: [javascript, typescript]
     severity: WARNING
@@ -110,7 +110,7 @@ rules:
 
   # === HIGH-6: Server error messages echoed ===
   - id: js-error-message-echo
-    pattern-regex: 'enqueueSnackbar\s*\(\s*`?\$\{.*error.*response.*data.*message'
+    pattern-regex: "enqueueSnackbar\\s*\\(\\s*`?\\$\\{.*error.*response.*data.*message"
     message: "Server error message echoed to user (CWE-209) — may leak internal details. Use safe fallback."
     languages: [javascript, typescript]
     severity: WARNING
@@ -126,7 +126,7 @@ rules:
 
   # === HIGH-12: Missing OTP rate limiting ===
   - id: no-otp-rate-limit
-    pattern-regex: 'sendOTP|sendOffsiteOTP|resendOTP'
+    pattern-regex: "sendOTP|sendOffsiteOTP|resendOTP"
     message: "OTP sending function — verify rate limiting and cooldown timer exist (CWE-307)"
     languages: [javascript, typescript]
     severity: INFO
@@ -134,7 +134,7 @@ rules:
 
   # === HIGH-7: Logout without server call ===
   - id: logout-without-server-call
-    pattern-regex: 'logoutUser.*localStorage\.removeItem|logout.*localStorage\.remove'
+    pattern-regex: "logoutUser.*localStorage\\.removeItem|logout.*localStorage\\.remove"
     message: "Logout only clears localStorage — server token not invalidated (CWE-613). Add POST /logout server call."
     languages: [javascript, typescript]
     severity: WARNING
@@ -158,7 +158,7 @@ rules:
 
   # === POC files in production ===
   - id: poc-file-in-production
-    pattern-regex: '/poc/|/proof-of-concept/|hospitalLogo|signatureBase64'
+    pattern-regex: "/poc/|/proof-of-concept/|hospitalLogo|signatureBase64"
     message: "POC/proof-of-concept file detected in source tree — should not ship in production bundle"
     languages: [javascript, typescript]
     severity: WARNING
@@ -166,7 +166,7 @@ rules:
 
   # === Missing auth guard in React Router layout ===
   - id: react-missing-auth-guard
-    pattern-regex: 'const\s+\w*(?:Auth|Protected|Secure)\w*\s*=\s*(?:\([^)]*\)\s*=>|function)\s*\{[^}]*(?:return|<Outlet)'
+    pattern-regex: "const\\s+\\w*(?:Auth|Protected|Secure)\\w*\\s*=\\s*(?:\\([^)]*\\)\\s*=>|function)\\s*\\{[^}]*(?:return|<Outlet)"
     message: "Auth layout component may be missing authentication check — verify token validation before rendering children"
     languages: [javascript, typescript]
     severity: WARNING
@@ -174,7 +174,7 @@ rules:
 
   # === Default-allow in switch statement (privilege escalation) ===
   - id: react-default-allow-switch
-    pattern-regex: 'default\s*:\s*(?:permissions|access|role|visibility)\s*=\s*\{[^}]*true'
+    pattern-regex: "default\\s*:\\s*(?:permissions|access|role|visibility)\\s*=\\s*\\{[^}]*true"
     message: "Default case in permission switch grants access — should default to DENY (CWE-285)"
     languages: [javascript, typescript]
     severity: ERROR
@@ -182,7 +182,7 @@ rules:
 
   # === Fetch without auth header ===
   - id: fetch-without-auth
-    pattern-regex: 'fetch\s*\([^)]*\)(?![^;]*(?:Authorization|auth|token|Bearer))'
+    pattern-regex: "fetch\\s*\\([^)]*\\)(?![^;]*(?:Authorization|auth|token|Bearer))"
     message: "fetch() call without Authorization header — endpoint may be accessible without auth (CWE-862)"
     languages: [javascript, typescript]
     severity: INFO
@@ -190,7 +190,7 @@ rules:
 
   # === localStorage used for role/permission check ===
   - id: react-role-from-localstorage
-    pattern-regex: 'localStorage\.getItem\s*\(\s*["\'].*ROLE|localStorage\.getItem\s*\(\s*["\'].*PERMISSION'
+    pattern-regex: "localStorage\\.getItem\\s*\\(\\s*[\"'].*ROLE|localStorage\\.getItem\\s*\\(\\s*[\"'].*PERMISSION"
     message: "Role/permission read from localStorage — user-editable, not trustworthy (CWE-269). Read from JWT claims instead."
     languages: [javascript, typescript]
     severity: WARNING
@@ -198,7 +198,7 @@ rules:
 
   # === User-editable corpId/tenantId from localStorage ===
   - id: react-corphid-from-localstorage
-    pattern-regex: 'localStorage\.getItem\s*\(\s*["\'].*CORP|localStorage\.getItem\s*\(\s*["\'].*TENANT|localStorage\.getItem\s*\(\s*["\'].*ORG_ID'
+    pattern-regex: "localStorage\\.getItem\\s*\\(\\s*[\"'].*CORP|localStorage\\.getItem\\s*\\(\\s*[\"'].*TENANT|localStorage\\.getItem\\s*\\(\\s*[\"'].*ORG_ID"
     message: "CorpId/tenantId read from localStorage — user can substitute any org ID (CWE-639). Verify server-side."
     languages: [javascript, typescript]
     severity: WARNING
@@ -206,7 +206,7 @@ rules:
 
   # === Template literal with ${} in HTML context ===
   - id: react-template-literal-html
-    pattern-regex: '`[^`]*<(?:td|div|span|p|h1|h2|h3|th|li|a|img)\b[^`]*\$\{'
+    pattern-regex: "`[^`]*<(?:td|div|span|p|h1|h2|h3|th|li|a|img)\\b[^`]*\\$\\{"
     message: "Template literal with HTML tags and ${} interpolation — XSS risk (CWE-79). Escape interpolated values."
     languages: [javascript, typescript]
     severity: ERROR
@@ -214,7 +214,7 @@ rules:
 
   # === CryptoJS usage (client-side crypto) ===
   - id: react-cryptojs-usage
-    pattern-regex: 'CryptoJS\.'
+    pattern-regex: "CryptoJS\\."
     message: "CryptoJS usage — client-side crypto is insecure. Keys are in the bundle. Use WebCrypto API."
     languages: [javascript, typescript]
     severity: WARNING
@@ -222,7 +222,7 @@ rules:
 
   # === axios without withCredentials ===
   - id: react-axios-no-credentials
-    pattern-regex: 'axios\.(get|post|put|delete|patch)\s*\([^)]*\)(?![^;]*withCredentials)'
+    pattern-regex: "axios\\.(get|post|put|delete|patch)\\s*\\([^)]*\\)(?![^;]*withCredentials)"
     message: "axios call without withCredentials — cookies won't be sent. May break auth."
     languages: [javascript, typescript]
     severity: INFO
@@ -230,7 +230,7 @@ rules:
 
   # === setInterval without cleanup ===
   - id: react-setinterval-no-cleanup
-    pattern-regex: 'setInterval\s*\([^)]*\)(?![^;]*clearInterval)'
+    pattern-regex: "setInterval\\s*\\([^)]*\\)(?![^;]*clearInterval)"
     message: "setInterval without clearInterval in cleanup — memory leak / unnecessary polling"
     languages: [javascript, typescript]
     severity: INFO
@@ -238,7 +238,7 @@ rules:
 
   # === Hardcoded API base URL ===
   - id: react-hardcoded-api-url
-    pattern-regex: '(?:BASE_URL|API_URL)\s*=\s*["\']https?://(?:api)?test\.|(?:BASE_URL|API_URL)\s*=\s*["\']https?://localhost'
+    pattern-regex: "(?:BASE_URL|API_URL)\\s*=\\s*[\"']https?://(?:api)?test\\.|(?:BASE_URL|API_URL)\\s*=\\s*[\"']https?://localhost"
     message: "Hardcoded test/localhost API URL — production traffic may go to test environment (CWE-489)"
     languages: [javascript, typescript]
     severity: ERROR
@@ -246,7 +246,7 @@ rules:
 
   # === Missing input validation on form submit ===
   - id: react-no-input-validation
-    pattern-regex: 'onChange\s*=\s*\{[^}]*set\w+\s*\(\s*e\.target\.value\s*\)'
+    pattern-regex: "onChange\\s*=\\s*\\{[^}]*set\\w+\\s*\\(\\s*e\\.target\\.value\\s*\\)"
     message: "Form input stored without validation — sanitize/validate before storing (CWE-20)"
     languages: [javascript, typescript]
     severity: INFO
@@ -254,7 +254,7 @@ rules:
 
   # === Error response displayed to user ===
   - id: react-error-response-displayed
-    pattern-regex: '(?:enqueueSnackbar|toast|alert|setError)\s*\(\s*`?\$\{.*?error.*?response.*?data.*?message'
+    pattern-regex: "(?:enqueueSnackbar|toast|alert|setError)\\s*\\(\\s*`?\\$\\{.*?error.*?response.*?data.*?message"
     message: "Raw error response displayed to user — may leak internal details (CWE-209)"
     languages: [javascript, typescript]
     severity: WARNING
@@ -262,7 +262,7 @@ rules:
 
   # === JSON.parse without try/catch ===
   - id: react-json-parse-no-try
-    pattern-regex: '^(?!.*try\s*\{).*JSON\.parse\s*\('
+    pattern-regex: "^(?!.*try\\s*\\{).*JSON\\.parse\\s*\\("
     message: "JSON.parse without try/catch — will crash if value is malformed (CWE-754)"
     languages: [javascript, typescript]
     severity: WARNING

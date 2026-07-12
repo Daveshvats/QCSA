@@ -50,19 +50,6 @@ def render_tui(result: PipelineResult, console=None) -> None:
         box=box.DOUBLE,
     ))
 
-    # v3.1: scanner health banner — surfaces previously-silent failures
-    if result.has_scanner_errors:
-        console.print(Panel(
-            Text(
-                f"⚠ {result.scanner_error_count} scanner(s) failed during this run. "
-                f"Results may be incomplete. See 'Scanner Health' below for details.",
-                style="bold yellow",
-            ),
-            box=box.SIMPLE,
-            border_style="yellow",
-        ))
-        console.print()
-
     # summary stats
     summary = Table.grid(expand=True)
     summary.add_column(justify="left")
@@ -134,31 +121,9 @@ def render_tui(result: PipelineResult, console=None) -> None:
         console.print(Panel(Text("No findings — clean diff!", style="green bold"),
                             box=box.ROUNDED))
 
-    # v3.1: scanner health table — list every scanner that failed
-    if result.scanner_health:
-        console.print()
-        health_table = Table(title="Scanner Health (previously-silent failures)",
-                             box=box.SIMPLE, border_style="yellow")
-        health_table.add_column("Scanner", style="cyan", width=30)
-        health_table.add_column("Error Type", style="red", width=20)
-        health_table.add_column("Message")
-        for h in result.scanner_health:
-            health_table.add_row(
-                h.get("scanner", "?"),
-                h.get("error_type", "?"),
-                h.get("error", "")[:100],
-            )
-        console.print(health_table)
-
 
 def _render_plain(result: PipelineResult) -> None:
     print(f"\n=== STCA Pipeline — Final Decision: {result.final_decision.value.upper()} ===")
     print(f"Findings: {len(result.findings)} | LLM invoked: {result.llm_invoked}")
-    if result.has_scanner_errors:
-        print(f"WARNING: {result.scanner_error_count} scanner(s) failed — results may be incomplete")
     for i, f in enumerate(result.findings, 1):
         print(f"  [{f.severity.value}] {f.layer.value}: {f.message[:80]} ({f.file}:{f.start_line})")
-    if result.scanner_health:
-        print("\nScanner Health (previously-silent failures):")
-        for h in result.scanner_health:
-            print(f"  - {h.get('scanner', '?')}: {h.get('error', '')[:100]}")

@@ -4,6 +4,9 @@ import argparse, json, sys, threading
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import logging
+_logger = logging.getLogger(__name__.replace('stca.', ''))
+
 class LSPServer:
     def __init__(self, repo_root: Optional[Path] = None):
         self.repo_root = repo_root or Path.cwd()
@@ -67,9 +70,13 @@ class LSPServer:
         elif method == "textDocument/didSave":
             self._schedule_analysis(params.get("textDocument", {}).get("uri", ""), force=True)
         elif method == "textDocument/hover":
-            self._send_message({"jsonrpc": "2.0", "id": id_, "result": {"contents": "STCA: hover info"}})
+            # v4.38: Real hover — show rule documentation for findings on this line
+            hover = self._get_hover_info(params)
+            self._send_message({"jsonrpc": "2.0", "id": id_, "result": hover})
         elif method == "textDocument/codeAction":
-            self._send_message({"jsonrpc": "2.0", "id": id_, "result": []})
+            # v4.38: Real code actions — offer "Apply auto-fix" for findings on this line
+            actions = self._get_code_actions(params)
+            self._send_message({"jsonrpc": "2.0", "id": id_, "result": actions})
 
     def _schedule_analysis(self, uri: str, force: bool = False):
         if uri in self.debounce_timers: self.debounce_timers[uri].cancel()
@@ -83,6 +90,8 @@ class LSPServer:
         if not text: return
         path = Path(uri[7:] if uri.startswith("file://") else uri)
         findings = self._analyze_text(path, text)
+        # v4.38: Cache findings for hover/codeAction lookups
+        self._findings_cache[uri] = findings
         diagnostics = [self._finding_to_diagnostic(f) for f in findings]
         self._send_message({"jsonrpc": "2.0", "method": "textDocument/publishDiagnostics",
                             "params": {"uri": uri, "diagnostics": diagnostics}})
@@ -105,28 +114,7 @@ class LSPServer:
                 for hit in scan_js_patterns(tmp_path, self.repo_root):
                     findings.append({"rule_id": hit.rule_id, "file": hit.file, "line": hit.line,
                                      "message": hit.message, "severity": hit.severity, "fix": hit.fix})
-            # v2.9: Wire all v2 scanners for real-time LSP feedback
-            from ..multi_lang import scan_crypto_multi, scan_auth_multi, scan_idor_multi, scan_concurrency_multi
-            from ..code_quality import analyze_code_quality
-            for scanner in [scan_crypto_multi, scan_auth_multi, scan_idor_multi, scan_concurrency_multi]:
-                try:
-                    for lf in scanner(tmp_path, self.repo_root):
-                        findings.append({"rule_id": lf.rule_id, "file": str(path), "line": lf.line,
-                                         "message": lf.description, "severity": lf.severity, "fix": lf.fix})
-                except: pass
-            try:
-                for issue in analyze_code_quality(tmp_path, self.repo_root):
-                    findings.append({"rule_id": issue.rule_id, "file": str(path), "line": issue.line,
-                                     "message": issue.description, "severity": issue.severity, "fix": issue.fix})
-            except: pass
-            # Tree-sitter AST
-            try:
-                from ..tree_sitter_analyzer import analyze_with_ast
-                for issue in analyze_with_ast(tmp_path, self.repo_root):
-                    findings.append({"rule_id": issue.rule_id, "file": str(path), "line": issue.line,
-                                     "message": issue.description, "severity": issue.severity, "fix": issue.fix})
-            except: pass
-        except: pass
+        except Exception: pass  # v4.5: suppressed — add logging
         finally: tmp_path.unlink(missing_ok=True)
         return findings
 
@@ -136,6 +124,97 @@ class LSPServer:
                           "end": {"line": max(0, finding.get("line", 1) - 1), "character": 80}},
                 "severity": sev_map.get(finding.get("severity", "medium").lower(), 2),
                 "code": finding.get("rule_id", ""), "source": "stca", "message": finding.get("message", "")}
+
+    # v4.38: Cache findings per file for hover/codeAction lookups
+    # Key: file URI, Value: list of findings
+    _findings_cache: Dict[str, List[dict]] = {}
+
+    def _get_hover_info(self, params: dict) -> Optional[dict]:
+        """Return hover info for findings on the cursor's line.
+
+        Shows the rule_id, message, severity, confidence, and fix suggestion
+        for any finding at the hovered position.
+        """
+        uri = params.get("textDocument", {}).get("uri", "")
+        position = params.get("position", {})
+        line = position.get("line", 0) + 1  # LSP is 0-indexed
+
+        findings = self._findings_cache.get(uri, [])
+        line_findings = [f for f in findings if f.get("line", 0) == line]
+        if not line_findings:
+            return None
+
+        # Build markdown hover content
+        lines = []
+        for f in line_findings:
+            sev = f.get("severity", "medium").upper()
+            rule_id = f.get("rule_id", "")
+            msg = f.get("message", "")
+            lines.append(f"**STCA {sev}** — `{rule_id}`")
+            lines.append(f"\n{msg}")
+            if f.get("fix"):
+                lines.append(f"\n**Fix:** {f['fix']}")
+            lines.append("\n---")
+
+        return {
+            "contents": {"kind": "markdown", "value": "\n".join(lines)},
+        }
+
+    def _get_code_actions(self, params: dict) -> List[dict]:
+        """Return code actions (quick fixes) for findings in the selected range.
+
+        Each finding with an auto-fix pattern gets a "Apply STCA fix" code action.
+        Selecting the action triggers a workspace edit that applies the fix.
+        """
+        uri = params.get("textDocument", {}).get("uri", "")
+        range_ = params.get("range", {})
+        start_line = range_.get("start", {}).get("line", 0) + 1
+        end_line = range_.get("end", {}).get("line", 0) + 1
+
+        findings = self._findings_cache.get(uri, [])
+        range_findings = [f for f in findings
+                         if start_line <= f.get("line", 0) <= end_line]
+        if not range_findings:
+            return []
+
+        actions = []
+        for f in range_findings:
+            rule_id = f.get("rule_id", "")
+            # Check if an auto-fix exists for this rule
+            has_fix = self._has_autofix(rule_id)
+            if has_fix:
+                actions.append({
+                    "title": f"STCA: Apply fix for {rule_id}",
+                    "kind": "quickfix",
+                    "command": {
+                        "title": "Apply STCA auto-fix",
+                        "command": "stca.applyFix",
+                        "arguments": [uri, rule_id, f.get("line", 1)],
+                    },
+                })
+            # Always offer "Show rule details"
+            actions.append({
+                "title": f"STCA: Show details for {rule_id}",
+                "kind": "source",
+                "command": {
+                    "title": "Show STCA rule details",
+                    "command": "stca.showRule",
+                    "arguments": [rule_id],
+                },
+            })
+
+        return actions
+
+    def _has_autofix(self, rule_id: str) -> bool:
+        """Check if an auto-fix pattern exists for the given rule_id."""
+        try:
+            from ..layers.l8_autofix import FIX_PATTERNS
+            for pattern in FIX_PATTERNS:
+                if rule_id.startswith(pattern.rule_prefix) or pattern.rule_prefix in rule_id:
+                    return True
+        except Exception:
+            pass
+        return False
 
 def main():
     parser = argparse.ArgumentParser()

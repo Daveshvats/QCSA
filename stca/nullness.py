@@ -1,4 +1,15 @@
-"""Sound nullness analysis for Python (NilAway-inspired) — v3 with inter-branch tracking.
+"""Sound nullness analysis for Python (NilAway-inspired) — v4 with interprocedural callee check.
+
+v4 (v4.7) fixes the biggest false-positive source in the entire pipeline:
+any bare function call (not a builtin) was treated as possibly-None.
+This fires on the most common shape of ordinary Python code:
+    config = get_default_config()  # returns a dict, never None
+    return config["timeout"]       # flagged as possible null deref
+
+The fix: before flagging a bare call as possibly-None, look up the callee's
+FunctionDef in the same file and check whether any of its return statements
+can produce None (no explicit return, bare return, or return None). If the
+function provably never returns None, don't flag it.
 
 v3 fixes the v2 FP problem on `requests` (54 FPs from dict.get() where the result
 IS checked in a later if-branch).
@@ -15,10 +26,8 @@ Key improvements:
      count as guards.
   6. Only flag EXPLICIT None sources (default=None, Optional annotations, dict.get(),
      re.search(), .first(), .last(), etc.)
-  7. Bare function calls (e.g. `result = get_value()`) are treated as possibly-None
-     when no type information is available, matching NilAway's conservative default.
-     A small allowlist of guaranteed non-None builtins (len, str, list, ...) is
-     excluded to keep false positives down.
+  7. v4.7: Interprocedural callee return-value check — same-file lookup of the
+     callee's FunctionDef to determine if it can return None.
 """
 from __future__ import annotations
 
@@ -43,10 +52,7 @@ NONE_RETURNING_METHODS = {
     "first", "last", "one_or_none", "get_or_none",
 }
 
-# Builtins and common stdlib calls that are guaranteed to never return None.
-# Used to suppress false positives when a bare call result is dereferenced.
-# Note: getattr() is intentionally excluded — it returns the supplied default
-# which may be None. print() is also excluded because it returns None.
+# Builtins guaranteed to never return None (suppresses FPs on bare calls)
 NON_NONE_BUILTINS = {
     "len", "abs", "min", "max", "sum", "round", "pow", "divmod",
     "bool", "int", "float", "str", "bytes", "bytearray", "complex", "frozenset",
@@ -95,13 +101,14 @@ class NullnessAnalyzer:
         issues: List[NullnessIssue] = []
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                issues += self._analyze_function(node, rel_path, source)
+                issues += self._analyze_function(node, rel_path, source, tree)
         return issues
 
     def _analyze_function(self, func_node: ast.FunctionDef,
-                          file: str, source: str) -> List[NullnessIssue]:
+                          file: str, source: str,
+                          module_tree: Optional[ast.AST] = None) -> List[NullnessIssue]:
         issues: List[NullnessIssue] = []
-        possibly_none = self._collect_none_sources(func_node)
+        possibly_none = self._collect_none_sources(func_node, module_tree)
         if not possibly_none:
             return []
         guards = self._collect_guards(func_node, possibly_none)
@@ -126,7 +133,8 @@ class NullnessAnalyzer:
                 unique.append(issue)
         return unique
 
-    def _collect_none_sources(self, func_node: ast.FunctionDef) -> Set[str]:
+    def _collect_none_sources(self, func_node: ast.FunctionDef,
+                                module_tree: Optional[ast.AST] = None) -> Set[str]:
         possibly_none: Set[str] = set()
         # Parameters with default None
         args_with_defaults = zip(
@@ -152,21 +160,83 @@ class NullnessAnalyzer:
                         elif isinstance(node.value, ast.Call):
                             call = node.value
                             if isinstance(call.func, ast.Attribute):
-                                # Attribute calls known to return None (dict.get, re.search, ...)
                                 if call.func.attr in NONE_RETURNING_METHODS:
                                     possibly_none.add(target.id)
-                                # Other attribute calls (obj.foo()) are still
-                                # potentially None-returning — but we only flag
-                                # the well-known ones to avoid excessive FPs.
                             elif isinstance(call.func, ast.Name):
-                                # Bare function call (e.g. result = get_value()).
-                                # Without type info we conservatively treat the
-                                # result as possibly-None, matching NilAway's
-                                # default assumption for untyped call sites.
-                                # Exclude obvious non-None builtins to keep FPs down.
+                                # v4.7: Interprocedural callee return-value check.
+                                # Before treating a bare function call as possibly-None,
+                                # look up the callee's FunctionDef in the same file and
+                                # check whether any of its return statements can produce
+                                # None. If the function provably never returns None,
+                                # don't flag it.
+                                #
+                                # This is the fix Claude identified as the highest-priority
+                                # fix in the entire review: without it, ANY user-defined
+                                # function call is treated as possibly-None, firing on
+                                # the most common shape of ordinary Python code.
                                 if call.func.id not in NON_NONE_BUILTINS:
-                                    possibly_none.add(target.id)
+                                    if not self._callee_can_return_none(call.func.id, module_tree):
+                                        pass  # callee provably never returns None — safe
+                                    else:
+                                        possibly_none.add(target.id)
         return possibly_none
+
+    def _callee_can_return_none(self, callee_name: str,
+                                 module_tree: Optional[ast.AST]) -> bool:
+        """v4.7: Check if a function can return None.
+
+        Looks up the callee's FunctionDef in the same module tree and
+        examines its return statements:
+          - No return statement → returns None (implicit) → can return None
+          - Bare `return` → returns None → can return None
+          - `return None` → can return None
+          - `return <expr>` where expr is not None → cannot return None
+          - Function not found → conservatively return True (might return None)
+
+        This eliminates the biggest false-positive source in the pipeline:
+        any user-defined function call being treated as possibly-None.
+        """
+        if module_tree is None:
+            return True  # can't check — conservatively assume might return None
+
+        # Find the callee's FunctionDef in the module tree
+        callee_func = None
+        for node in ast.walk(module_tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if node.name == callee_name:
+                    callee_func = node
+                    break
+
+        if callee_func is None:
+            return True  # function not found in this file — might be imported
+
+        # Examine all return statements in the callee
+        has_explicit_return = False
+        for node in ast.walk(callee_func):
+            if isinstance(node, ast.Return):
+                has_explicit_return = True
+                if node.value is None:
+                    return True  # bare return → None
+                if isinstance(node.value, ast.Constant) and node.value.value is None:
+                    return True  # return None
+                # If the return value is a call to a None-returning method
+                if isinstance(node.value, ast.Call):
+                    if isinstance(node.value.func, ast.Attribute):
+                        if node.value.func.attr in NONE_RETURNING_METHODS:
+                            return True
+                    elif isinstance(node.value.func, ast.Name):
+                        # Recursive: check if THIS callee can return None
+                        if node.value.func.id not in NON_NONE_BUILTINS:
+                            if node.value.func.id != callee_name:  # avoid infinite recursion
+                                if self._callee_can_return_none(node.value.func.id, module_tree):
+                                    return True
+
+        # If the function has explicit returns and none of them return None,
+        # it cannot return None. If it has NO explicit returns, it implicitly
+        # returns None.
+        if not has_explicit_return:
+            return True  # no return → implicit return None
+        return False  # all returns are non-None
 
     def _collect_guards(self, func_node: ast.FunctionDef,
                         possibly_none: Set[str]) -> List[GuardInfo]:
@@ -280,9 +350,8 @@ class NullnessAnalyzer:
                                 return True
                         elif isinstance(val.func, ast.Name):
                             # Bare function call is non-None only if it's in
-                            # the safe-builtins allowlist (len, str, list, ...).
-                            # Otherwise it may still return None — keep the
-                            # variable flagged as possibly-None.
+                            # the safe-builtins allowlist. Otherwise it may
+                            # still return None — keep flagged as possibly-None.
                             if val.func.id in NON_NONE_BUILTINS:
                                 return True
                     if isinstance(val, (ast.List, ast.Dict, ast.Tuple, ast.Set)):

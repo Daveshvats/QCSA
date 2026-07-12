@@ -65,13 +65,21 @@ class Decision(str, Enum):
 class LayerID(str, Enum):
     L0_FAST = "L0_fast"
     L0B_SUPPLY_CHAIN = "L0b_supply_chain"
+    # v4.11: Add missing LayerIDs so layers don't borrow L0_FAST.
+    # Previously L0c/L0d/L0e/L0f/L8 all hardcoded id = LayerID.L0_FAST,
+    # collapsing per-layer reliability scoring.
+    L0C_DEPENDENCIES = "L0c_dependencies"
+    L0D_BEHAVIORAL = "L0d_behavioral"
+    L0E_IAC = "L0e_iac"
+    L0F_COMMIT_RISK = "L0f_commit_risk"
     L1_PROPERTY = "L1_property"
-    L2_MUTATION = "L2_mutation"
+    L2_MUTATION = "L2_test_coverage"  # v4.15: value renamed, keeping enum name for compat
     L3_INVARIANTS = "L3_invariants"
     L4_FUZZ = "L4_fuzz"
     L5_POLICY = "L5_policy"
     L6_SYMBOLIC = "L6_symbolic"
     L7_SIMULATION = "L7_simulation"
+    L8_AUTOFIX = "L8_autofix"
 
 
 @dataclass
@@ -91,6 +99,14 @@ class Finding:
     cwe: Optional[str] = None         # e.g. "CWE-89"
     fix_suggestion: Optional[str] = None
     raw: Dict[str, Any] = field(default_factory=dict)
+    # v4.3: Engine field for per-detector identification within L0_FAST.
+    # The precision engine's corroboration logic skips same-layer findings,
+    # which means ~15 detectors all using L0_FAST can never be deduped or
+    # corroborated. The engine field lets precision.py group findings by
+    # (layer, engine) instead of just layer, so same-concept findings from
+    # different detectors (e.g., typestate.py vs v4_restored.py) can be
+    # recognized as duplicates even when they share L0_FAST.
+    engine: str = ""
 
     @property
     def fingerprint(self) -> str:
@@ -164,13 +180,14 @@ class PipelineResult:
     llm_invoked: bool = False
     final_decision: Decision = Decision.PASS
     suppressed_count: int = 0
+    # v4.11: Persist suppressed findings so reviewers can audit what was hidden.
+    # Previously only suppressed_count was stored — the actual findings were discarded.
+    suppressed_findings: List[tuple] = field(default_factory=list)  # List[Tuple[Finding, Suppression]]
     autofix_count: int = 0
     precision_stats: Dict[str, Any] = field(default_factory=dict)
     baselined_count: int = 0
     issue_store_stats: Dict[str, Any] = field(default_factory=dict)
-    # v3.1: scanner health tracking — surfaces previously-silent failures
-    # so they appear in the final report (TUI, JSON, SARIF) instead of
-    # only in logs that scroll by.
+    # v3.1+: scanner health tracking — surfaces previously-silent failures
     scanner_health: List[Dict[str, Any]] = field(default_factory=list)
 
     @property
@@ -184,6 +201,19 @@ class PipelineResult:
         return self.scanner_error_count > 0
 
     def to_dict(self) -> Dict[str, Any]:
+        # v4.14: Include suppressed_findings so reviewers can audit
+        # what was hidden. v4.11 populated the field but v4.13 still
+        # didn't serialize it.
+        suppressed_serialized = []
+        for item in self.suppressed_findings:
+            if isinstance(item, tuple) and len(item) == 2:
+                f, sup = item
+                suppressed_serialized.append({
+                    "finding": f.to_dict() if hasattr(f, 'to_dict') else str(f),
+                    "suppression": {"file": sup.file, "line": sup.line,
+                                    "rule_id": sup.rule_id, "reason": sup.reason}
+                                    if hasattr(sup, 'file') else str(sup),
+                })
         return {
             "findings": [f.to_dict() for f in self.findings],
             "decisions": [d.to_dict() for d in self.decisions],
@@ -197,6 +227,7 @@ class PipelineResult:
             "llm_invoked": self.llm_invoked,
             "final_decision": self.final_decision.value,
             "suppressed_count": self.suppressed_count,
+            "suppressed_findings": suppressed_serialized,  # v4.14
             "autofix_count": self.autofix_count,
             "precision_stats": self.precision_stats,
             "baselined_count": self.baselined_count,

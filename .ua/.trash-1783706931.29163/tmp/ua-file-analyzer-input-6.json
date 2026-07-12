@@ -1,0 +1,158 @@
+{
+    "projectRoot":  "C:\\Users\\deves\\Downloads\\stca-pipeline-complete-v2.6\\stca-pipeline",
+    "batchImportData":  {
+
+                        },
+    "batchFiles":  [
+                       {
+                           "path":  ".github/actions/stca-action/action.yml",
+                           "language":  "yaml",
+                           "sizeLines":  52,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  ".github/workflows/stca.yml",
+                           "language":  "yaml",
+                           "sizeLines":  49,
+                           "fileCategory":  "infra"
+                       },
+                       {
+                           "path":  "examples/rules/custom.semgrep.yml",
+                           "language":  "yaml",
+                           "sizeLines":  38,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "examples/sample-python-repo/.stca.yaml",
+                           "language":  "yaml",
+                           "sizeLines":  27,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "pyproject.toml",
+                           "language":  "toml",
+                           "sizeLines":  59,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "README.md",
+                           "language":  "markdown",
+                           "sizeLines":  189,
+                           "fileCategory":  "docs"
+                       },
+                       {
+                           "path":  "stca_pipeline.egg-info/dependency_links.txt",
+                           "language":  "txt",
+                           "sizeLines":  1,
+                           "fileCategory":  "docs"
+                       },
+                       {
+                           "path":  "stca_pipeline.egg-info/entry_points.txt",
+                           "language":  "txt",
+                           "sizeLines":  2,
+                           "fileCategory":  "docs"
+                       },
+                       {
+                           "path":  "stca_pipeline.egg-info/requires.txt",
+                           "language":  "txt",
+                           "sizeLines":  38,
+                           "fileCategory":  "docs"
+                       },
+                       {
+                           "path":  "stca_pipeline.egg-info/SOURCES.txt",
+                           "language":  "txt",
+                           "sizeLines":  140,
+                           "fileCategory":  "docs"
+                       },
+                       {
+                           "path":  "stca_pipeline.egg-info/top_level.txt",
+                           "language":  "txt",
+                           "sizeLines":  1,
+                           "fileCategory":  "docs"
+                       },
+                       {
+                           "path":  "stca/rules/packs/cpp-security.yml",
+                           "language":  "yaml",
+                           "sizeLines":  90,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/detekt-ported.yml",
+                           "language":  "yaml",
+                           "sizeLines":  256,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/go-security.yml",
+                           "language":  "yaml",
+                           "sizeLines":  98,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/java-frameworks.yml",
+                           "language":  "yaml",
+                           "sizeLines":  200,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/java-security.yml",
+                           "language":  "yaml",
+                           "sizeLines":  90,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/javascript-frameworks.yml",
+                           "language":  "yaml",
+                           "sizeLines":  227,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/javascript-security.yml",
+                           "language":  "yaml",
+                           "sizeLines":  178,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/lintr-ported.yml",
+                           "language":  "yaml",
+                           "sizeLines":  174,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/luacheck-ported.yml",
+                           "language":  "yaml",
+                           "sizeLines":  162,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/python-frameworks.yml",
+                           "language":  "yaml",
+                           "sizeLines":  256,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/python-security.yml",
+                           "language":  "yaml",
+                           "sizeLines":  204,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/react-security.yml",
+                           "language":  "yaml",
+                           "sizeLines":  269,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "stca/rules/packs/spotbugs-ported.yml",
+                           "language":  "yaml",
+                           "sizeLines":  190,
+                           "fileCategory":  "config"
+                       },
+                       {
+                           "path":  "worklog.md",
+                           "language":  "markdown",
+                           "sizeLines":  186,
+                           "fileCategory":  "docs"
+                       }
+                   ]
+}

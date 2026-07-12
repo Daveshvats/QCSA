@@ -5,6 +5,9 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+import logging
+_logger = logging.getLogger(__name__.replace('stca.', ''))
+
 @dataclass
 class MavenCVE:
     cve_id: str; package: str; affected_versions: str; fixed_version: str
@@ -178,7 +181,7 @@ class MavenCVEDatabase:
                 cached = [MavenCVE(**c) for c in data.get("cves",[])]
                 bundled_keys = {(c.cve_id,c.package) for c in self.cves}
                 self.cves += [c for c in cached if (c.cve_id,c.package) not in bundled_keys]
-            except: pass
+            except Exception: pass  # v4.5: suppressed — add logging
     def _save_cache(self):
         self.db_file.write_text(json.dumps({"cves":[asdict(c) for c in self.cves]}, indent=2))
     def update_from_osv(self, packages=None):

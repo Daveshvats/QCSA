@@ -1,0 +1,139 @@
+{
+  "name": "stca",
+  "displayName": "STCA Pipeline",
+  "description": "Real-time squiggles from STCA (Static + Test + Constraint Analysis) in your editor. Connects to the STCA LSP server.",
+  "version": "0.2.0",
+  "publisher": "stca-pipeline",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "security",
+    "static-analysis",
+    "linter",
+    "sast",
+    "taint"
+  ],
+  "activationEvents": [
+    "onLanguage:python",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:go",
+    "onLanguage:java",
+    "onLanguage:rust",
+    "onLanguage:c",
+    "onLanguage:cpp",
+    "onLanguage:php",
+    "onLanguage:ruby",
+    "onLanguage:csharp",
+    "onLanguage:swift",
+    "onLanguage:scala",
+    "onLanguage:kotlin",
+    "onLanguage:sql",
+    "onLanguage:shell",
+    "onLanguage:dart"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "stca.checkRepo",
+        "title": "STCA: Run full check on repo"
+      },
+      {
+        "command": "stca.checkFile",
+        "title": "STCA: Check current file"
+      },
+      {
+        "command": "stca.applyFix",
+        "title": "STCA: Apply auto-fix for current finding"
+      },
+      {
+        "command": "stca.showUncertain",
+        "title": "STCA: Show uncertain findings (30-70% confidence)"
+      },
+      {
+        "command": "stca.gate",
+        "title": "STCA: Run quality gate (SonarQube-style thresholds)"
+      },
+      {
+        "command": "stca.restart",
+        "title": "STCA: Restart LSP server"
+      }
+    ],
+    "configuration": {
+      "title": "STCA Pipeline",
+      "properties": {
+        "stca.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable STCA real-time diagnostics"
+        },
+        "stca.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to the Python interpreter that has STCA installed"
+        },
+        "stca.strictness": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 9,
+          "description": "Strictness level 1-9 (PHPStan-inspired). Higher = more findings."
+        },
+        "stca.debounceMs": {
+          "type": "number",
+          "default": 500,
+          "description": "Debounce interval (ms) for re-running diagnostics after a save"
+        },
+        "stca.showUncertainOnly": {
+          "type": "boolean",
+          "default": false,
+          "description": "Only show findings in the 30-70% confidence band (worth human review)"
+        },
+        "stca.useLsp": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use the LSP server for real-time diagnostics (true) or fall back to CLI invocation (false). LSP is faster but may be less reliable on large repos."
+        },
+        "stca.gatePreset": {
+          "type": "string",
+          "enum": ["strict", "balanced", "permissive", "custom"],
+          "default": "balanced",
+          "description": "Quality gate preset: strict (0 critical, 0 high), balanced (0 critical, 5 high), permissive (5 critical, 20 high), custom (use stca.gate* settings)"
+        },
+        "stca.gateMaxCritical": {
+          "type": "number",
+          "default": 0,
+          "description": "Custom gate: max critical findings (only used when gatePreset=custom)"
+        },
+        "stca.gateMaxHigh": {
+          "type": "number",
+          "default": 0,
+          "description": "Custom gate: max high findings (only used when gatePreset=custom)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}

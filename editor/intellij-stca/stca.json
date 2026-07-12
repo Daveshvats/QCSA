@@ -1,0 +1,98 @@
+{
+  "id": "com.stca.pipeline.intellij",
+  "name": "STCA Pipeline",
+  "version": "0.1.0",
+  "description": "STCA (Static + Test + Constraint Analysis) — real-time squiggles, quality gates, auto-fix, and rule mining. Connects to the STCA LSP server.",
+  "changeNotes": "Initial release. LSP client + commands + quality gates.",
+  "vendor": {
+    "name": "STCA Pipeline",
+    "url": "https://github.com/local/stca-pipeline"
+  },
+  "category": "Tools.Build",
+  "tags": ["security", "static-analysis", "linter", "sast", "taint"],
+
+  "dependencies": {
+    "com.intellij.modules.platform": "231.8109.91"
+  },
+
+  "extensions": {
+    "com.stca.pipeline.intellij.StcaLspServerSupport": {
+      "language": "STCA",
+      "displayName": "STCA Pipeline",
+      "fileNamePattern": "*",
+      "supportsValidation": true
+    }
+  },
+
+  "actions": [
+    {
+      "id": "Stca.CheckRepo",
+      "class": "com.stca.pipeline.action.CheckRepoAction",
+      "text": "STCA: Run Full Check on Repo",
+      "description": "Run stca check --full and stream output"
+    },
+    {
+      "id": "Stca.CheckFile",
+      "class": "com.stca.pipeline.action.CheckFileAction",
+      "text": "STCA: Check Current File",
+      "description": "Re-analyze the current file"
+    },
+    {
+      "id": "Stca.ApplyFix",
+      "class": "com.stca.pipeline.action.ApplyFixAction",
+      "text": "STCA: Apply Auto-fix",
+      "description": "Apply stca fix --apply for the current finding"
+    },
+    {
+      "id": "Stca.ShowUncertain",
+      "class": "com.stca.pipeline.action.ShowUncertainAction",
+      "text": "STCA: Toggle Uncertain Findings (30-70%)",
+      "description": "Show only findings in the 30-70% confidence band"
+    },
+    {
+      "id": "Stca.Gate",
+      "class": "com.stca.pipeline.action.GateAction",
+      "text": "STCA: Run Quality Gate",
+      "description": "Run stca gate (SonarQube-style thresholds)"
+    },
+    {
+      "id": "Stca.Mine",
+      "class": "com.stca.pipeline.action.MineAction",
+      "text": "STCA: Mine Rules from Git History",
+      "description": "Auto-derive rules from bug-fix commits"
+    },
+    {
+      "id": "Stca.Restart",
+      "class": "com.stca.pipeline.action.RestartAction",
+      "text": "STCA: Restart LSP Server",
+      "description": "Restart the STCA LSP server"
+    }
+  ],
+
+  "applicationServices": [],
+  "projectServices": [
+    {
+      "service": {
+        "serviceInterface": "com.stca.pipeline.service.StcaService",
+        "serviceImplementation": "com.stca.pipeline.service.StcaServiceImpl"
+      }
+    }
+  ],
+
+  "com.intellij.configurationSchema": {
+    "StcaSettings": {
+      "type": "object",
+      "properties": {
+        "stcaEnabled": { "type": "boolean", "default": true },
+        "pythonPath": { "type": "string", "default": "python" },
+        "strictness": { "type": "integer", "default": 5, "minimum": 1, "maximum": 9 },
+        "debounceMs": { "type": "integer", "default": 500 },
+        "showUncertainOnly": { "type": "boolean", "default": false },
+        "useLsp": { "type": "boolean", "default": true },
+        "gatePreset": { "type": "string", "enum": ["strict", "balanced", "permissive", "custom"], "default": "balanced" },
+        "gateMaxCritical": { "type": "integer", "default": 0 },
+        "gateMaxHigh": { "type": "integer", "default": 0 }
+      }
+    }
+  }
+}

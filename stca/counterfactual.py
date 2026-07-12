@@ -11,6 +11,9 @@ Strategies:
 """
 from __future__ import annotations
 
+import logging
+_logger = logging.getLogger(__name__.replace('stca.', ''))
+
 import ast
 import re
 import shutil
@@ -64,6 +67,11 @@ class CounterfactualMutator:
         mutation eliminates the detector's report.
         """
         context = context or {}
+        # v4.11: Store file_path so _mutate can detect language for
+        # language-aware no-ops. v4.10 wrote the logic but never set
+        # _source_path, making the language guard dead code.
+        self._source_path = str(file_path)
+        context["file_path"] = str(file_path)
         try:
             source = file_path.read_text(encoding="utf-8")
         except Exception as e:
@@ -99,7 +107,7 @@ class CounterfactualMutator:
                     best = result
             finally:
                 try: tmp_path.unlink()
-                except Exception: pass
+                except Exception: pass  # v4.5: suppressed — add logging
         return best
 
     # ------------------------------------------------------------------
@@ -114,9 +122,22 @@ class CounterfactualMutator:
         original = lines[idx]
 
         if strategy == "line_removal":
-            # Replace the offending line with a no-op (preserving indentation)
+            # v4.10: Language-aware no-op — "pass" is Python-only.
+            # For JS/Java/Go/C, use a comment or language-appropriate no-op.
             indent = re.match(r"^(\s*)", original).group(1)
-            lines[idx] = f"{indent}pass  # counterfactual: line removed\n"
+            ext = Path(self._source_path if hasattr(self, '_source_path') else "").suffix.lower()
+            # Detect language from file extension in the path
+            # (context is passed by verify_finding which has file_path)
+            if ext in (".js", ".jsx", ".ts", ".tsx", ".mjs"):
+                lines[idx] = f"{indent}/* counterfactual: line removed */\n"
+            elif ext == ".go":
+                lines[idx] = f"{indent}// counterfactual: line removed\n"
+            elif ext in (".java",):
+                lines[idx] = f"{indent};// counterfactual: line removed\n"
+            elif ext in (".c", ".cpp", ".h", ".hpp"):
+                lines[idx] = f"{indent}/* counterfactual: line removed */\n"
+            else:
+                lines[idx] = f"{indent}pass  # counterfactual: line removed\n"
             return "".join(lines)
 
         if strategy == "guard_injection":

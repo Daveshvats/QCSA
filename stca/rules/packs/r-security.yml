@@ -1,0 +1,177 @@
+# STCA R Security Rules — 35 rules
+rules:
+  - id: r-eval
+    pattern: "\\beval\\s*\\("
+    severity: critical
+    message: "eval — RCE on user input"
+    metadata: {cwe: "CWE-94"}
+  - id: r-eval-parse
+    pattern: "\\beval\\s*\\(\\s*parse\\s*\\("
+    severity: critical
+    message: "eval(parse()) — RCE on user input"
+    metadata: {cwe: "CWE-94"}
+  - id: r-eval-user
+    pattern: "\\beval\\s*\\(\\s*(?:readLines|input|request|params)"
+    severity: critical
+    message: "eval on user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: r-parse-user
+    pattern: "\\bparse\\s*\\(\\s*text\\s*=\\s*(?:readLines|input|request)"
+    severity: high
+    message: "parse on user input — RCE risk"
+    metadata: {cwe: "CWE-94"}
+  - id: r-system
+    pattern: "\\bsystem\\s*\\("
+    severity: high
+    message: "system() — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: r-system2
+    pattern: "\\bsystem2\\s*\\("
+    severity: high
+    message: "system2() — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: r-system-intern
+    pattern: "\\bsystem\\s*\\(\\s*intern\\s*=\\s*TRUE"
+    severity: medium
+    message: "system(intern=TRUE) — verify no user input"
+    metadata: {cwe: "CWE-78"}
+  - id: r-shell
+    pattern: "\\bshell\\s*\\("
+    severity: high
+    message: "shell() — command injection risk (Windows)"
+    metadata: {cwe: "CWE-78"}
+  - id: r-source-user
+    pattern: "\\bsource\\s*\\(\\s*(?:readLines|input|request)"
+    severity: critical
+    message: "source on user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: r-source-var
+    pattern: "\\bsource\\s*\\(\\s*[\\\"'].*\\.\\."
+    severity: high
+    message: "source with concat — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: r-load-user
+    pattern: "\\bload\\s*\\(\\s*(?:readLines|input|request)"
+    severity: critical
+    message: "load on user input — RCE via RDS"
+    metadata: {cwe: "CWE-502"}
+  - id: r-readRDS-user
+    pattern: "\\breadRDS\\s*\\(\\s*(?:readLines|input|request)"
+    severity: critical
+    message: "readRDS on user input — RCE"
+    metadata: {cwe: "CWE-502"}
+  - id: r-unserialize-user
+    pattern: "\\bunserialize\\s*\\(\\s*(?:readLines|input|request)"
+    severity: critical
+    message: "unserialize on user input — RCE"
+    metadata: {cwe: "CWE-502"}
+  - id: r-dgetURL
+    pattern: "\\bdownload\\.file\\s*\\(\\s*[\\\"']http://"
+    severity: medium
+    message: "HTTP (not HTTPS) download — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: r-getURL
+    pattern: "\\bgetURL\\s*\\(\\s*[\\\"']http://"
+    severity: medium
+    message: "RCurl getURL HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: r-readLines-http
+    pattern: "\\breadLines\\s*\\(\\s*[\\\"']http://"
+    severity: medium
+    message: "readLines HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: r-setwd
+    pattern: "\\bsetwd\\s*\\(\\s*[\\\"']"
+    severity: low
+    message: "setwd in script — fragile, use here::here()"
+    metadata: {cwe: "CWE-697"}
+  - id: r-options-warn
+    pattern: "\\boptions\\s*\\(\\s*warn\\s*=\\s*-?\\d"
+    severity: medium
+    message: "options(warn=...) — verify not suppressing errors"
+    metadata: {cwe: "CWE-755"}
+  - id: r-suppressWarnings
+    pattern: "\\bsuppressWarnings\\s*\\("
+    severity: medium
+    message: "suppressWarnings — hides bugs"
+    metadata: {cwe: "CWE-755"}
+  - id: r-tryCatch-empty
+    pattern: "\\btryCatch\\s*\\([^,]+,\\s*error\\s*=\\s*function\\s*\\([^)]*\\)\\s*\\{\\s*\\}"
+    severity: medium
+    message: "empty tryCatch error handler — silent failures"
+    metadata: {cwe: "CWE-755"}
+  - id: r-hardcoded-secret
+    pattern: "\\b(?:password|secret|api[_-]?key|auth[_-]?token)\\s*=\\s*[\\\"'][^\\\"']{8,}[\\\"']"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: r-hardcoded-conn-str
+    pattern: "\\b(?:dbConnect|odbcConnect)\\s*\\([^)]*password\\s*=\\s*[\\\"']"
+    severity: high
+    message: "Hardcoded DB password"
+    metadata: {cwe: "CWE-798"}
+  - id: r-md5
+    pattern: "\\bdigest\\s*\\([^,]+,\\s*[\\\"']md5[\\\"']"
+    severity: high
+    message: "MD5 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: r-sha1
+    pattern: "\\bdigest\\s*\\([^,]+,\\s*[\\\"']sha1[\\\"']"
+    severity: high
+    message: "SHA1 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: r-sample
+    pattern: "\\bsample\\s*\\("
+    severity: medium
+    message: "sample NOT CSPRNG — use openssl::rand_bytes"
+    metadata: {cwe: "CWE-338"}
+  - id: r-runif
+    pattern: "\\brunif\\s*\\(|rnorm\\s*\\("
+    severity: medium
+    message: "runif/rnorm NOT CSPRNG"
+    metadata: {cwe: "CWE-338"}
+  - id: r-set-seed
+    pattern: "\\bset\\.seed\\s*\\("
+    severity: low
+    message: "set.seed — verify not for security"
+    metadata: {cwe: "CWE-338"}
+  - id: r-cat-prod
+    pattern: "\\bcat\\s*\\("
+    severity: low
+    message: "cat() in production — use message/warning"
+    metadata: {cwe: "CWE-532"}
+  - id: r-print-prod
+    pattern: "\\bprint\\s*\\("
+    severity: low
+    message: "print() in production — use logger"
+    metadata: {cwe: "CWE-532"}
+  - id: r-message-prod
+    pattern: "\\bmessage\\s*\\("
+    severity: low
+    message: "message() in production — verify logging config"
+    metadata: {cwe: "CWE-532"}
+  - id: r-sql-paste
+    pattern: "\\bdbGetQuery\\s*\\(\\s*[^,]+,\\s*paste\\s*\\("
+    severity: high
+    message: "dbGetQuery with paste — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: r-sql-sprintf
+    pattern: "\\bdbGetQuery\\s*\\(\\s*[^,]+,\\s*sprintf\\s*\\("
+    severity: high
+    message: "dbGetQuery with sprintf — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: r-sql-concat
+    pattern: "\\bdbExecute\\s*\\(\\s*[^,]+,\\s*paste0\\s*\\("
+    severity: high
+    message: "dbExecute with paste0 — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: r-assignin-global
+    pattern: "\\bassign\\s*\\(\\s*[\\\"'][^\\\"']+[\\\"']\\s*,\\s*[^,]+,\\s*envir\\s*=\\s*\\.GlobalEnv"
+    severity: medium
+    message: "assign to GlobalEnv — implicit global state"
+    metadata: {cwe: "CWE-1109"}
+  - id: r-setwd-tmp
+    pattern: "\\bsetwd\\s*\\(\\s*tempdir\\s*\\(\\s*\\)"
+    severity: low
+    message: "setwd(tempdir()) — fragile, use absolute paths"
+    metadata: {cwe: "CWE-697"}

@@ -10,10 +10,6 @@ and to gracefully skip tools that aren't installed.
 """
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.layers.l0_fast")
-
 import re
 import subprocess
 import json
@@ -31,7 +27,11 @@ SECRET_PATTERNS = [
     (r"(?i)\b(sk-[a-zA-Z0-9]{20,})\b", "OpenAI/Stripe-style API key", "CWE-798"),
     (r"(?i)\b(ghp_[a-zA-Z0-9]{36,})\b", "GitHub PAT", "CWE-798"),
     (r"(?i)\b(glpat-[a-zA-Z0-9_-]{20,})\b", "GitLab PAT", "CWE-798"),
-    (r"(?i)(password|passwd|pwd)\s*[=:]\s*['\"][^'\"]{6,}['\"]",
+    # v3.3: Fixed hardcoded password regex — now matches both assignment (=)
+    # AND comparison (==). The old regex `[=:]` didn't match `==` because
+    # it only expected one `=`. Now we match `==` first (comparison), then
+    # fall back to `=` (assignment).
+    (r"(?i)(password|passwd|pwd)\s*(?:==|[=:])\s*['\"][^'\"]{4,}['\"]",
      "Hardcoded password", "CWE-259"),
     (r"-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----",
      "Private key material", "CWE-321"),
@@ -63,6 +63,16 @@ MINI_SAST_RULES = [
         "pattern": r"(execute|executemany)\s*\(\s*f['\"]",
         "msg": "SQL query built with f-string — SQL injection risk",
         "severity": Severity.CRITICAL, "cwe": "CWE-89",
+    },
+    # v3.3: SQL injection via intermediate variable — catches the pattern:
+    #   query = f"SELECT ... {user_input}"
+    #   cursor.execute(query)
+    # The old regex only caught `execute(f"...")` on the same line.
+    {
+        "id": "py-sql-var-fstring",
+        "pattern": r"(query|sql|stmt|statement)\s*=\s*f['\"]",
+        "msg": "SQL query string built with f-string (variable) — SQL injection risk when passed to execute()",
+        "severity": Severity.HIGH, "cwe": "CWE-89",
     },
     {
         "id": "py-assert-in-prod",
@@ -237,8 +247,8 @@ class L0Fast(LayerBase):
                 try:
                     data = json.loads(external_manifest.read_text())
                     configs.extend(p["url"] for p in data.values())
-                except Exception as e:
-                    logger.warning("Failed to load external packs manifest %s: %s", external_manifest, e)
+                except Exception:
+                    pass
 
             # Semgrep can only take one --config at a time, so we combine:
             # For multiple configs, semgrep accepts repeated --config flags

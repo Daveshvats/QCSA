@@ -3,42 +3,42 @@
 rules:
   # === Express.js ===
   - id: express-no-helmet
-    pattern: app.use(...)
+    pattern: "app.use(...)"
     message: "Express app — verify helmet() is used for security headers"
     languages: [javascript, typescript]
     severity: INFO
     metadata: { cwe: "CWE-693" }
 
   - id: express-cors-wildcard
-    pattern: cors({ origin: "*" })
+    pattern: "cors({ origin: \"*\" })"
     message: "Express CORS with origin='*' — allows any origin"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-942" }
 
   - id: express-csrf-disabled
-    pattern: csurf({ cookie: false })
+    pattern: "csurf({ cookie: false })"
     message: "Express CSRF disabled — verify this is intentional"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-352" }
 
   - id: express-body-parser-large
-    pattern: express.json({ limit: "100mb" })
+    pattern: "express.json({ limit: \"100mb\" })"
     message: "Express body parser with high limit — DoS risk"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-400" }
 
   - id: express-redirect-user-input
-    pattern: res.redirect($URL)
+    pattern: "res.redirect($URL)"
     message: "Express redirect — open redirect if $URL is user-controlled"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-601" }
 
   - id: express-static-public
-    pattern: express.static($DIR)
+    pattern: "express.static($DIR)"
     message: "Express static — verify $DIR doesn't contain sensitive files"
     languages: [javascript, typescript]
     severity: INFO
@@ -46,35 +46,35 @@ rules:
 
   # === React ===
   - id: react-dangerouslysetinnerhtml
-    pattern: $EL.dangerouslySetInnerHTML = ...
+    pattern: "$EL.dangerouslySetInnerHTML = ..."
     message: "React dangerouslySetInnerHTML — XSS risk"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-79" }
 
   - id: react-href-user-input
-    pattern: <a href={$URL}>
+    pattern: "<a href={$URL}>"
     message: "React <a href> with user input — XSS via javascript: URL"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-79" }
 
   - id: react-eval-in-render
-    pattern: eval($X)
+    pattern: "eval($X)"
     message: "eval() in React component — code injection"
     languages: [javascript, typescript]
     severity: ERROR
     metadata: { cwe: "CWE-95" }
 
   - id: react-useeffect-no-cleanup
-    pattern: useEffect(() => { ... })
+    pattern: "useEffect(() => { ... })"
     message: "useEffect without cleanup — may cause memory leaks"
     languages: [javascript, typescript]
     severity: INFO
     metadata: { cwe: "CWE-404" }
 
   - id: react-setstate-in-render
-    pattern: this.setState(...)
+    pattern: "this.setState(...)"
     message: "setState in render — infinite loop"
     languages: [javascript, typescript]
     severity: ERROR
@@ -82,21 +82,21 @@ rules:
 
   # === Next.js ===
   - id: nextjs-getserverSideProps-no-auth
-    pattern: getServerSideProps(...)
+    pattern: "getServerSideProps(...)"
     message: "Next.js getServerSideProps — verify auth check if page is protected"
     languages: [javascript, typescript]
     severity: INFO
     metadata: { cwe: "CWE-862" }
 
   - id: nextjs-api-route-no-csrf
-    pattern: export default function handler(req, res)
+    pattern: "export default function handler(req, res)"
     message: "Next.js API route — verify CSRF protection"
     languages: [javascript, typescript]
     severity: INFO
     metadata: { cwe: "CWE-352" }
 
   - id: nextjs-redirect-user-input
-    pattern: return { redirect: { destination: $URL } }
+    pattern: "return { redirect: { destination: $URL } }"
     message: "Next.js redirect — open redirect if $URL is user-controlled"
     languages: [javascript, typescript]
     severity: WARNING
@@ -112,14 +112,14 @@ rules:
 
   # === Database ===
   - id: js-mongodb-find-user-input
-    pattern: $COL.find($QUERY)
+    pattern: "$COL.find($QUERY)"
     message: "MongoDB find with user input — NoSQL injection if $QUERY is from req.body"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-943" }
 
   - id: js-mongoose-find-raw
-    pattern: $MODEL.find($QUERY)
+    pattern: "$MODEL.find($QUERY)"
     message: "Mongoose find — verify $QUERY is sanitized (NoSQL injection)"
     languages: [javascript, typescript]
     severity: INFO
@@ -127,14 +127,14 @@ rules:
 
   # === JWT ===
   - id: js-jwt-none-alg
-    pattern: jwt.verify(..., { algorithms: ["none"] })
+    pattern: "jwt.verify(..., { algorithms: [\"none\"] })"
     message: "JWT alg:none — bypasses verification"
     languages: [javascript, typescript]
     severity: ERROR
     metadata: { cwe: "CWE-345" }
 
   - id: js-jwt-sync-verify-false
-    pattern: jwt.verify(..., { verify: false })
+    pattern: "jwt.verify(..., { verify: false })"
     message: "JWT verification disabled"
     languages: [javascript, typescript]
     severity: ERROR
@@ -142,21 +142,21 @@ rules:
 
   # === Crypto ===
   - id: js-crypto-md5
-    pattern: crypto.createHash("md5")
+    pattern: "crypto.createHash(\"md5\")"
     message: "MD5 — cryptographically broken"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-327" }
 
   - id: js-crypto-sha1
-    pattern: crypto.createHash("sha1")
+    pattern: "crypto.createHash(\"sha1\")"
     message: "SHA1 — cryptographically broken"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-327" }
 
   - id: js-bcrypt-low-rounds
-    pattern: bcrypt.hash($PWD, 4)
+    pattern: "bcrypt.hash($PWD, 4)"
     message: "bcrypt with low rounds — use at least 12"
     languages: [javascript, typescript]
     severity: WARNING
@@ -175,7 +175,7 @@ rules:
     metadata: { cwe: "CWE-1058" }
 
   - id: js-promise-no-catch
-    pattern: $PROMISE.then(...)
+    pattern: "$PROMISE.then(...)"
     message: "Promise.then without .catch — unhandled rejection"
     languages: [javascript, typescript]
     severity: WARNING
@@ -183,14 +183,14 @@ rules:
 
   # === Prototype pollution ===
   - id: js-object-assign-merge
-    pattern: Object.assign($TARGET, $SOURCE)
+    pattern: "Object.assign($TARGET, $SOURCE)"
     message: "Object.assign — verify $SOURCE doesn't have __proto__ (prototype pollution)"
     languages: [javascript, typescript]
     severity: INFO
     metadata: { cwe: "CWE-1321" }
 
   - id: js-merge-deep-unsafe
-    pattern: lodash.merge($TARGET, $SOURCE)
+    pattern: "lodash.merge($TARGET, $SOURCE)"
     message: "lodash.merge deep — prototype pollution risk"
     languages: [javascript, typescript]
     severity: WARNING
@@ -198,14 +198,14 @@ rules:
 
   # === Path traversal ===
   - id: js-fs-read-user-input
-    pattern: fs.readFile($PATH, ...)
+    pattern: "fs.readFile($PATH, ...)"
     message: "fs.readFile with user input — path traversal"
     languages: [javascript, typescript]
     severity: WARNING
     metadata: { cwe: "CWE-22" }
 
   - id: js-path-join-user-input
-    pattern: path.join(..., $INPUT)
+    pattern: "path.join(..., $INPUT)"
     message: "path.join with user input — path traversal"
     languages: [javascript, typescript]
     severity: INFO
@@ -213,14 +213,14 @@ rules:
 
   # === SSRF ===
   - id: js-axios-user-url
-    pattern: axios.get($URL)
+    pattern: "axios.get($URL)"
     message: "axios.get — verify $URL is not user-controlled (SSRF)"
     languages: [javascript, typescript]
     severity: INFO
     metadata: { cwe: "CWE-918" }
 
   - id: js-fetch-user-url
-    pattern: fetch($URL)
+    pattern: "fetch($URL)"
     message: "fetch — verify $URL is not user-controlled (SSRF)"
     languages: [javascript, typescript]
     severity: INFO

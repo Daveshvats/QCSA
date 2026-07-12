@@ -1,13 +1,10 @@
 """STCA CLI — `stca init|check|bootstrap|report|feedback`."""
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.cli")
-
 import sys
 import json
 from pathlib import Path
+from typing import Optional
 
 import click
 
@@ -125,6 +122,133 @@ def rules_pull(name: str, repo: str):
     click.echo("The pack will be used automatically on the next `stca check`.")
 
 
+@rules.command("submit")
+@click.option("--pack", required=True, help="Path to the YAML pack file to submit")
+@click.option("--name", required=True, help="Pack name (e.g. 'my-company-security')")
+@click.option("--language", required=True, help="Target language (e.g. 'python', 'javascript')")
+@click.option("--description", required=True, help="Short description of the pack")
+@click.option("--author", default="", help="Author name (for attribution)")
+@click.option("--license", default="MIT", help="License for the rules (default: MIT)")
+@click.option("--output", "-o", default="-", help="Output file for the submission package (- for stdout)")
+def rules_submit(pack: str, name: str, language: str, description: str,
+                 author: str, license: str, output: str):
+    """v4.41: Submit a community rule pack for inclusion in STCA.
+
+    Validates a YAML rule pack, packages it with metadata, and generates
+    a submission-ready file that can be shared with the STCA project.
+
+    The pack is validated for:
+      - Valid YAML syntax
+      - Each rule has: id, pattern, severity, message
+      - No duplicate rule IDs
+      - Severity is one of: critical, high, medium, low, info
+      - Pattern is a valid regex
+
+    Examples:
+      stca rules submit --pack my-rules.yml --name my-company-security \\
+        --language python --description "My company security rules"
+    """
+    import yaml as _yaml
+    import re as _re
+    import tempfile
+    import tarfile
+    import io
+
+    pack_path = Path(pack).resolve()
+    if not pack_path.exists():
+        click.echo(f"Error: pack file not found: {pack_path}", err=True)
+        sys.exit(2)
+
+    # Load and validate
+    try:
+        with open(pack_path) as f:
+            data = _yaml.safe_load(f)
+    except Exception as e:
+        click.echo(f"Error: invalid YAML: {e}", err=True)
+        sys.exit(2)
+
+    if not data or "rules" not in data:
+        click.echo("Error: pack must have a 'rules' key", err=True)
+        sys.exit(2)
+
+    rules_list = data["rules"]
+    if not isinstance(rules_list, list) or len(rules_list) == 0:
+        click.echo("Error: 'rules' must be a non-empty list", err=True)
+        sys.exit(2)
+
+    # Validate each rule
+    valid_severities = {"critical", "high", "medium", "low", "info"}
+    seen_ids = set()
+    errors = []
+    for i, rule in enumerate(rules_list):
+        if "id" not in rule:
+            errors.append(f"Rule {i}: missing 'id'")
+            continue
+        rid = rule["id"]
+        if rid in seen_ids:
+            errors.append(f"Rule {i}: duplicate id '{rid}'")
+        seen_ids.add(rid)
+
+        if "pattern" not in rule and "pattern-regex" not in rule and "pattern-either" not in rule:
+            errors.append(f"Rule {i} ({rid}): missing 'pattern' or 'pattern-regex'")
+        else:
+            # Validate regex compiles
+            pat = rule.get("pattern") or rule.get("pattern-regex", "")
+            if pat:
+                try:
+                    _re.compile(pat)
+                except _re.error as e:
+                    errors.append(f"Rule {i} ({rid}): invalid regex: {e}")
+
+        if "severity" not in rule:
+            errors.append(f"Rule {i} ({rid}): missing 'severity'")
+        elif rule["severity"].lower() not in valid_severities:
+            errors.append(f"Rule {i} ({rid}): invalid severity '{rule['severity']}'")
+
+        if "message" not in rule:
+            errors.append(f"Rule {i} ({rid}): missing 'message'")
+
+    if errors:
+        click.echo(f"\nValidation failed ({len(errors)} error(s)):", err=True)
+        for e in errors:
+            click.echo(f"  - {e}", err=True)
+        sys.exit(1)
+
+    # Build metadata
+    metadata = {
+        "name": name,
+        "language": language,
+        "description": description,
+        "author": author,
+        "license": license,
+        "rule_count": len(rules_list),
+        "stca_version": __version__,
+        "submitted_at": _yaml.safe_load(_yaml.safe_dump({"time": None})) or {},
+    }
+    import datetime
+    metadata["submitted_at"] = datetime.datetime.now().isoformat()
+
+    # Package as YAML with metadata header
+    submission = {
+        "metadata": metadata,
+        "rules": rules_list,
+    }
+    submission_yaml = _yaml.safe_dump(submission, sort_keys=False, default_flow_style=False)
+
+    if output == "-":
+        click.echo(submission_yaml)
+    else:
+        out_path = Path(output)
+        out_path.write_text(submission_yaml, encoding="utf-8")
+        click.echo(f"Submission package written to {out_path}")
+        click.echo(f"  Rules: {len(rules_list)}")
+        click.echo(f"  Language: {language}")
+        click.echo(f"  Author: {author or '(not specified)'}")
+        click.echo(f"\nTo contribute: submit this file to the STCA project.")
+        click.echo(f"  GitHub: https://github.com/YOUR_ORG/stca-pipeline/issues")
+        click.echo(f"  Or: stca rules install {out_path}")
+
+
 @rules.command("show")
 @click.argument("name")
 def rules_show(name: str):
@@ -162,6 +286,96 @@ def cache_clear(repo: str, layer: str):
     c = ResultCache(Path(repo).resolve())
     c.invalidate(layer=layer)
     click.echo("Cache cleared.")
+
+
+@main.command("monorepo")
+@click.option("--repo", default=".", help="Repository root")
+@click.option("--add", help="Add a workspace pattern (e.g. 'apps/*')")
+@click.option("--remove", help="Remove a workspace pattern")
+@click.option("--list", "list_", is_flag=True, help="List resolved workspaces")
+@click.option("--scan", is_flag=True, help="Scan each workspace and report finding counts")
+def monorepo_cmd(repo: str, add: Optional[str], remove: Optional[str], list_: bool, scan: bool):
+    """v4.37: Monorepo workspace management.
+
+    Configure multiple workspace roots for monorepo scanning. STCA will scan
+    each workspace as a separate logical project, merging findings with
+    workspace-prefixed paths.
+
+    Examples:
+      stca monorepo --add 'apps/*'             # add a workspace pattern
+      stca monorepo --add 'packages/*'
+      stca monorepo --list                     # list resolved workspaces
+      stca monorepo --scan                     # scan each, report counts
+      stca monorepo --remove 'apps/*'          # remove a pattern
+    """
+    repo_root = Path(repo).resolve()
+    cfg_path = find_config(repo_root)
+    config = STCAConfig.from_file(cfg_path)
+
+    if add:
+        if add not in config.workspaces:
+            config.workspaces.append(add)
+            config.save(cfg_path)
+            click.echo(f"Added workspace: {add}")
+            click.echo(f"Workspaces: {config.workspaces}")
+        else:
+            click.echo(f"Already present: {add}")
+        return
+
+    if remove:
+        if remove in config.workspaces:
+            config.workspaces.remove(remove)
+            config.save(cfg_path)
+            click.echo(f"Removed workspace: {remove}")
+            click.echo(f"Workspaces: {config.workspaces}")
+        else:
+            click.echo(f"Not found: {remove}")
+        return
+
+    if list_:
+        if not config.workspaces:
+            click.echo("No workspaces configured (single-repo mode).")
+            click.echo("Add with: stca monorepo --add 'apps/*'")
+            return
+        resolved = config.resolve_workspaces(repo_root)
+        click.echo(f"Configured workspaces: {len(config.workspaces)}")
+        for ws in config.workspaces:
+            click.echo(f"  pattern: {ws}")
+        click.echo(f"\nResolved: {len(resolved)}")
+        for p in resolved:
+            rel = p.relative_to(repo_root) if p != repo_root else "<root>"
+            click.echo(f"  {rel}")
+        return
+
+    if scan:
+        if not config.workspaces:
+            click.echo("No workspaces configured. Add with: stca monorepo --add 'apps/*'")
+            return
+        resolved = config.resolve_workspaces(repo_root)
+        click.echo(f"Scanning {len(resolved)} workspace(s)...")
+        from .orchestrator import Orchestrator
+        for ws in resolved:
+            rel = ws.relative_to(repo_root) if ws != repo_root else "<root>"
+            click.echo(f"\n=== Workspace: {rel} ===")
+            ws_config = STCAConfig.from_file(find_config(ws))
+            orch = Orchestrator(ws, ws_config, strictness=5)
+            result = orch.run_full()
+            click.echo(f"  Findings: {len(result.findings)}")
+            # Show top 3 by severity
+            from .models import Severity
+            by_sev = {Severity.CRITICAL: 0, Severity.HIGH: 0,
+                      Severity.MEDIUM: 0, Severity.LOW: 0}
+            for f in result.findings:
+                if f.severity in by_sev:
+                    by_sev[f.severity] += 1
+            click.echo(f"  Critical: {by_sev[Severity.CRITICAL]}, "
+                       f"High: {by_sev[Severity.HIGH]}, "
+                       f"Medium: {by_sev[Severity.MEDIUM]}, "
+                       f"Low: {by_sev[Severity.LOW]}")
+        return
+
+    # Default: show help
+    click.echo("STCA monorepo management. Use --add, --remove, --list, or --scan.")
 
 
 @main.command("sbom")
@@ -219,8 +433,8 @@ def _generate_sbom(repo_root: Path, fmt: str) -> str:
                         "version": ver_clean,
                         "purl": f"pkg:npm/{name}@{ver_clean}",
                     })
-        except Exception as e:
-            logger.warning("Failed to parse package.json for SBOM: %s", e)
+        except Exception:
+            pass
 
     # Go
     go_mod = repo_root / "go.mod"
@@ -236,8 +450,8 @@ def _generate_sbom(repo_root: Path, fmt: str) -> str:
                             "version": parts[1].lstrip("v"),
                             "purl": f"pkg:golang/{parts[0]}@{parts[1]}",
                         })
-        except Exception as e:
-            logger.warning("Failed to parse go.mod for SBOM: %s", e)
+        except Exception:
+            pass
 
     # Rust
     cargo_lock = repo_root / "Cargo.lock"
@@ -270,8 +484,8 @@ def _generate_sbom(repo_root: Path, fmt: str) -> str:
                     "version": current_ver,
                     "purl": f"pkg:cargo/{current_pkg}@{current_ver}",
                 })
-        except Exception as e:
-            logger.warning("Failed to parse Cargo.lock for SBOM: %s", e)
+        except Exception:
+            pass
 
     if fmt == "cyclonedx":
         return json.dumps({
@@ -308,28 +522,41 @@ def _generate_sbom(repo_root: Path, fmt: str) -> str:
 @click.option("--baseline", is_flag=True, help="Only flag NEW issues (detekt-inspired)")
 @click.option("--full", is_flag=True, help="Full-repo scan (not just diff) — scans ALL source files")
 @click.option("--strict-scanners", is_flag=True,
-              help="Exit with code 3 if any scanner failed during the run "
-                   "(surfaces previously-silent failures as a CI gate)")
+              help="Exit code 3 if any scanner failed during the run (CI gate)")
+@click.option("--sarif", is_flag=True, default=False,
+              help="Output SARIF report for GitHub Code Scanning (also written to --output path)")
+@click.option("--output", "-o", "output_path", default=None,
+              help="Output file path for SARIF report (default: .stca-reports/result.sarif). "
+                   "Use '-' for stdout. Only used with --sarif.")
+@click.option("--max-files", "max_files", type=int, default=None,
+              help="Maximum number of files to scan per engine (default: engine-specific caps). "
+                   "Set to 0 for unlimited. Env: STCA_MAX_FILES")
+@click.option("--uncertain", is_flag=True, default=False,
+              help="Show only 30-70% confidence findings (the ones worth human review)")
 @click.option("-v", "--verbose", is_flag=True,
-              help="Enable DEBUG-level logging (shows optional-parser failures, "
-                   "per-file scan errors, and other low-level diagnostics)")
+              help="Enable DEBUG-level logging on stca namespace")
 def check(repo: str, base: str, staged: bool, as_json: bool, quiet: bool,
-          strictness: int, baseline: bool, full: bool, strict_scanners: bool,
-          verbose: bool):
+          strictness: int, baseline: bool, full: bool,
+          strict_scanners: bool, sarif: bool, output_path: Optional[str],
+          max_files: int, uncertain: bool, verbose: bool):
     """Run the pipeline on a git diff (or full repo with --full)."""
+    import logging as _logging
+    import os as _os
     if verbose:
-        # Enable DEBUG-level logging for the stca namespace.
-        # Also add a handler to stderr if none exists (so DEBUG messages
-        # actually appear, not just get filtered out).
-        stca_logger = logging.getLogger("stca")
-        stca_logger.setLevel(logging.DEBUG)
-        if not stca_logger.handlers:
-            handler = logging.StreamHandler(sys.stderr)
-            handler.setFormatter(logging.Formatter(
-                "%(levelname)s %(name)s: %(message)s"
-            ))
-            stca_logger.addHandler(handler)
-        stca_logger.propagate = False  # avoid duplicate output via root
+        _logging.getLogger("stca").setLevel(_logging.DEBUG)
+    else:
+        _logging.getLogger("stca").setLevel(_logging.WARNING)
+
+    # v4.32: --max-files flag + STCA_MAX_FILES env var
+    env_max = _os.environ.get("STCA_MAX_FILES")
+    if max_files is None and env_max:
+        try:
+            max_files = int(env_max)
+        except ValueError:
+            pass
+    if max_files is not None and max_files > 0:
+        # Override all hardcoded caps by setting a global that orchestrator reads
+        _os.environ["STCA_MAX_FILES_OVERRIDE"] = str(max_files)
 
     repo_root = Path(repo).resolve()
     if not (repo_root / ".git").exists():
@@ -338,41 +565,208 @@ def check(repo: str, base: str, staged: bool, as_json: bool, quiet: bool,
 
     config = STCAConfig.from_file(find_config(repo_root))
     orch = Orchestrator(repo_root, config, strictness=strictness, use_baseline=baseline)
+    orch._strict_scanners = strict_scanners
 
     if full:
         result = orch.run_full()
     else:
         result = orch.run(base=base, staged=staged)
 
-    if quiet:
+    # v4.32: --uncertain flag surfaces only 30-70% confidence findings
+    if uncertain:
+        uncertain_findings = [f for f in result.findings
+                             if hasattr(f, 'confidence') and 0.3 <= f.confidence <= 0.7]
+        result.findings = uncertain_findings
+        click.echo(f"Showing {len(uncertain_findings)} uncertain findings (30-70% confidence):", err=True)
+
+    # v4.33: --sarif flag — generate SARIF from the live PipelineResult.
+    # v4.32 had 3 bugs here (ImportError on generate_sarif, wrong default path,
+    # missing --output flag). All fixed.
+    if sarif:
+        from .report.sarif import to_sarif, save_sarif
+        # Decide output target
+        if output_path == "-":
+            # stdout only, no file
+            sarif_data = to_sarif(result, repo_root)
+            click.echo(json.dumps(sarif_data, indent=2))
+        else:
+            # Write to file (default: .stca-reports/result.sarif to match _save_reports)
+            if output_path:
+                sarif_path = Path(output_path)
+                # Resolve relative to repo_root if not absolute
+                if not sarif_path.is_absolute():
+                    sarif_path = repo_root / sarif_path
+            else:
+                sarif_dir = repo_root / ".stca-reports"
+                sarif_dir.mkdir(parents=True, exist_ok=True)
+                sarif_path = sarif_dir / "result.sarif"
+            sarif_path.parent.mkdir(parents=True, exist_ok=True)
+            save_sarif(result, repo_root, sarif_path)
+            click.echo(f"SARIF report written to {sarif_path}", err=True)
+    elif quiet:
         click.echo(result.final_decision.value)
     elif as_json:
         click.echo(json.dumps(result.to_dict(), indent=2))
     else:
         render_tui(result)
 
-    # exit code: 0 = pass, 1 = block, 3 = scanner errors (when --strict-scanners)
+    # exit code: 0 = pass, 1 = block, 3 = scanner failure (with --strict-scanners)
     from .models import Decision
-    exit_code = {
+    if strict_scanners and result.has_scanner_errors:
+        sys.exit(3)
+    sys.exit({
         Decision.PASS: 0,
-        Decision.WARN: 0,  # don't block commits on warnings
+        Decision.WARN: 0,
         Decision.UNCERTAIN: 0,
         Decision.BLOCK: 1,
-    }.get(result.final_decision, 0)
+    }.get(result.final_decision, 0))
 
-    # v3.1: --strict-scanners gate — surfaces previously-silent failures
-    # as a CI-blocking exit code so they can't be ignored.
+
+@main.command()
+@click.option("--repo", default=".", help="Repository root")
+@click.option("--full", is_flag=True, help="Full-repo scan (not just diff)")
+@click.option("--base", default="origin/main", help="Base branch for diff comparison")
+@click.option("--staged", is_flag=True, help="Diff staged changes")
+@click.option("--preset", type=click.Choice(["strict", "balanced", "permissive", "custom"]),
+              default=None,
+              help="Quality gate preset: strict (0 crit, 0 high, 5/1k LOC), "
+                   "balanced (0 crit, 5 high, 10/1k LOC), "
+                   "permissive (5 crit, 20 high, 20/1k LOC), "
+                   "custom (use --max-* flags). Overrides --max-* flags when set.")
+@click.option("--max-critical", default=0, help="Max allowed critical findings (default: 0 = fail on any)")
+@click.option("--max-high", default=0, help="Max allowed high findings (default: 0 = fail on any)")
+@click.option("--max-medium", default=-1, help="Max allowed medium findings (default: -1 = no limit)")
+@click.option("--max-low", default=-1, help="Max allowed low findings (default: -1 = no limit)")
+@click.option("--max-density", default=10.0, help="Max findings per 1k LOC (default: 10.0)")
+@click.option("--strict-scanners", is_flag=True, help="Also fail if any scanner failed during the run")
+@click.option("--json", "as_json", is_flag=True, help="Output JSON report")
+@click.option("-v", "--verbose", is_flag=True, help="Enable DEBUG-level logging")
+def gate(repo: str, full: bool, base: str, staged: bool, preset: Optional[str],
+         max_critical: int, max_high: int, max_medium: int, max_low: int,
+         max_density: float, strict_scanners: bool, as_json: bool, verbose: bool):
+    """Quality gate — fail the build if finding counts exceed thresholds.
+
+    SonarQube-style quality gate. Exit codes:
+      0 = gate passed (all thresholds met)
+      1 = gate failed (a threshold was exceeded)
+      2 = gate error (config or scan failure)
+      3 = scanner failure (--strict-scanners only)
+
+    Presets (override --max-* flags):
+      strict:      0 critical, 0 high,   unlimited med/low, 5/1k LOC
+      balanced:    0 critical, 5 high,   unlimited med/low, 10/1k LOC (DEFAULT)
+      permissive:  5 critical, 20 high,  unlimited med/low, 20/1k LOC
+      custom:      use --max-* flags as-is
+
+    Default gate (no preset, no flags): 0 critical, 0 high, unlimited medium/low, <=10 findings/1k LOC.
+
+    Examples:
+      stca gate --full                                  # full scan, default gate
+      stca gate --preset strict --full                  # strict preset
+      stca gate --preset balanced --full                # balanced preset (default)
+      stca gate --preset permissive --full               # permissive preset
+      stca gate --preset custom --max-critical 0 --max-high 5  # custom
+      stca gate --max-critical 0 --max-high 5           # allow up to 5 high
+      stca gate --max-density 5.0 --full                # fail if >5 findings/1k LOC
+      stca gate --strict-scanners                       # also fail on scanner errors
+    """
+    import logging as _logging
+    from .models import Severity
+    if verbose:
+        _logging.getLogger("stca").setLevel(_logging.DEBUG)
+
+    # v4.36: Apply preset overrides
+    if preset == "strict":
+        max_critical, max_high, max_medium, max_low, max_density = 0, 0, -1, -1, 5.0
+    elif preset == "balanced":
+        max_critical, max_high, max_medium, max_low, max_density = 0, 5, -1, -1, 10.0
+    elif preset == "permissive":
+        max_critical, max_high, max_medium, max_low, max_density = 5, 20, -1, -1, 20.0
+    # preset == "custom" or None: use --max-* flags as-is
+
+    repo_root = Path(repo).resolve()
+    if not (repo_root / ".git").exists():
+        click.echo(f"Not a git repo: {repo_root}", err=True)
+        sys.exit(2)
+
+    config = STCAConfig.from_file(find_config(repo_root))
+    orch = Orchestrator(repo_root, config, strictness=5)
+    orch._strict_scanners = strict_scanners
+
+    if full:
+        result = orch.run_full()
+    else:
+        result = orch.run(base=base, staged=staged)
+
+    # Count findings by severity
+    sev_counts = {Severity.CRITICAL: 0, Severity.HIGH: 0,
+                  Severity.MEDIUM: 0, Severity.LOW: 0, Severity.INFO: 0}
+    for f in result.findings:
+        if f.severity in sev_counts:
+            sev_counts[f.severity] += 1
+
+    # Compute density (findings per 1k LOC)
+    total_loc = 0
+    for hunk in result.diff_hunks:
+        total_loc += max(1, hunk.end_line - hunk.start_line + 1)
+    density = (len(result.findings) / max(1, total_loc / 1000)) if total_loc > 0 else 0.0
+
+    # Evaluate gate
+    failures = []
+    if sev_counts[Severity.CRITICAL] > max_critical:
+        failures.append(f"critical findings: {sev_counts[Severity.CRITICAL]} > {max_critical}")
+    if sev_counts[Severity.HIGH] > max_high:
+        failures.append(f"high findings: {sev_counts[Severity.HIGH]} > {max_high}")
+    if max_medium >= 0 and sev_counts[Severity.MEDIUM] > max_medium:
+        failures.append(f"medium findings: {sev_counts[Severity.MEDIUM]} > {max_medium}")
+    if max_low >= 0 and sev_counts[Severity.LOW] > max_low:
+        failures.append(f"low findings: {sev_counts[Severity.LOW]} > {max_low}")
+    if density > max_density:
+        failures.append(f"finding density: {density:.2f}/1k LOC > {max_density}")
     if strict_scanners and result.has_scanner_errors:
-        click.echo(
-            f"\nERROR: --strict-scanners gate failed: "
-            f"{result.scanner_error_count} scanner(s) failed during this run. "
-            f"Results may be incomplete. Re-run without --strict-scanners to "
-            f"allow partial results, or fix the scanner errors.",
-            err=True,
-        )
-        exit_code = 3
+        failures.append(f"scanner errors: {result.scanner_error_count}")
 
-    sys.exit(exit_code)
+    # Report
+    if as_json:
+        report = {
+            "gate_passed": not failures,
+            "failures": failures,
+            "counts": {s.name.lower(): c for s, c in sev_counts.items()},
+            "total_findings": len(result.findings),
+            "total_loc": total_loc,
+            "density_per_1k_loc": round(density, 2),
+            "preset": preset or "custom",
+            "thresholds": {
+                "max_critical": max_critical,
+                "max_high": max_high,
+                "max_medium": max_medium,
+                "max_low": max_low,
+                "max_density": max_density,
+            },
+            "scanner_errors": result.scanner_error_count if strict_scanners else 0,
+            "final_decision": result.final_decision.value,
+        }
+        click.echo(json.dumps(report, indent=2))
+    else:
+        click.echo("\n=== STCA Quality Gate ===")
+        click.echo(f"  Critical: {sev_counts[Severity.CRITICAL]} (max {max_critical})")
+        click.echo(f"  High:     {sev_counts[Severity.HIGH]} (max {max_high})")
+        click.echo(f"  Medium:   {sev_counts[Severity.MEDIUM]} (max {max_medium if max_medium >= 0 else 'unlimited'})")
+        click.echo(f"  Low:      {sev_counts[Severity.LOW]} (max {max_low if max_low >= 0 else 'unlimited'})")
+        click.echo(f"  Total:    {len(result.findings)} findings / {total_loc} LOC ({density:.2f}/1k LOC, max {max_density})")
+        if strict_scanners:
+            click.echo(f"  Scanner errors: {result.scanner_error_count}")
+        click.echo("")
+        if failures:
+            click.echo(f"X GATE FAILED - {len(failures)} threshold(s) exceeded:")
+            for f in failures:
+                click.echo(f"   - {f}")
+        else:
+            click.echo("OK GATE PASSED - all thresholds met")
+
+    if failures:
+        sys.exit(1)
+    sys.exit(0)
 
 
 @main.command()
@@ -1411,14 +1805,14 @@ def missing_patches_cmd(repo: str):
     Compares your code against known CVE patch patterns to find
     unpatched code — even if the package version says it's fixed.
     """
-    from .missing_patches import scan_missing_patches, patch_database_stats
+    from .version_vuln_checks import scan_version_vuln_checks, version_vuln_check_stats
     repo_root = Path(repo).resolve()
-    db_stats = patch_database_stats()
+    db_stats = version_vuln_check_stats()
     click.echo(f"Patch database: {db_stats['total_patches']} known patches")
     click.echo(f"  By severity: {db_stats['by_severity']}")
     click.echo()
     click.echo("Scanning for missing patches...")
-    missing = scan_missing_patches(repo_root)
+    missing = scan_version_vuln_checks(repo_root)
     if not missing:
         click.echo("No missing patches detected.")
         return
@@ -2062,12 +2456,104 @@ def doctor(repo: str):
     click.echo(f"  Run `stca install-tools` to install missing tools.")
 
     click.echo()
+    click.echo("Language support (business logic detection):")
+    try:
+        from .multi_language_bl import get_capabilities, get_supported_languages
+        caps = get_capabilities()
+        for lang in caps["supported_languages"]:
+            detectors = caps["techniques_per_language"].get(lang, {})
+            active = sum(1 for v in detectors.values() if v)
+            total = len(detectors)
+            click.echo(f"  ✓ {lang:<15} {active}/{total} BL detectors active")
+        if caps["tree_sitter_available"]:
+            click.echo(f"  Tree-sitter: available ({len(caps['tree_sitter_languages'])} languages)")
+        else:
+            click.echo(f"  Tree-sitter: not installed (Python-only mode — install tree-sitter for multi-language)")
+            click.echo(f"               pip install tree-sitter tree-sitter-python tree-sitter-javascript tree-sitter-go tree-sitter-java tree-sitter-c tree-sitter-cpp")
+    except Exception:
+        click.echo("  (multi-language BL module not available)")
+
+    click.echo()
     config = STCAConfig.from_file(find_config(repo_root))
     click.echo(f"LLM enabled: {config.llm.get('enabled')}")
     if config.llm.get("enabled"):
         llm = LLMClient(endpoint=config.llm.get("endpoint", "http://localhost:11434"),
                         model=config.llm.get("model", "qwen3-coder-1.5b"))
         click.echo(f"LLM available: {'yes' if llm.is_available() else 'no (Ollama not running?)'}")
+
+
+@main.command()
+@click.option("--repo", default=".", help="Repository root")
+@click.option("--changed", multiple=True, required=True, help="Changed file(s) to analyze impact for")
+def impact(repo: str, changed: tuple):
+    """Show blast-radius analysis for changed files.
+
+    v4.32: Uses the knowledge graph to determine which functions/classes
+    are affected by changes to the specified files. Shows directly affected,
+    transitively affected, and total blast radius.
+
+    Example:
+        stca impact --changed stca/orchestrator.py --changed stca/cpg.py
+    """
+    repo_root = Path(repo).resolve()
+    try:
+        from .knowledge_graph import KnowledgeGraphBuilder, DiffImpactAnalyzer
+        click.echo(f"Building knowledge graph for {repo_root}...", err=True)
+        builder = KnowledgeGraphBuilder(repo_root)
+        graph = builder.build(max_files=300)
+        analyzer = DiffImpactAnalyzer(graph)
+        result = analyzer.analyze_changed_files(list(changed))
+
+        click.echo(f"\nImpact Analysis: {len(changed)} changed file(s)")
+        click.echo(f"  Total blast radius: {result['total_blast_radius']} nodes")
+        click.echo(f"  Directly affected: {len(result['directly_affected'])} functions")
+        click.echo(f"  Transitively affected: {len(result['transitively_affected'])} functions")
+        click.echo(f"\nBy layer:")
+        for layer, funcs in result.get("by_layer", {}).items():
+            click.echo(f"  {layer}: {len(funcs)} functions")
+        if result["transitively_affected"]:
+            click.echo(f"\nTop affected functions:")
+            for fn in result["transitively_affected"][:10]:
+                click.echo(f"  - {fn}")
+            if len(result["transitively_affected"]) > 10:
+                click.echo(f"  ... and {len(result['transitively_affected']) - 10} more")
+
+        # Suggest tests
+        suggested = analyzer.suggest_tests(list(changed))
+        if suggested:
+            click.echo(f"\nSuggested test files to run:")
+            for t in suggested:
+                click.echo(f"  - {t}")
+    except Exception as e:
+        click.echo(f"Impact analysis error: {e}", err=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.option("--repo", default=".", help="Repository root")
+@click.option("--stdio", is_flag=True, default=True, help="Use stdio for LSP communication")
+def lsp(repo: str, stdio: bool):
+    """Start the STCA LSP server for IDE integration (VS Code, Neovim, JetBrains).
+
+    v4.30: Exposes the LSP server that was previously unreachable.
+    Configure in VS Code settings.json:
+    {
+        "languageserver": {
+            "stca": {
+                "command": "stca",
+                "args": ["lsp", "--repo", "."],
+                "filetypes": ["python", "javascript", "typescript", "go", "java", "c", "cpp", "rust"]
+            }
+        }
+    }
+    """
+    try:
+        from .lsp.server import LSPServer
+        server = LSPServer(repo_root=Path(repo).resolve())
+        server.run()
+    except Exception as e:
+        click.echo(f"LSP server error: {e}", err=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

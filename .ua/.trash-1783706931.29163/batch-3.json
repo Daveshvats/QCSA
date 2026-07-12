@@ -1,0 +1,261 @@
+{
+  "nodes": [
+    {
+      "id": "file:stca/layers/l0b_supply_chain.py",
+      "type": "file",
+      "name": "l0b_supply_chain",
+      "filePath": "stca/layers/l0b_supply_chain.py",
+      "summary": "Layer 0b analysis: supply chain auditing for Python (pip-audit), Node.js (npm audit), Go (govulncheck), and Rust (cargo-audit) dependencies, plus EOL version detection and typosquat checking.",
+      "tags": ["layers", "supply-chain", "security", "vulnerability-scan", "dependencies"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/layers/l0c_dependencies.py",
+      "type": "file",
+      "name": "l0c_dependencies",
+      "filePath": "stca/layers/l0c_dependencies.py",
+      "summary": "Layer 0c analysis: checks for deprecated packages, outdated Python/Node dependencies via pip-audit and npm outdated, and license compliance scanning using pip-licenses.",
+      "tags": ["layers", "dependencies", "license-compliance", "outdated-packages"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/layers/l0d_behavioral.py",
+      "type": "file",
+      "name": "l0d_behavioral",
+      "filePath": "stca/layers/l0d_behavioral.py",
+      "summary": "Layer 0d analysis: behavioral metrics using git history to detect hotspots (high churn + complexity), knowledge drift (single-author files), and growing complexity via AST-based cyclomatic analysis.",
+      "tags": ["layers", "behavioral", "git-history", "complexity", "hotspots"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/layers/l0e_iac.py",
+      "type": "file",
+      "name": "l0e_iac",
+      "filePath": "stca/layers/l0e_iac.py",
+      "summary": "Layer 0e analysis: Infrastructure-as-Code scanning for Dockerfiles (latest tags, root user), Kubernetes manifests (privileged containers, host networking), Terraform (public S3), and GitHub Actions workflows (pull_request_target), plus Checkov/KICS integration.",
+      "tags": ["layers", "iac", "docker", "kubernetes", "terraform", "github-actions", "security"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/layers/l0f_commit_risk.py",
+      "type": "file",
+      "name": "l0f_commit_risk",
+      "filePath": "stca/layers/l0f_commit_risk.py",
+      "summary": "Layer 0f analysis: commit risk assessment analyzing commit size, commit time patterns, message quality, tangled changes across directories, author patterns, and recent reverts.",
+      "tags": ["layers", "commit-risk", "git-analysis", "code-quality"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/layers/l1_property.py",
+      "type": "file",
+      "name": "l1_property",
+      "filePath": "stca/layers/l1_property.py",
+      "summary": "Layer 1 analysis: property-based testing using Hypothesis to generate test inputs and detect edge cases, with support for custom test discovery.",
+      "tags": ["layers", "property-testing", "hypothesis", "test-generation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/l2_mutation.py",
+      "type": "file",
+      "name": "l2_mutation",
+      "filePath": "stca/layers/l2_mutation.py",
+      "summary": "Layer 2 analysis: mutation testing to assess test quality by making small code mutations and checking if existing tests catch them, with quick heuristic mode.",
+      "tags": ["layers", "mutation-testing", "test-quality"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/l3_invariants.py",
+      "type": "file",
+      "name": "l3_invariants",
+      "filePath": "stca/layers/l3_invariants.py",
+      "summary": "Layer 3 analysis: invariant checking using a JSON invariant database to validate static invariants like non-null checks, length constraints, and boundary conditions in function bodies.",
+      "tags": ["layers", "invariants", "static-analysis", "constraints"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/l4_fuzz.py",
+      "type": "file",
+      "name": "l4_fuzz",
+      "filePath": "stca/layers/l4_fuzz.py",
+      "summary": "Layer 4 analysis: fuzz testing generation using Atheris to create fuzz harnesses for Python functions, with automatic harness generation and execution.",
+      "tags": ["layers", "fuzzing", "atheris", "test-generation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/l5_policy.py",
+      "type": "file",
+      "name": "l5_policy",
+      "filePath": "stca/layers/l5_policy.py",
+      "summary": "Layer 5 analysis: policy enforcement using OPA (Open Policy Agent) for Rego policy evaluation, plus static policy checks for common code policy violations.",
+      "tags": ["layers", "policy", "opa", "rego", "compliance"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/l6_symbolic.py",
+      "type": "file",
+      "name": "l6_symbolic",
+      "filePath": "stca/layers/l6_symbolic.py",
+      "summary": "Layer 6 analysis: symbolic execution integration for critical paths, leveraging external symbolic execution tools to find path-based vulnerabilities.",
+      "tags": ["layers", "symbolic-execution", "path-analysis", "critical-path"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/l7_simulation.py",
+      "type": "file",
+      "name": "l7_simulation",
+      "filePath": "stca/layers/l7_simulation.py",
+      "summary": "Layer 7 analysis: concurrency simulation and race condition detection for concurrent code paths, with pytest-based concurrency test execution.",
+      "tags": ["layers", "simulation", "concurrency", "race-conditions"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/l8_autofix.py",
+      "type": "file",
+      "name": "l8_autofix",
+      "filePath": "stca/layers/l8_autofix.py",
+      "summary": "Layer 8 analysis: automatic code fix generation with built-in fix patterns for eval usage, hardcoded passwords, Docker latest tags, and bare except clauses, plus Semgrep and Ruff integration for automated remediation.",
+      "tags": ["layers", "autofix", "remediation", "semgrep", "ruff", "code-fix"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/learning.py",
+      "type": "file",
+      "name": "learning",
+      "filePath": "stca/learning.py",
+      "summary": "Machine learning components: code embedding similarity via TF-IDF vectors, active learning for prioritizing findings for human review, and a lightweight GNN-inspired CPG scorer that extracts features from source code graphs to rank bug likelihood.",
+      "tags": ["ml", "learning", "embeddings", "gnn", "active-learning", "cpg"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/llm_verify.py",
+      "type": "file",
+      "name": "llm_verify",
+      "filePath": "stca/llm_verify.py",
+      "summary": "LLM-powered bug verification: generates hypotheses about potential bugs using LLM, then verifies them by constructing and running test inputs, producing VerifiedBug results with CWE classification.",
+      "tags": ["llm", "verification", "bug-detection", "hypothesis-testing"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/llm/__init__.py",
+      "type": "file",
+      "name": "__init__",
+      "filePath": "stca/llm/__init__.py",
+      "summary": "Package init for the LLM module, re-exporting client and PRM scorer components.",
+      "tags": ["package-init", "llm"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/llm/client.py",
+      "type": "file",
+      "name": "client",
+      "filePath": "stca/llm/client.py",
+      "summary": "LLM client for local API communication: supports availability checking, prompt-based generation via HTTP POST to a local LLM endpoint, and structured finding review with JSON response parsing.",
+      "tags": ["llm", "client", "api", "inference"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/llm/prm.py",
+      "type": "file",
+      "name": "prm",
+      "filePath": "stca/llm/prm.py",
+      "summary": "Process Reward Model scorer: evaluates LLM reasoning steps by analyzing logical connectives, step dependencies, claim consistency, and evidence grounding to produce step-level and overall quality scores.",
+      "tags": ["llm", "prm", "scoring", "reasoning-quality"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/lsp/__init__.py",
+      "type": "file",
+      "name": "__init__",
+      "filePath": "stca/lsp/__init__.py",
+      "summary": "Package init for the LSP (Language Server Protocol) module.",
+      "tags": ["package-init", "lsp"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/lsp/server.py",
+      "type": "file",
+      "name": "server",
+      "filePath": "stca/lsp/server.py",
+      "summary": "LSP server implementation providing real-time code analysis in editors: handles initialize, textDocument/didOpen/didChange/didSave notifications, with debounced analysis and diagnostic publishing for nullness, JS patterns, and code quality issues.",
+      "tags": ["lsp", "server", "ide-integration", "real-time-analysis"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/malicious_patterns.py",
+      "type": "file",
+      "name": "malicious_patterns",
+      "filePath": "stca/malicious_patterns.py",
+      "summary": "Malicious code pattern detection: scans source files for backdoor indicators, obfuscation, data exfiltration, privilege escalation, reverse shells, and other supply-chain attack patterns using regex-based indicators.",
+      "tags": ["security", "malicious-patterns", "backdoor-detection", "supply-chain-security"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/maven_cve_db.py",
+      "type": "file",
+      "name": "maven_cve_db",
+      "filePath": "stca/maven_cve_db.py",
+      "summary": "Maven CVE database and pom.xml scanner: parses Maven version ranges, maintains a cached CVE database updated from OSV, and scans pom.xml files for vulnerable dependencies including Spring Boot BOM version resolution.",
+      "tags": ["security", "cve", "maven", "java", "dependency-scanning"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/metamorphic.py",
+      "type": "file",
+      "name": "metamorphic",
+      "filePath": "stca/metamorphic.py",
+      "summary": "Metamorphic testing: classifies functions by type (sorting, hashing, string manipulation, math, compression, etc.), generates metamorphic test relations (determinism, idempotence, commutativity) using Hypothesis, and runs them to detect behavioral violations.",
+      "tags": ["testing", "metamorphic-testing", "property-testing", "hypothesis"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/missing_patches.py",
+      "type": "file",
+      "name": "missing_patches",
+      "filePath": "stca/missing_patches.py",
+      "summary": "Missing patch detection: scans codebases against a database of known vulnerable code patterns and their patched counterparts to identify unpatched CVEs in source code.",
+      "tags": ["security", "patches", "cve", "vulnerability-patterns"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/models.py",
+      "type": "file",
+      "name": "models",
+      "filePath": "stca/models.py",
+      "summary": "Core data models: defines Severity, Category, BlastRadius, Decision, LayerID, Finding, AggregatedDecision, DiffHunk, PipelineResult, and LayerStats dataclasses that form the pipeline's type system and serialization layer.",
+      "tags": ["models", "core", "dataclasses", "types", "pipeline"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {"source": "file:stca/layers/l0b_supply_chain.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l0b_supply_chain.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l0c_dependencies.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l0c_dependencies.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l0d_behavioral.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l0d_behavioral.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l0e_iac.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l0e_iac.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l0f_commit_risk.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l0f_commit_risk.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l1_property.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l1_property.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l2_mutation.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l2_mutation.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l3_invariants.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l3_invariants.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l4_fuzz.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l4_fuzz.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l5_policy.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l5_policy.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l6_symbolic.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l6_symbolic.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l7_simulation.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l7_simulation.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/layers/l8_autofix.py", "target": "file:stca/layers/base.py", "type": "import"},
+    {"source": "file:stca/layers/l8_autofix.py", "target": "file:stca/models.py", "type": "import"},
+    {"source": "file:stca/llm/__init__.py", "target": "file:stca/llm/client.py", "type": "import"},
+    {"source": "file:stca/llm/__init__.py", "target": "file:stca/llm/prm.py", "type": "import"},
+    {"source": "file:stca/llm/__init__.py", "target": "file:stca/llm/client.py", "type": "contains"},
+    {"source": "file:stca/llm/__init__.py", "target": "file:stca/llm/prm.py", "type": "contains"}
+  ]
+}

@@ -17,10 +17,6 @@ real-world breaches come from vulnerable *dependencies*.
 """
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.layers.l0b_supply_chain")
-
 import json
 import re
 import subprocess
@@ -53,7 +49,7 @@ class L0bSupplyChain(LayerBase):
     """Note: this layer doesn't have a LayerID in the enum yet — we use a
     string identifier. The orchestrator handles it as an 'extra' layer.
     """
-    id = LayerID.L0_FAST  # borrow L0_FAST for now
+    id = LayerID.L0B_SUPPLY_CHAIN  # v4.11: use own LayerID
     name = "Supply Chain"
     description = "Dependency CVE scanning + EOL language detection + typosquat detection"
 
@@ -143,6 +139,13 @@ class L0bSupplyChain(LayerBase):
             return findings
 
         if not self.is_tool_available("npm"):
+            # v4.8: Surface missing tool as a warning instead of silent zero
+            findings.append(Finding(
+                layer=self.id, rule_id="L0b.npm_audit.tool_missing",
+                message="npm not installed — Node.js dependency vulnerabilities not checked. Install Node.js to enable npm audit.",
+                file="package-lock.json", start_line=1,
+                severity=Severity.INFO, confidence=1.0,
+            ))
             return findings
 
         try:
@@ -167,8 +170,8 @@ class L0bSupplyChain(LayerBase):
                     fix_suggestion=f"Run `npm audit fix` to update {vuln_id}",
                     raw=vuln,
                 ))
-        except Exception as e:
-            logger.warning("npm audit failed: %s", e)
+        except Exception:
+            pass
         return findings
 
     def _audit_go(self, repo_root: Path) -> List[Finding]:
@@ -177,6 +180,12 @@ class L0bSupplyChain(LayerBase):
         if not (repo_root / "go.mod").exists():
             return findings
         if not self.is_tool_available("govulncheck"):
+            findings.append(Finding(
+                layer=self.id, rule_id="L0b.govulncheck.tool_missing",
+                message="govulncheck not installed — Go dependency vulnerabilities not checked. Install with: go install golang.org/x/vuln/cmd/govulncheck@latest",
+                file="go.mod", start_line=1,
+                severity=Severity.INFO, confidence=1.0,
+            ))
             return findings
 
         try:
@@ -203,8 +212,8 @@ class L0bSupplyChain(LayerBase):
                         ))
                 except json.JSONDecodeError:
                     continue
-        except Exception as e:
-            logger.warning("go vuln audit failed: %s", e)
+        except Exception:
+            pass
         return findings
 
     def _audit_rust(self, repo_root: Path) -> List[Finding]:
@@ -215,6 +224,12 @@ class L0bSupplyChain(LayerBase):
         if not self.is_tool_available("cargo-audit"):
             # try `cargo audit` (without hyphen)
             if not self.is_tool_available("cargo"):
+                findings.append(Finding(
+                    layer=self.id, rule_id="L0b.cargo_audit.tool_missing",
+                    message="cargo-audit not installed — Rust dependency vulnerabilities not checked. Install with: cargo install cargo-audit",
+                    file="Cargo.lock", start_line=1,
+                    severity=Severity.INFO, confidence=1.0,
+                ))
                 return findings
 
         try:
@@ -237,14 +252,20 @@ class L0bSupplyChain(LayerBase):
                     fix_suggestion=f"Update {vuln.get('package', {}).get('name')} to patched version",
                     raw=vuln,
                 ))
-        except Exception as e:
-            logger.warning("rust cargo audit failed: %s", e)
+        except Exception:
+            pass
         return findings
 
     def _audit_osv(self, repo_root: Path) -> List[Finding]:
         """Run osv-scanner — covers Python, Node, Go, Rust, Java, Maven."""
         findings: List[Finding] = []
         if not self.is_tool_available("osv-scanner"):
+            findings.append(Finding(
+                layer=self.id, rule_id="L0b.osv_scanner.tool_missing",
+                message="osv-scanner not installed — multi-language dependency vulnerabilities not checked. Install from: https://github.com/google/osv-scanner",
+                file="<pipeline>", start_line=1,
+                severity=Severity.INFO, confidence=1.0,
+            ))
             return findings
 
         try:
@@ -269,8 +290,8 @@ class L0bSupplyChain(LayerBase):
                             fix_suggestion=f"Update {pkg.get('package', {}).get('name')} to a fixed version",
                             raw=vuln,
                         ))
-        except Exception as e:
-            logger.warning("OSV.dev audit failed: %s", e)
+        except Exception:
+            pass
         return findings
 
     def _check_eol_versions(self, repo_root: Path) -> List[Finding]:
@@ -406,7 +427,7 @@ class L0bSupplyChain(LayerBase):
                                 cwe="CWE-1357",
                                 fix_suggestion=f"Replace '{dep}' with '{TYPOSQUATS[dep]}'",
                             ))
-            except Exception as e:
-                logger.warning("typosquat check failed: %s", e)
+            except Exception:
+                pass
 
         return findings

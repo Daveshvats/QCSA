@@ -1,0 +1,397 @@
+# STCA Ruby Security Rules — 79 rules
+rules:
+  - id: ruby-eval
+    pattern: "\\beval\\s*\\("
+    severity: critical
+    message: "eval — code injection"
+    metadata: {cwe: "CWE-95"}
+  - id: ruby-system
+    pattern: "\\b(?:system|exec|spawn)\\s*\\(?\\s*[\\\"\\']"
+    severity: high
+    message: "system/exec — injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: ruby-backtick-interp
+    pattern: "\\`[^\\`]*\\#\\{"
+    severity: high
+    message: "Backtick with interpolation — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: ruby-marshal-load
+    pattern: "\\bMarshal\\.(?:load|restore)\\s*\\("
+    severity: critical
+    message: "Marshal.load — RCE on untrusted data"
+    metadata: {cwe: "CWE-502"}
+  - id: ruby-html-safe
+    pattern: "\\.html_safe\\b"
+    severity: high
+    message: "html_safe — XSS bypass"
+    metadata: {cwe: "CWE-79"}
+  - id: ruby-md5
+    pattern: "\\bDigest::MD5\\b"
+    severity: high
+    message: "MD5 broken"
+    metadata: {cwe: "CWE-327"}
+  - id: ruby-sha1
+    pattern: "\\bDigest::SHA1\\b"
+    severity: high
+    message: "SHA1 broken"
+    metadata: {cwe: "CWE-327"}
+  - id: ruby-rand
+    pattern: "\\brand\\s*\\(\\s*\\)|Random\\.rand\\s*\\("
+    severity: high
+    message: "Random.rand NOT CSPRNG"
+    metadata: {cwe: "CWE-338"}
+  - id: ruby-send-params
+    pattern: "\\.send\\s*\\(\\s*params"
+    severity: high
+    message: ".send with params — method dispatch attack"
+    metadata: {cwe: "CWE-913"}
+  - id: ruby-eval-params
+    pattern: "\\beval\\s*\\([^)]*params"
+    severity: critical
+    message: "eval with user input — RCE"
+    metadata: {cwe: "CWE-95"}
+  - id: ruby-open-redirect
+    pattern: "redirect_to\\s+(?:params|request\\.\\w+)"
+    severity: high
+    message: "Open redirect via params"
+    metadata: {cwe: "CWE-601"}
+  - id: ruby-mass-assign
+    pattern: "(?:update_attributes|update)\\s*\\(\\s*params\\[:"
+    severity: high
+    message: "Mass assignment via params"
+    metadata: {cwe: "CWE-915"}
+  - id: ruby-sql-interp
+    pattern: "(?:execute|query)\\s*\\(\\s*[\\\"\\`\\'\\'].*\\#\\{"
+    severity: high
+    message: "SQL with interpolation — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: ruby-csrf-disabled
+    pattern: "protect_from_forgery\\s+with:\\s+:null_session|skip_before_action\\s+:verify_authenticity_token"
+    severity: high
+    message: "CSRF protection disabled"
+    metadata: {cwe: "CWE-352"}
+  - id: ruby-http-not-https
+    pattern: "(?:Net::HTTP|Faraday|HTTParty)\\.\\w+\\s*\\(\\s*[\\\"\\']http://"
+    severity: medium
+    message: "HTTP (not HTTPS) request"
+    metadata: {cwe: "CWE-319"}
+  - id: ruby-ssl-verify-none
+    pattern: "verify_mode\\s*=\\s*OpenSSL::SSL::VERIFY_NONE"
+    severity: high
+    message: "SSL verification disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: ruby-hardcoded-secret
+    pattern: "\\b(?:password|secret|api_key|auth_token)\\s*=\\s*[\\\"\\'][^\\\"\\']{8,}[\\\"\\']"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: ruby-puts-prod
+    pattern: "\\bputs\\s+"
+    severity: low
+    message: "puts in production"
+    metadata: {cwe: "CWE-532"}
+  - id: ruby-rescue-exception
+    pattern: "\\brescue\\s+Exception\\b"
+    severity: medium
+    message: "rescue Exception — too broad"
+    metadata: {cwe: "CWE-396"}
+  - id: ruby-find-params
+    pattern: "\\.find\\s*\\(\\s*params\\[:"
+    severity: medium
+    message: "Model.find(params[:id]) — IDOR risk"
+    metadata: {cwe: "CWE-639"}
+  - id: ruby-YAML-load
+    pattern: "\\bYAML\\.load\\s*\\("
+    severity: critical
+    message: "YAML.load — RCE on untrusted data, use safe_load"
+    metadata: {cwe: "CWE-502"}
+  - id: ruby-YAML-load-stream
+    pattern: "\\bYAML\\.load_stream\\s*\\("
+    severity: critical
+    message: "YAML.load_stream — RCE on untrusted data"
+    metadata: {cwe: "CWE-502"}
+  - id: ruby-JSON-parse-user
+    pattern: "\\bJSON\\.parse\\s*\\(\\s*(?:params|request|cookies)"
+    severity: high
+    message: "JSON.parse on user input — DoS via huge payload"
+    metadata: {cwe: "CWE-400"}
+  - id: ruby-open-uri
+    pattern: "\\bopen\\s*\\(\\s*(?:params|request\\.|url|uri)"
+    severity: critical
+    message: "Kernel#open with user input — RCE via file:// or |cmd"
+    metadata: {cwe: "CWE-78"}
+  - id: ruby-IO-read-user
+    pattern: "\\bIO\\.read\\s*\\(\\s*params"
+    severity: high
+    message: "IO.read with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: ruby-file-read-user
+    pattern: "\\bFile\\.read\\s*\\(\\s*params"
+    severity: high
+    message: "File.read with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: ruby-file-open-user
+    pattern: "\\bFile\\.open\\s*\\(\\s*params"
+    severity: high
+    message: "File.open with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: ruby-shellwords-missing
+    pattern: "\\b`[^`]*\\#\\{params"
+    severity: high
+    message: "Backtick with params — use Shellwords.escape"
+    metadata: {cwe: "CWE-78"}
+  - id: ruby-system-call-user
+    pattern: "\\b(?:system|exec|spawn)\\s*\\(?\\s*params"
+    severity: critical
+    message: "system() with params — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: ruby-Open3-capture
+    pattern: "\\bOpen3\\.(?:capture|popen|pipeline)\\s*\\(\\s*(?:params|format|#\\{)"
+    severity: critical
+    message: "Open3 with user input — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: ruby-render-user
+    pattern: "\\brender\\s+(?:inline|partial|template):\\s*params"
+    severity: high
+    message: "render with user-controlled template — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: ruby-render-text
+    pattern: "\\brender\\s+text:\\s*params"
+    severity: high
+    message: "render text: params — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: ruby-render-html
+    pattern: "\\brender\\s+html:\\s*params"
+    severity: high
+    message: "render html: params — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: ruby-content-type-user
+    pattern: "\\bresponse\\.content_type\\s*=\\s*params"
+    severity: high
+    message: "Content-Type from user — XSS via content sniffing"
+    metadata: {cwe: "CWE-79"}
+  - id: ruby-send-public
+    pattern: "\\bpublic_send\\s*\\(\\s*params"
+    severity: high
+    message: "public_send with params — method dispatch attack"
+    metadata: {cwe: "CWE-913"}
+  - id: ruby-constantize
+    pattern: "\\.constantize\\s*$"
+    severity: critical
+    message: "constantize — RCE via class instantiation"
+    metadata: {cwe: "CWE-470"}
+  - id: ruby-constantize-params
+    pattern: "\\bparams\\[.*\\]\\.constantize"
+    severity: critical
+    message: "params.constantize — RCE"
+    metadata: {cwe: "CWE-470"}
+  - id: ruby-class-eval
+    pattern: "\\b(?:class|module)_eval\\s*\\(\\s*params"
+    severity: critical
+    message: "class_eval with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: ruby-instance-eval
+    pattern: "\\binstance_eval\\s*\\(\\s*params"
+    severity: critical
+    message: "instance_eval with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: ruby-method-missing
+    pattern: "\\bdef\\s+method_missing\\b"
+    severity: medium
+    message: "method_missing — security risk if not guarded"
+    metadata: {cwe: "CWE-913"}
+  - id: ruby-attr-accessible-removed
+    pattern: "\\battr_accessible\\b"
+    severity: medium
+    message: "attr_accessible removed in Rails 4+ — use strong params"
+    metadata: {cwe: "CWE-915"}
+  - id: ruby-attr-protected-removed
+    pattern: "\\battr_protected\\b"
+    severity: medium
+    message: "attr_protected removed in Rails 4+"
+    metadata: {cwe: "CWE-915"}
+  - id: ruby-has-secure-password
+    pattern: "\\bhas_secure_password\\b"
+    severity: low
+    message: "has_secure_password — verify proper use"
+    metadata: {cwe: "CWE-521"}
+  - id: ruby-validate-missing
+    pattern: "\\bclass\\s+\\w+\\s*<\\s*ApplicationRecord\\b[^(?!.*validates)]"
+    severity: low
+    message: "Model without validates — input validation gap"
+    metadata: {cwe: "CWE-20"}
+  - id: ruby-before-action-skipped
+    pattern: "\\bskip_before_action\\s+:require_login"
+    severity: high
+    message: "skip_before_action :require_login — auth bypass"
+    metadata: {cwe: "CWE-306"}
+  - id: ruby-before-action-only
+    pattern: "\\bbefore_action\\s+:.*only:\\s*\\["
+    severity: low
+    message: "before_action with only: — verify coverage"
+    metadata: {cwe: "CWE-285"}
+  - id: ruby-link-to-destroy
+    pattern: "\\blink_to\\s+.*method:\\s*:delete"
+    severity: medium
+    message: "link_to with method: :delete — CSRF risk"
+    metadata: {cwe: "CWE-352"}
+  - id: ruby-button-to-missing
+    pattern: "\\blink_to\\s+.*data-confirm.*data-method"
+    severity: low
+    message: "link_to with data-method — use button_to"
+    metadata: {cwe: "CWE-352"}
+  - id: ruby-cookie-store
+    pattern: "\\bsession_store\\s+:cookie_store"
+    severity: medium
+    message: "Cookie store — verify secret_key_base"
+    metadata: {cwe: "CWE-312"}
+  - id: ruby-session-secret-hardcoded
+    pattern: "\\bsecret_key_base\\s*=\\s*[\\\"\\']"
+    severity: high
+    message: "Hardcoded secret_key_base"
+    metadata: {cwe: "CWE-798"}
+  - id: ruby-config-secret
+    pattern: "\\b(?:Rails\\.application\\.secrets|Rails\\.application\\.credentials)\\.\\w+"
+    severity: low
+    message: "Verify secrets access pattern"
+    metadata: {cwe: "CWE-798"}
+  - id: ruby-where-string
+    pattern: "\\.where\\s*\\(\\s*[\\\"\\'][^\\\"\\']*\\#\\{"
+    severity: high
+    message: "where with string interpolation — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: ruby-where-string-concat
+    pattern: "\\.where\\s*\\(\\s*[\\\"\\'][^\\\"\\']*\\s*\\+\\s*"
+    severity: high
+    message: "where with string concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: ruby-order-params
+    pattern: "\\.order\\s*\\(\\s*params"
+    severity: high
+    message: "order with params — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: ruby-joins-params
+    pattern: "\\.joins\\s*\\(\\s*params"
+    severity: high
+    message: "joins with params — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: ruby-from-params
+    pattern: "\\.from\\s*\\(\\s*params"
+    severity: high
+    message: "from with params — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: ruby-pluck-params
+    pattern: "\\.pluck\\s*\\(\\s*params"
+    severity: medium
+    message: "pluck with params — info leak risk"
+    metadata: {cwe: "CWE-200"}
+  - id: ruby-group-params
+    pattern: "\\.group\\s*\\(\\s*params"
+    severity: high
+    message: "group with params — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: ruby-having-params
+    pattern: "\\.having\\s*\\(\\s*params"
+    severity: high
+    message: "having with params — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: ruby-raw-html
+    pattern: "\\braw\\s+\\w+"
+    severity: high
+    message: "raw — XSS bypass"
+    metadata: {cwe: "CWE-79"}
+  - id: ruby-raw-params
+    pattern: "\\braw\\s+params"
+    severity: critical
+    message: "raw params — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: ruby-ERB-new
+    pattern: "\\bERB\\.new\\s*\\([^)]*\\)\\.result"
+    severity: high
+    message: "ERB.new with user template — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: ruby-ERB-inline
+    pattern: "\\b<%=\\s*params"
+    severity: high
+    message: "ERB output of params — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: ruby-content-tag-params
+    pattern: "\\bcontent_tag\\s*\\([^)]*params"
+    severity: high
+    message: "content_tag with params — XSS if not escaped"
+    metadata: {cwe: "CWE-79"}
+  - id: ruby-redirect-back
+    pattern: "\\bredirect_back\\s*\\(.*fallback_location:\\s*params"
+    severity: high
+    message: "redirect_back with params fallback — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: ruby-send-file
+    pattern: "\\bsend_file\\s*\\(\\s*params"
+    severity: high
+    message: "send_file with params — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: ruby-send-data
+    pattern: "\\bsend_data\\s*\\(\\s*params"
+    severity: medium
+    message: "send_data with params — info leak"
+    metadata: {cwe: "CWE-200"}
+  - id: ruby-headers-user
+    pattern: "\\bresponse\\.headers\\s*\\[[\\\"\\']\\w+[\\\"\\']\\]\\s*=\\s*params"
+    severity: high
+    message: "Response header from params — header injection"
+    metadata: {cwe: "CWE-113"}
+  - id: ruby-cookies-set
+    pattern: "\\bcookies\\s*\\[[\\\"\\']\\w+[\\\"\\']\\]\\s*=\\s*params"
+    severity: high
+    message: "Cookie from params — XSS/session fix"
+    metadata: {cwe: "CWE-1004"}
+  - id: ruby-cookies-permanent
+    pattern: "\\bcookies\\.permanent\\b"
+    severity: medium
+    message: "cookies.permanent — verify expiry is intended"
+    metadata: {cwe: "CWE-613"}
+  - id: ruby-cookies-signed
+    pattern: "\\bcookies\\.signed\\b"
+    severity: low
+    message: "cookies.signed — verify secret_key_base"
+    metadata: {cwe: "CWE-312"}
+  - id: ruby-session-set-params
+    pattern: "\\bsession\\[(:\\w+|['\\\"]\\w+['\\\"])\\]\\s*=\\s*params"
+    severity: high
+    message: "Session from params — privilege escalation"
+    metadata: {cwe: "CWE-269"}
+  - id: ruby-debug-rails
+    pattern: "\\bRails\\.logger\\.debug\\s*\\(\\s*params"
+    severity: high
+    message: "Debug log of params — info leak"
+    metadata: {cwe: "CWE-532"}
+  - id: ruby-env-user
+    pattern: "\\bENV\\[.*params\\]"
+    severity: high
+    message: "ENV from params — info leak"
+    metadata: {cwe: "CWE-200"}
+  - id: ruby-p-open
+    pattern: "\\bIO\\.popen\\s*\\(\\s*(?:params|#\\{)"
+    severity: critical
+    message: "IO.popen with user input — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: ruby-fork-block
+    pattern: "\\bfork\\s*(?:do|\\{)"
+    severity: medium
+    message: "fork — race conditions, zombie processes"
+    metadata: {cwe: "CWE-362"}
+  - id: ruby-thread-new
+    pattern: "\\bThread\\.new\\s*(?:do|\\{)"
+    severity: low
+    message: "Thread.new — verify exception handling"
+    metadata: {cwe: "CWE-208"}
+  - id: ruby-rails-cache-read
+    pattern: "\\bRails\\.cache\\.read\\s*\\(\\s*params"
+    severity: medium
+    message: "Cache key from params — cache poisoning"
+    metadata: {cwe: "CWE-441"}
+  - id: ruby-rails-cache-fetch
+    pattern: "\\bRails\\.cache\\.fetch\\s*\\(\\s*params"
+    severity: medium
+    message: "Cache fetch with params — cache poisoning"
+    metadata: {cwe: "CWE-441"}

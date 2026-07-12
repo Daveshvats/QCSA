@@ -39,7 +39,7 @@ RISKY_MESSAGE_PATTERNS = [
 
 
 class L0fCommitRisk(LayerBase):
-    id = LayerID.L0_FAST
+    id = LayerID.L0F_COMMIT_RISK  # v4.11: use own LayerID
     name = "Commit Risk"
     description = "Git metadata risk analysis (size, time, message, author)"
     LAYER_TAG = "L0f_commit"

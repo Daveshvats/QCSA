@@ -1,0 +1,1718 @@
+﻿{
+    "scriptCompleted":  true,
+    "files":  [
+                  {
+                      "path":  ".github/actions/stca-action/action.yml",
+                      "language":  "yaml",
+                      "sizeLines":  52,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  ".github/workflows/stca.yml",
+                      "language":  "yaml",
+                      "sizeLines":  49,
+                      "fileCategory":  "infra"
+                  },
+                  {
+                      "path":  ".mimocode/.cron-lock",
+                      "language":  "unknown",
+                      "sizeLines":  0,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  ".ua/.understandignore",
+                      "language":  "unknown",
+                      "sizeLines":  49,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "examples/policies/no_secrets_in_logs.rego",
+                      "language":  "rego",
+                      "sizeLines":  36,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "examples/rules/custom.semgrep.yml",
+                      "language":  "yaml",
+                      "sizeLines":  38,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "examples/sample-python-repo/.stca.yaml",
+                      "language":  "yaml",
+                      "sizeLines":  27,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "examples/sample-python-repo/app.py",
+                      "language":  "python",
+                      "sizeLines":  137,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "examples/sample-python-repo/test_app.py",
+                      "language":  "python",
+                      "sizeLines":  24,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "pyproject.toml",
+                      "language":  "toml",
+                      "sizeLines":  59,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "README.md",
+                      "language":  "markdown",
+                      "sizeLines":  189,
+                      "fileCategory":  "docs"
+                  },
+                  {
+                      "path":  "scripts/find_bad_loggers.py",
+                      "language":  "python",
+                      "sizeLines":  40,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "scripts/fix_silent_except_v2.py",
+                      "language":  "python",
+                      "sizeLines":  431,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "scripts/fix_silent_except.py",
+                      "language":  "python",
+                      "sizeLines":  123,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "scripts/rewire_scanner_errors.py",
+                      "language":  "python",
+                      "sizeLines":  39,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "scripts/show_silent_context.py",
+                      "language":  "python",
+                      "sizeLines":  27,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "scripts/survey_silent_except.py",
+                      "language":  "python",
+                      "sizeLines":  39,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca_pipeline.egg-info/dependency_links.txt",
+                      "language":  "txt",
+                      "sizeLines":  1,
+                      "fileCategory":  "docs"
+                  },
+                  {
+                      "path":  "stca_pipeline.egg-info/entry_points.txt",
+                      "language":  "txt",
+                      "sizeLines":  2,
+                      "fileCategory":  "docs"
+                  },
+                  {
+                      "path":  "stca_pipeline.egg-info/PKG-INFO",
+                      "language":  "unknown",
+                      "sizeLines":  235,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca_pipeline.egg-info/requires.txt",
+                      "language":  "txt",
+                      "sizeLines":  38,
+                      "fileCategory":  "docs"
+                  },
+                  {
+                      "path":  "stca_pipeline.egg-info/SOURCES.txt",
+                      "language":  "txt",
+                      "sizeLines":  140,
+                      "fileCategory":  "docs"
+                  },
+                  {
+                      "path":  "stca_pipeline.egg-info/top_level.txt",
+                      "language":  "txt",
+                      "sizeLines":  1,
+                      "fileCategory":  "docs"
+                  },
+                  {
+                      "path":  "stca/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  8,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/advanced_secrets.py",
+                      "language":  "python",
+                      "sizeLines":  319,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/architecture.py",
+                      "language":  "python",
+                      "sizeLines":  185,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/audit.py",
+                      "language":  "python",
+                      "sizeLines":  142,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/baseline.py",
+                      "language":  "python",
+                      "sizeLines":  166,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/bootstrap/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  11,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/bootstrap/harness_gen.py",
+                      "language":  "python",
+                      "sizeLines":  151,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/bootstrap/invariant_inference.py",
+                      "language":  "python",
+                      "sizeLines":  192,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/bootstrap/property_gen.py",
+                      "language":  "python",
+                      "sizeLines":  129,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/brain/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  6,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/brain/aggregator.py",
+                      "language":  "python",
+                      "sizeLines":  109,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/brain/bayesian.py",
+                      "language":  "python",
+                      "sizeLines":  334,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/brain/it2_fis.py",
+                      "language":  "python",
+                      "sizeLines":  158,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/brain/membership.py",
+                      "language":  "python",
+                      "sizeLines":  209,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/brain/project_tuner.py",
+                      "language":  "python",
+                      "sizeLines":  267,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/brain/rules.py",
+                      "language":  "python",
+                      "sizeLines":  169,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/brain/tuner.py",
+                      "language":  "python",
+                      "sizeLines":  114,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/bug_seeds.py",
+                      "language":  "python",
+                      "sizeLines":  253,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/business_logic.py",
+                      "language":  "python",
+                      "sizeLines":  451,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/cache.py",
+                      "language":  "python",
+                      "sizeLines":  102,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/cli_v2.py",
+                      "language":  "python",
+                      "sizeLines":  577,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/cli.py",
+                      "language":  "python",
+                      "sizeLines":  2074,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/code_quality.py",
+                      "language":  "python",
+                      "sizeLines":  396,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/codebase_miner.py",
+                      "language":  "python",
+                      "sizeLines":  261,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/complexity_metrics.py",
+                      "language":  "python",
+                      "sizeLines":  355,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/concurrency.py",
+                      "language":  "python",
+                      "sizeLines":  278,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/config_scanner.py",
+                      "language":  "python",
+                      "sizeLines":  82,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/config.py",
+                      "language":  "python",
+                      "sizeLines":  147,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/consistency.py",
+                      "language":  "python",
+                      "sizeLines":  242,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/contracts.py",
+                      "language":  "python",
+                      "sizeLines":  286,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/counterfactual.py",
+                      "language":  "python",
+                      "sizeLines":  202,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/coverage.py",
+                      "language":  "python",
+                      "sizeLines":  293,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/cpg_queries.py",
+                      "language":  "python",
+                      "sizeLines":  208,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/cpg.py",
+                      "language":  "python",
+                      "sizeLines":  329,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/crypto_audit.py",
+                      "language":  "python",
+                      "sizeLines":  210,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/deadcode.py",
+                      "language":  "python",
+                      "sizeLines":  199,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/diff_slicer.py",
+                      "language":  "python",
+                      "sizeLines":  256,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/differential.py",
+                      "language":  "python",
+                      "sizeLines":  214,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/doc_audit.py",
+                      "language":  "python",
+                      "sizeLines":  157,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/duplication.py",
+                      "language":  "python",
+                      "sizeLines":  135,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/extra_rules.py",
+                      "language":  "python",
+                      "sizeLines":  150,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/feedback/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  5,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/feedback/rule_capture.py",
+                      "language":  "python",
+                      "sizeLines":  78,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/feedback/stats.py",
+                      "language":  "python",
+                      "sizeLines":  83,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/ffi_analyzer.py",
+                      "language":  "python",
+                      "sizeLines":  977,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/flawfinder_db.py",
+                      "language":  "python",
+                      "sizeLines":  352,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/hotspots.py",
+                      "language":  "python",
+                      "sizeLines":  321,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/html_scanner.py",
+                      "language":  "python",
+                      "sizeLines":  191,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/iac_scanner.py",
+                      "language":  "python",
+                      "sizeLines":  235,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/impact_analysis.py",
+                      "language":  "python",
+                      "sizeLines":  235,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/incremental.py",
+                      "language":  "python",
+                      "sizeLines":  315,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/installer.py",
+                      "language":  "python",
+                      "sizeLines":  404,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/interprocedural.py",
+                      "language":  "python",
+                      "sizeLines":  1202,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/issue_store.py",
+                      "language":  "python",
+                      "sizeLines":  251,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/js_cpg.py",
+                      "language":  "python",
+                      "sizeLines":  390,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/js_multiline.py",
+                      "language":  "python",
+                      "sizeLines":  154,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/js_pattern_scanner.py",
+                      "language":  "python",
+                      "sizeLines":  502,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/js_quality.py",
+                      "language":  "python",
+                      "sizeLines":  220,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/jsx_auth.py",
+                      "language":  "python",
+                      "sizeLines":  219,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/knowledge_base.py",
+                      "language":  "python",
+                      "sizeLines":  572,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  21,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/base.py",
+                      "language":  "python",
+                      "sizeLines":  51,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l0_fast.py",
+                      "language":  "python",
+                      "sizeLines":  408,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l0b_supply_chain.py",
+                      "language":  "python",
+                      "sizeLines":  412,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l0c_dependencies.py",
+                      "language":  "python",
+                      "sizeLines":  203,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l0d_behavioral.py",
+                      "language":  "python",
+                      "sizeLines":  235,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l0e_iac.py",
+                      "language":  "python",
+                      "sizeLines":  430,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l0f_commit_risk.py",
+                      "language":  "python",
+                      "sizeLines":  313,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l1_property.py",
+                      "language":  "python",
+                      "sizeLines":  101,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l2_mutation.py",
+                      "language":  "python",
+                      "sizeLines":  117,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l3_invariants.py",
+                      "language":  "python",
+                      "sizeLines":  127,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l4_fuzz.py",
+                      "language":  "python",
+                      "sizeLines":  136,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l5_policy.py",
+                      "language":  "python",
+                      "sizeLines":  138,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l6_symbolic.py",
+                      "language":  "python",
+                      "sizeLines":  76,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l7_simulation.py",
+                      "language":  "python",
+                      "sizeLines":  106,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/layers/l8_autofix.py",
+                      "language":  "python",
+                      "sizeLines":  277,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/learning.py",
+                      "language":  "python",
+                      "sizeLines":  299,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/llm_verify.py",
+                      "language":  "python",
+                      "sizeLines":  221,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/llm/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  14,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/llm/client.py",
+                      "language":  "python",
+                      "sizeLines":  105,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/llm/prm.py",
+                      "language":  "python",
+                      "sizeLines":  128,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/lsp/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  1,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/lsp/server.py",
+                      "language":  "python",
+                      "sizeLines":  148,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/malicious_patterns.py",
+                      "language":  "python",
+                      "sizeLines":  231,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/maven_cve_db.py",
+                      "language":  "python",
+                      "sizeLines":  259,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/metamorphic.py",
+                      "language":  "python",
+                      "sizeLines":  304,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/missing_patches.py",
+                      "language":  "python",
+                      "sizeLines":  296,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/models.py",
+                      "language":  "python",
+                      "sizeLines":  236,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/modern_attacks.py",
+                      "language":  "python",
+                      "sizeLines":  220,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/multi_lang.py",
+                      "language":  "python",
+                      "sizeLines":  384,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/nullness.py",
+                      "language":  "python",
+                      "sizeLines":  317,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/orchestrator.py",
+                      "language":  "python",
+                      "sizeLines":  1592,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/pii_detection.py",
+                      "language":  "python",
+                      "sizeLines":  232,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/pre_commit.py",
+                      "language":  "python",
+                      "sizeLines":  84,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/precision.py",
+                      "language":  "python",
+                      "sizeLines":  384,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/profiles.py",
+                      "language":  "python",
+                      "sizeLines":  239,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/pysa_integration.py",
+                      "language":  "python",
+                      "sizeLines":  141,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/report/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  6,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/report/dashboard.py",
+                      "language":  "python",
+                      "sizeLines":  314,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/report/html.py",
+                      "language":  "python",
+                      "sizeLines":  112,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/report/sarif.py",
+                      "language":  "python",
+                      "sizeLines":  133,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/report/tui.py",
+                      "language":  "python",
+                      "sizeLines":  164,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/root_cause.py",
+                      "language":  "python",
+                      "sizeLines":  165,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/rule_compiler.py",
+                      "language":  "python",
+                      "sizeLines":  297,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/rule_config.py",
+                      "language":  "python",
+                      "sizeLines":  163,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/rule_dsl.py",
+                      "language":  "python",
+                      "sizeLines":  329,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/rule_miner.py",
+                      "language":  "python",
+                      "sizeLines":  334,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/rules/__init__.py",
+                      "language":  "python",
+                      "sizeLines":  224,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/rules/packs/cpp-security.yml",
+                      "language":  "yaml",
+                      "sizeLines":  90,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/detekt-ported.yml",
+                      "language":  "yaml",
+                      "sizeLines":  256,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/go-security.yml",
+                      "language":  "yaml",
+                      "sizeLines":  98,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/java-frameworks.yml",
+                      "language":  "yaml",
+                      "sizeLines":  200,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/java-security.yml",
+                      "language":  "yaml",
+                      "sizeLines":  90,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/javascript-frameworks.yml",
+                      "language":  "yaml",
+                      "sizeLines":  227,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/javascript-security.yml",
+                      "language":  "yaml",
+                      "sizeLines":  178,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/lintr-ported.yml",
+                      "language":  "yaml",
+                      "sizeLines":  174,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/luacheck-ported.yml",
+                      "language":  "yaml",
+                      "sizeLines":  162,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/python-frameworks.yml",
+                      "language":  "yaml",
+                      "sizeLines":  256,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/python-security.yml",
+                      "language":  "yaml",
+                      "sizeLines":  204,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/react-security.yml",
+                      "language":  "yaml",
+                      "sizeLines":  269,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/rules/packs/spotbugs-ported.yml",
+                      "language":  "yaml",
+                      "sizeLines":  190,
+                      "fileCategory":  "config"
+                  },
+                  {
+                      "path":  "stca/source_discovery.py",
+                      "language":  "python",
+                      "sizeLines":  90,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/state_machine.py",
+                      "language":  "python",
+                      "sizeLines":  310,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/strictness.py",
+                      "language":  "python",
+                      "sizeLines":  186,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/supply_chain.py",
+                      "language":  "python",
+                      "sizeLines":  272,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/suppressions.py",
+                      "language":  "python",
+                      "sizeLines":  108,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/symbolic.py",
+                      "language":  "python",
+                      "sizeLines":  479,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/taint_cross_file.py",
+                      "language":  "python",
+                      "sizeLines":  291,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/taint_tracker.py",
+                      "language":  "python",
+                      "sizeLines":  135,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/tree_sitter_analyzer.py",
+                      "language":  "python",
+                      "sizeLines":  142,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/typestate.py",
+                      "language":  "python",
+                      "sizeLines":  206,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "stca/unified_cve_db.py",
+                      "language":  "python",
+                      "sizeLines":  489,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_advanced_layers.py",
+                      "language":  "python",
+                      "sizeLines":  361,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_cache.py",
+                      "language":  "python",
+                      "sizeLines":  58,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_detection_frontier.py",
+                      "language":  "python",
+                      "sizeLines":  285,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_diff_slicer.py",
+                      "language":  "python",
+                      "sizeLines":  72,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_enterprise_features.py",
+                      "language":  "python",
+                      "sizeLines":  356,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_installer.py",
+                      "language":  "python",
+                      "sizeLines":  53,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_it2_fis.py",
+                      "language":  "python",
+                      "sizeLines":  95,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_new_detection.py",
+                      "language":  "python",
+                      "sizeLines":  194,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_orchestrator.py",
+                      "language":  "python",
+                      "sizeLines":  75,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_oss_inspired.py",
+                      "language":  "python",
+                      "sizeLines":  393,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_ported_configs.py",
+                      "language":  "python",
+                      "sizeLines":  263,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_precision_engine.py",
+                      "language":  "python",
+                      "sizeLines":  376,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_scanner_health.py",
+                      "language":  "python",
+                      "sizeLines":  210,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "tests/test_supply_chain.py",
+                      "language":  "python",
+                      "sizeLines":  60,
+                      "fileCategory":  "code"
+                  },
+                  {
+                      "path":  "worklog.md",
+                      "language":  "markdown",
+                      "sizeLines":  186,
+                      "fileCategory":  "docs"
+                  }
+              ],
+    "totalFiles":  170,
+    "filteredByIgnore":  0,
+    "estimatedComplexity":  "large",
+    "stats":  {
+                  "filesScanned":  170,
+                  "byCategory":  {
+                                     "config":  17,
+                                     "infra":  1,
+                                     "code":  145,
+                                     "docs":  7
+                                 },
+                  "byLanguage":  {
+                                     "yaml":  17,
+                                     "unknown":  3,
+                                     "rego":  1,
+                                     "python":  141,
+                                     "toml":  1,
+                                     "markdown":  2,
+                                     "txt":  5
+                                 }
+              },
+    "name":  "stca-pipeline",
+    "rawDescription":  "Static + Test + Constraint Analysis  an offline, deterministic-first bug detection pipeline with a type-2 fuzzy aggregation brain",
+    "readmeHead":  "# STCA Pipeline  Static + Test + Constraint Analysis\n\n\u003e A deterministic-first, type-2 fuzzy aggregated bug detection pipeline. Now with Code Property Graph (CPG) cross-file taint tracking, typestate analysis, metamorphic testing, differential testing, LLM-as-oracle with verified reasoning, and Joern-style CPG queries  detection depth comparable to CodeQL/Joern, free and offline.",
+    "frameworks":  [
+                       "tree-sitter",
+                       "click",
+                       "rich",
+                       "numpy",
+                       "scikit-fuzzy",
+                       "pyyaml",
+                       "jsonschema",
+                       "hypothesis",
+                       "GitHub Actions"
+                   ],
+    "languages":  [
+                      "python",
+                      "yaml",
+                      "markdown",
+                      "rego",
+                      "toml"
+                  ],
+    "importMap":  {
+                      "scriptCompleted":  true,
+                      "stats":  {
+                                    "filesScanned":  170,
+                                    "filesWithImports":  58,
+                                    "totalEdges":  188
+                                },
+                      "importMap":  {
+                                        ".github/actions/stca-action/action.yml":  [
+
+                                                                                   ],
+                                        ".github/workflows/stca.yml":  [
+
+                                                                       ],
+                                        ".mimocode/.cron-lock":  [
+
+                                                                 ],
+                                        ".ua/.understandignore":  [
+
+                                                                  ],
+                                        "examples/policies/no_secrets_in_logs.rego":  [
+
+                                                                                      ],
+                                        "examples/rules/custom.semgrep.yml":  [
+
+                                                                              ],
+                                        "examples/sample-python-repo/.stca.yaml":  [
+
+                                                                                   ],
+                                        "examples/sample-python-repo/app.py":  [
+
+                                                                               ],
+                                        "examples/sample-python-repo/test_app.py":  [
+                                                                                        "examples/sample-python-repo/app.py"
+                                                                                    ],
+                                        "pyproject.toml":  [
+
+                                                           ],
+                                        "README.md":  [
+
+                                                      ],
+                                        "scripts/find_bad_loggers.py":  [
+
+                                                                        ],
+                                        "scripts/fix_silent_except_v2.py":  [
+
+                                                                            ],
+                                        "scripts/fix_silent_except.py":  [
+
+                                                                         ],
+                                        "scripts/rewire_scanner_errors.py":  [
+
+                                                                             ],
+                                        "scripts/show_silent_context.py":  [
+
+                                                                           ],
+                                        "scripts/survey_silent_except.py":  [
+
+                                                                            ],
+                                        "stca_pipeline.egg-info/dependency_links.txt":  [
+
+                                                                                        ],
+                                        "stca_pipeline.egg-info/entry_points.txt":  [
+
+                                                                                    ],
+                                        "stca_pipeline.egg-info/PKG-INFO":  [
+
+                                                                            ],
+                                        "stca_pipeline.egg-info/requires.txt":  [
+
+                                                                                ],
+                                        "stca_pipeline.egg-info/SOURCES.txt":  [
+
+                                                                               ],
+                                        "stca_pipeline.egg-info/top_level.txt":  [
+
+                                                                                 ],
+                                        "stca/__init__.py":  [
+
+                                                             ],
+                                        "stca/advanced_secrets.py":  [
+                                                                         "stca/models.py"
+                                                                     ],
+                                        "stca/architecture.py":  [
+
+                                                                 ],
+                                        "stca/audit.py":  [
+
+                                                          ],
+                                        "stca/baseline.py":  [
+
+                                                             ],
+                                        "stca/bootstrap/__init__.py":  [
+                                                                           "stca/bootstrap/harness_gen.py",
+                                                                           "stca/bootstrap/invariant_inference.py",
+                                                                           "stca/bootstrap/property_gen.py"
+                                                                       ],
+                                        "stca/bootstrap/harness_gen.py":  [
+                                                                              "stca/llm/client.py",
+                                                                              "stca/llm/prm.py"
+                                                                          ],
+                                        "stca/bootstrap/invariant_inference.py":  [
+
+                                                                                  ],
+                                        "stca/bootstrap/property_gen.py":  [
+                                                                               "stca/llm/client.py",
+                                                                               "stca/llm/prm.py"
+                                                                           ],
+                                        "stca/brain/__init__.py":  [
+                                                                       "stca/brain/it2_fis.py",
+                                                                       "stca/brain/membership.py",
+                                                                       "stca/brain/rules.py"
+                                                                   ],
+                                        "stca/brain/aggregator.py":  [
+                                                                         "stca/brain/it2_fis.py",
+                                                                         "stca/brain/membership.py",
+                                                                         "stca/models.py"
+                                                                     ],
+                                        "stca/brain/bayesian.py":  [
+                                                                       "stca/models.py"
+                                                                   ],
+                                        "stca/brain/it2_fis.py":  [
+                                                                      "stca/brain/membership.py",
+                                                                      "stca/brain/rules.py"
+                                                                  ],
+                                        "stca/brain/membership.py":  [
+
+                                                                     ],
+                                        "stca/brain/project_tuner.py":  [
+
+                                                                        ],
+                                        "stca/brain/rules.py":  [
+
+                                                                ],
+                                        "stca/brain/tuner.py":  [
+
+                                                                ],
+                                        "stca/bug_seeds.py":  [
+
+                                                              ],
+                                        "stca/business_logic.py":  [
+
+                                                                   ],
+                                        "stca/cache.py":  [
+
+                                                          ],
+                                        "stca/cli_v2.py":  [
+
+                                                           ],
+                                        "stca/cli.py":  [
+                                                            "stca/baseline.py",
+                                                            "stca/bootstrap/harness_gen.py",
+                                                            "stca/bootstrap/invariant_inference.py",
+                                                            "stca/bootstrap/property_gen.py",
+                                                            "stca/cache.py",
+                                                            "stca/config.py",
+                                                            "stca/feedback/rule_capture.py",
+                                                            "stca/feedback/stats.py",
+                                                            "stca/installer.py",
+                                                            "stca/llm/client.py",
+                                                            "stca/orchestrator.py",
+                                                            "stca/report/tui.py",
+                                                            "stca/rules/__init__.py"
+                                                        ],
+                                        "stca/code_quality.py":  [
+                                                                     "stca/multi_lang.py"
+                                                                 ],
+                                        "stca/codebase_miner.py":  [
+
+                                                                   ],
+                                        "stca/complexity_metrics.py":  [
+
+                                                                       ],
+                                        "stca/concurrency.py":  [
+
+                                                                ],
+                                        "stca/config_scanner.py":  [
+
+                                                                   ],
+                                        "stca/config.py":  [
+
+                                                           ],
+                                        "stca/consistency.py":  [
+
+                                                                ],
+                                        "stca/contracts.py":  [
+
+                                                              ],
+                                        "stca/counterfactual.py":  [
+
+                                                                   ],
+                                        "stca/coverage.py":  [
+
+                                                             ],
+                                        "stca/cpg_queries.py":  [
+                                                                    "stca/cpg.py"
+                                                                ],
+                                        "stca/cpg.py":  [
+
+                                                        ],
+                                        "stca/crypto_audit.py":  [
+                                                                     "stca/multi_lang.py"
+                                                                 ],
+                                        "stca/deadcode.py":  [
+
+                                                             ],
+                                        "stca/diff_slicer.py":  [
+                                                                    "stca/models.py"
+                                                                ],
+                                        "stca/differential.py":  [
+
+                                                                 ],
+                                        "stca/doc_audit.py":  [
+
+                                                              ],
+                                        "stca/duplication.py":  [
+
+                                                                ],
+                                        "stca/extra_rules.py":  [
+
+                                                                ],
+                                        "stca/feedback/__init__.py":  [
+                                                                          "stca/feedback/rule_capture.py",
+                                                                          "stca/feedback/stats.py"
+                                                                      ],
+                                        "stca/feedback/rule_capture.py":  [
+
+                                                                          ],
+                                        "stca/feedback/stats.py":  [
+                                                                       "stca/models.py"
+                                                                   ],
+                                        "stca/ffi_analyzer.py":  [
+
+                                                                 ],
+                                        "stca/flawfinder_db.py":  [
+
+                                                                  ],
+                                        "stca/hotspots.py":  [
+
+                                                             ],
+                                        "stca/html_scanner.py":  [
+
+                                                                 ],
+                                        "stca/iac_scanner.py":  [
+
+                                                                ],
+                                        "stca/impact_analysis.py":  [
+
+                                                                    ],
+                                        "stca/incremental.py":  [
+
+                                                                ],
+                                        "stca/installer.py":  [
+
+                                                              ],
+                                        "stca/interprocedural.py":  [
+
+                                                                    ],
+                                        "stca/issue_store.py":  [
+
+                                                                ],
+                                        "stca/js_cpg.py":  [
+
+                                                           ],
+                                        "stca/js_multiline.py":  [
+
+                                                                 ],
+                                        "stca/js_pattern_scanner.py":  [
+
+                                                                       ],
+                                        "stca/js_quality.py":  [
+
+                                                               ],
+                                        "stca/jsx_auth.py":  [
+                                                                 "stca/business_logic.py"
+                                                             ],
+                                        "stca/knowledge_base.py":  [
+
+                                                                   ],
+                                        "stca/layers/__init__.py":  [
+                                                                        "stca/layers/base.py",
+                                                                        "stca/layers/l0_fast.py",
+                                                                        "stca/layers/l1_property.py",
+                                                                        "stca/layers/l2_mutation.py",
+                                                                        "stca/layers/l3_invariants.py",
+                                                                        "stca/layers/l4_fuzz.py",
+                                                                        "stca/layers/l5_policy.py",
+                                                                        "stca/layers/l6_symbolic.py",
+                                                                        "stca/layers/l7_simulation.py"
+                                                                    ],
+                                        "stca/layers/base.py":  [
+                                                                    "stca/config.py",
+                                                                    "stca/models.py"
+                                                                ],
+                                        "stca/layers/l0_fast.py":  [
+                                                                       "stca/layers/base.py",
+                                                                       "stca/models.py"
+                                                                   ],
+                                        "stca/layers/l0b_supply_chain.py":  [
+                                                                                "stca/layers/base.py",
+                                                                                "stca/models.py"
+                                                                            ],
+                                        "stca/layers/l0c_dependencies.py":  [
+                                                                                "stca/layers/base.py",
+                                                                                "stca/models.py"
+                                                                            ],
+                                        "stca/layers/l0d_behavioral.py":  [
+                                                                              "stca/layers/base.py",
+                                                                              "stca/models.py"
+                                                                          ],
+                                        "stca/layers/l0e_iac.py":  [
+                                                                       "stca/layers/base.py",
+                                                                       "stca/models.py"
+                                                                   ],
+                                        "stca/layers/l0f_commit_risk.py":  [
+                                                                               "stca/layers/base.py",
+                                                                               "stca/models.py"
+                                                                           ],
+                                        "stca/layers/l1_property.py":  [
+                                                                           "stca/layers/base.py",
+                                                                           "stca/models.py"
+                                                                       ],
+                                        "stca/layers/l2_mutation.py":  [
+                                                                           "stca/layers/base.py",
+                                                                           "stca/models.py"
+                                                                       ],
+                                        "stca/layers/l3_invariants.py":  [
+                                                                             "stca/layers/base.py",
+                                                                             "stca/models.py"
+                                                                         ],
+                                        "stca/layers/l4_fuzz.py":  [
+                                                                       "stca/layers/base.py",
+                                                                       "stca/models.py"
+                                                                   ],
+                                        "stca/layers/l5_policy.py":  [
+                                                                         "stca/layers/base.py",
+                                                                         "stca/models.py"
+                                                                     ],
+                                        "stca/layers/l6_symbolic.py":  [
+                                                                           "stca/layers/base.py",
+                                                                           "stca/models.py"
+                                                                       ],
+                                        "stca/layers/l7_simulation.py":  [
+                                                                             "stca/layers/base.py",
+                                                                             "stca/models.py"
+                                                                         ],
+                                        "stca/layers/l8_autofix.py":  [
+                                                                          "stca/layers/base.py",
+                                                                          "stca/models.py"
+                                                                      ],
+                                        "stca/learning.py":  [
+
+                                                             ],
+                                        "stca/llm_verify.py":  [
+
+                                                               ],
+                                        "stca/llm/__init__.py":  [
+                                                                     "stca/llm/client.py",
+                                                                     "stca/llm/prm.py"
+                                                                 ],
+                                        "stca/llm/client.py":  [
+
+                                                               ],
+                                        "stca/llm/prm.py":  [
+
+                                                            ],
+                                        "stca/lsp/__init__.py":  [
+
+                                                                 ],
+                                        "stca/lsp/server.py":  [
+
+                                                               ],
+                                        "stca/malicious_patterns.py":  [
+
+                                                                       ],
+                                        "stca/maven_cve_db.py":  [
+
+                                                                 ],
+                                        "stca/metamorphic.py":  [
+
+                                                                ],
+                                        "stca/missing_patches.py":  [
+
+                                                                    ],
+                                        "stca/models.py":  [
+
+                                                           ],
+                                        "stca/modern_attacks.py":  [
+
+                                                                   ],
+                                        "stca/multi_lang.py":  [
+
+                                                               ],
+                                        "stca/nullness.py":  [
+
+                                                             ],
+                                        "stca/orchestrator.py":  [
+                                                                     "stca/advanced_secrets.py",
+                                                                     "stca/architecture.py",
+                                                                     "stca/audit.py",
+                                                                     "stca/baseline.py",
+                                                                     "stca/brain/aggregator.py",
+                                                                     "stca/bug_seeds.py",
+                                                                     "stca/cache.py",
+                                                                     "stca/config.py",
+                                                                     "stca/consistency.py",
+                                                                     "stca/contracts.py",
+                                                                     "stca/coverage.py",
+                                                                     "stca/cpg_queries.py",
+                                                                     "stca/cpg.py",
+                                                                     "stca/diff_slicer.py",
+                                                                     "stca/differential.py",
+                                                                     "stca/doc_audit.py",
+                                                                     "stca/feedback/stats.py",
+                                                                     "stca/flawfinder_db.py",
+                                                                     "stca/hotspots.py",
+                                                                     "stca/html_scanner.py",
+                                                                     "stca/impact_analysis.py",
+                                                                     "stca/issue_store.py",
+                                                                     "stca/js_cpg.py",
+                                                                     "stca/js_pattern_scanner.py",
+                                                                     "stca/layers/__init__.py",
+                                                                     "stca/layers/l0b_supply_chain.py",
+                                                                     "stca/layers/l0c_dependencies.py",
+                                                                     "stca/layers/l0d_behavioral.py",
+                                                                     "stca/layers/l0e_iac.py",
+                                                                     "stca/layers/l0f_commit_risk.py",
+                                                                     "stca/layers/l8_autofix.py",
+                                                                     "stca/llm/client.py",
+                                                                     "stca/llm/prm.py",
+                                                                     "stca/malicious_patterns.py",
+                                                                     "stca/metamorphic.py",
+                                                                     "stca/missing_patches.py",
+                                                                     "stca/models.py",
+                                                                     "stca/nullness.py",
+                                                                     "stca/pii_detection.py",
+                                                                     "stca/precision.py",
+                                                                     "stca/pysa_integration.py",
+                                                                     "stca/root_cause.py",
+                                                                     "stca/strictness.py",
+                                                                     "stca/suppressions.py",
+                                                                     "stca/taint_cross_file.py",
+                                                                     "stca/typestate.py"
+                                                                 ],
+                                        "stca/pii_detection.py":  [
+
+                                                                  ],
+                                        "stca/pre_commit.py":  [
+
+                                                               ],
+                                        "stca/precision.py":  [
+
+                                                              ],
+                                        "stca/profiles.py":  [
+
+                                                             ],
+                                        "stca/pysa_integration.py":  [
+                                                                         "stca/models.py"
+                                                                     ],
+                                        "stca/report/__init__.py":  [
+                                                                        "stca/report/html.py",
+                                                                        "stca/report/sarif.py",
+                                                                        "stca/report/tui.py"
+                                                                    ],
+                                        "stca/report/dashboard.py":  [
+                                                                         "stca/report/html.py"
+                                                                     ],
+                                        "stca/report/html.py":  [
+                                                                    "stca/models.py"
+                                                                ],
+                                        "stca/report/sarif.py":  [
+                                                                     "stca/models.py"
+                                                                 ],
+                                        "stca/report/tui.py":  [
+                                                                   "stca/models.py"
+                                                               ],
+                                        "stca/root_cause.py":  [
+
+                                                               ],
+                                        "stca/rule_compiler.py":  [
+
+                                                                  ],
+                                        "stca/rule_config.py":  [
+
+                                                                ],
+                                        "stca/rule_dsl.py":  [
+
+                                                             ],
+                                        "stca/rule_miner.py":  [
+
+                                                               ],
+                                        "stca/rules/__init__.py":  [
+
+                                                                   ],
+                                        "stca/rules/packs/cpp-security.yml":  [
+
+                                                                              ],
+                                        "stca/rules/packs/detekt-ported.yml":  [
+
+                                                                               ],
+                                        "stca/rules/packs/go-security.yml":  [
+
+                                                                             ],
+                                        "stca/rules/packs/java-frameworks.yml":  [
+
+                                                                                 ],
+                                        "stca/rules/packs/java-security.yml":  [
+
+                                                                               ],
+                                        "stca/rules/packs/javascript-frameworks.yml":  [
+
+                                                                                       ],
+                                        "stca/rules/packs/javascript-security.yml":  [
+
+                                                                                     ],
+                                        "stca/rules/packs/lintr-ported.yml":  [
+
+                                                                              ],
+                                        "stca/rules/packs/luacheck-ported.yml":  [
+
+                                                                                 ],
+                                        "stca/rules/packs/python-frameworks.yml":  [
+
+                                                                                   ],
+                                        "stca/rules/packs/python-security.yml":  [
+
+                                                                                 ],
+                                        "stca/rules/packs/react-security.yml":  [
+
+                                                                                ],
+                                        "stca/rules/packs/spotbugs-ported.yml":  [
+
+                                                                                 ],
+                                        "stca/source_discovery.py":  [
+                                                                         "stca/multi_lang.py"
+                                                                     ],
+                                        "stca/state_machine.py":  [
+
+                                                                  ],
+                                        "stca/strictness.py":  [
+
+                                                               ],
+                                        "stca/supply_chain.py":  [
+
+                                                                 ],
+                                        "stca/suppressions.py":  [
+
+                                                                 ],
+                                        "stca/symbolic.py":  [
+
+                                                             ],
+                                        "stca/taint_cross_file.py":  [
+                                                                         "stca/cpg.py"
+                                                                     ],
+                                        "stca/taint_tracker.py":  [
+
+                                                                  ],
+                                        "stca/tree_sitter_analyzer.py":  [
+                                                                             "stca/multi_lang.py"
+                                                                         ],
+                                        "stca/typestate.py":  [
+
+                                                              ],
+                                        "stca/unified_cve_db.py":  [
+
+                                                                   ],
+                                        "tests/test_advanced_layers.py":  [
+                                                                              "stca/brain/tuner.py",
+                                                                              "stca/layers/l0d_behavioral.py",
+                                                                              "stca/layers/l0e_iac.py",
+                                                                              "stca/layers/l0f_commit_risk.py",
+                                                                              "stca/layers/l8_autofix.py",
+                                                                              "stca/models.py",
+                                                                              "stca/suppressions.py",
+                                                                              "stca/taint_tracker.py"
+                                                                          ],
+                                        "tests/test_cache.py":  [
+                                                                    "stca/cache.py"
+                                                                ],
+                                        "tests/test_detection_frontier.py":  [
+                                                                                 "stca/cpg_queries.py",
+                                                                                 "stca/cpg.py",
+                                                                                 "stca/differential.py",
+                                                                                 "stca/metamorphic.py",
+                                                                                 "stca/taint_cross_file.py",
+                                                                                 "stca/typestate.py"
+                                                                             ],
+                                        "tests/test_diff_slicer.py":  [
+                                                                          "stca/diff_slicer.py"
+                                                                      ],
+                                        "tests/test_enterprise_features.py":  [
+                                                                                  "stca/advanced_secrets.py",
+                                                                                  "stca/audit.py",
+                                                                                  "stca/coverage.py",
+                                                                                  "stca/hotspots.py"
+                                                                              ],
+                                        "tests/test_installer.py":  [
+                                                                        "stca/installer.py"
+                                                                    ],
+                                        "tests/test_it2_fis.py":  [
+                                                                      "stca/brain/it2_fis.py",
+                                                                      "stca/brain/membership.py"
+                                                                  ],
+                                        "tests/test_new_detection.py":  [
+                                                                            "stca/contracts.py",
+                                                                            "stca/deadcode.py",
+                                                                            "stca/flawfinder_db.py",
+                                                                            "stca/malicious_patterns.py",
+                                                                            "stca/missing_patches.py"
+                                                                        ],
+                                        "tests/test_orchestrator.py":  [
+                                                                           "stca/brain/aggregator.py",
+                                                                           "stca/models.py"
+                                                                       ],
+                                        "tests/test_oss_inspired.py":  [
+                                                                           "stca/baseline.py",
+                                                                           "stca/consistency.py",
+                                                                           "stca/issue_store.py",
+                                                                           "stca/models.py",
+                                                                           "stca/nullness.py",
+                                                                           "stca/strictness.py"
+                                                                       ],
+                                        "tests/test_ported_configs.py":  [
+                                                                             "stca/models.py",
+                                                                             "stca/profiles.py",
+                                                                             "stca/rule_config.py"
+                                                                         ],
+                                        "tests/test_precision_engine.py":  [
+                                                                               "stca/bug_seeds.py",
+                                                                               "stca/codebase_miner.py",
+                                                                               "stca/models.py",
+                                                                               "stca/precision.py",
+                                                                               "stca/rule_compiler.py",
+                                                                               "stca/rule_miner.py"
+                                                                           ],
+                                        "tests/test_scanner_health.py":  [
+                                                                             "stca/config.py",
+                                                                             "stca/models.py",
+                                                                             "stca/orchestrator.py",
+                                                                             "stca/report/sarif.py"
+                                                                         ],
+                                        "tests/test_supply_chain.py":  [
+                                                                           "stca/layers/l0b_supply_chain.py",
+                                                                           "stca/models.py"
+                                                                       ],
+                                        "worklog.md":  [
+
+                                                       ]
+                                    }
+                  }
+}
+

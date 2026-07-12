@@ -1,0 +1,612 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 25,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": ".github/actions/stca-action/action.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 52,
+      "nonEmptyLines": 52,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "inputs",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "runs",
+          "level": 1,
+          "line": 20
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": ".github/workflows/stca.yml",
+      "language": "yaml",
+      "fileCategory": "infra",
+      "totalLines": 49,
+      "nonEmptyLines": 49,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "on",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "jobs",
+          "level": 1,
+          "line": 7
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "examples/rules/custom.semgrep.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 38,
+      "nonEmptyLines": 35,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "examples/sample-python-repo/.stca.yaml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 27,
+      "nonEmptyLines": 24,
+      "sections": [
+        {
+          "heading": "layers",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "critical_paths",
+          "level": 1,
+          "line": 12
+        },
+        {
+          "heading": "concurrency_paths",
+          "level": 1,
+          "line": 13
+        },
+        {
+          "heading": "block_on",
+          "level": 1,
+          "line": 14
+        },
+        {
+          "heading": "warn_on",
+          "level": 1,
+          "line": 15
+        },
+        {
+          "heading": "llm",
+          "level": 1,
+          "line": 17
+        },
+        {
+          "heading": "tools",
+          "level": 1,
+          "line": 25
+        },
+        {
+          "heading": "stats_file",
+          "level": 1,
+          "line": 26
+        },
+        {
+          "heading": "report_dir",
+          "level": 1,
+          "line": 27
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 9
+      }
+    },
+    {
+      "path": "pyproject.toml",
+      "language": "toml",
+      "fileCategory": "config",
+      "totalLines": 59,
+      "nonEmptyLines": 53,
+      "sections": [
+        {
+          "heading": "build-system",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "project",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "project.optional-dependencies",
+          "level": 2,
+          "line": 38
+        },
+        {
+          "heading": "project.scripts",
+          "level": 2,
+          "line": 51
+        },
+        {
+          "heading": "tool.setuptools.packages.find",
+          "level": 4,
+          "line": 54
+        },
+        {
+          "heading": "tool.pytest.ini_options",
+          "level": 3,
+          "line": 57
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 189,
+      "nonEmptyLines": 155,
+      "sections": [
+        {
+          "heading": "STCA Pipeline — Static + Test + Constraint Analysis",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "What's new in this build (detection frontier)",
+          "level": 2,
+          "line": 5
+        },
+        {
+          "heading": "6 new detection engines",
+          "level": 3,
+          "line": 9
+        },
+        {
+          "heading": "CPG queries (Joern-style DSL)",
+          "level": 3,
+          "line": 20
+        },
+        {
+          "heading": "End-to-end detection: 23 findings on the sample repo (was 10)",
+          "level": 3,
+          "line": 42
+        },
+        {
+          "heading": "Architecture (15 layers + 6 new detection engines + brain + autofix)",
+          "level": 2,
+          "line": 50
+        },
+        {
+          "heading": "Quick start",
+          "level": 2,
+          "line": 99
+        },
+        {
+          "heading": "New CLI commands",
+          "level": 2,
+          "line": 109
+        },
+        {
+          "heading": "Existing CLI commands (still work)",
+          "level": 2,
+          "line": 136
+        },
+        {
+          "heading": "Detection depth comparison (vs major tools)",
+          "level": 2,
+          "line": 154
+        },
+        {
+          "heading": "Honest limits",
+          "level": 2,
+          "line": 178
+        },
+        {
+          "heading": "License",
+          "level": 2,
+          "line": 187
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 12
+      }
+    },
+    {
+      "path": "stca_pipeline.egg-info/dependency_links.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 1,
+      "nonEmptyLines": 0,
+      "metrics": {}
+    },
+    {
+      "path": "stca_pipeline.egg-info/entry_points.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 2,
+      "nonEmptyLines": 2,
+      "metrics": {}
+    },
+    {
+      "path": "stca_pipeline.egg-info/requires.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 38,
+      "nonEmptyLines": 31,
+      "metrics": {}
+    },
+    {
+      "path": "stca_pipeline.egg-info/SOURCES.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 141,
+      "nonEmptyLines": 141,
+      "metrics": {}
+    },
+    {
+      "path": "stca_pipeline.egg-info/top_level.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 1,
+      "nonEmptyLines": 1,
+      "metrics": {}
+    },
+    {
+      "path": "stca/rules/packs/cpp-security.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 90,
+      "nonEmptyLines": 79,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 2
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/detekt-ported.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 256,
+      "nonEmptyLines": 230,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 8
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/go-security.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 98,
+      "nonEmptyLines": 87,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 2
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/java-frameworks.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 200,
+      "nonEmptyLines": 176,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 2
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/java-security.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 90,
+      "nonEmptyLines": 79,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 2
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/javascript-frameworks.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 227,
+      "nonEmptyLines": 198,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/javascript-security.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 178,
+      "nonEmptyLines": 156,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 2
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/lintr-ported.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 174,
+      "nonEmptyLines": 154,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 10
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/luacheck-ported.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 162,
+      "nonEmptyLines": 147,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/python-frameworks.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 256,
+      "nonEmptyLines": 222,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/python-security.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 204,
+      "nonEmptyLines": 178,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 7
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/react-security.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 269,
+      "nonEmptyLines": 237,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 16
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "stca/rules/packs/spotbugs-ported.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 190,
+      "nonEmptyLines": 171,
+      "sections": [
+        {
+          "heading": "rules",
+          "level": 1,
+          "line": 18
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "worklog.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 186,
+      "nonEmptyLines": 166,
+      "sections": [
+        {
+          "heading": "Worklog — stca-pipeline P0/P1 follow-up fixes",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    }
+  ]
+}

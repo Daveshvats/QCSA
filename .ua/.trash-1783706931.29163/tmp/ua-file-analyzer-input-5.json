@@ -1,0 +1,224 @@
+{
+    "projectRoot":  "C:\\Users\\deves\\Downloads\\stca-pipeline-complete-v2.6\\stca-pipeline",
+    "batchImportData":  {
+                            "tests/test_detection_frontier.py":  [
+                                                                     "stca/cpg_queries.py",
+                                                                     "stca/cpg.py",
+                                                                     "stca/differential.py",
+                                                                     "stca/metamorphic.py",
+                                                                     "stca/taint_cross_file.py",
+                                                                     "stca/typestate.py"
+                                                                 ],
+                            "stca/taint_cross_file.py":  [
+                                                             "stca/cpg.py"
+                                                         ],
+                            "tests/test_ported_configs.py":  [
+                                                                 "stca/models.py",
+                                                                 "stca/profiles.py",
+                                                                 "stca/rule_config.py"
+                                                             ],
+                            "tests/test_advanced_layers.py":  [
+                                                                  "stca/brain/tuner.py",
+                                                                  "stca/layers/l0d_behavioral.py",
+                                                                  "stca/layers/l0e_iac.py",
+                                                                  "stca/layers/l0f_commit_risk.py",
+                                                                  "stca/layers/l8_autofix.py",
+                                                                  "stca/models.py",
+                                                                  "stca/suppressions.py",
+                                                                  "stca/taint_tracker.py"
+                                                              ],
+                            "tests/test_supply_chain.py":  [
+                                                               "stca/layers/l0b_supply_chain.py",
+                                                               "stca/models.py"
+                                                           ],
+                            "tests/test_orchestrator.py":  [
+                                                               "stca/brain/aggregator.py",
+                                                               "stca/models.py"
+                                                           ],
+                            "stca/symbolic.py":  [
+
+                                                 ],
+                            "tests/test_installer.py":  [
+                                                            "stca/installer.py"
+                                                        ],
+                            "tests/test_scanner_health.py":  [
+                                                                 "stca/config.py",
+                                                                 "stca/models.py",
+                                                                 "stca/orchestrator.py",
+                                                                 "stca/report/sarif.py"
+                                                             ],
+                            "stca/tree_sitter_analyzer.py":  [
+                                                                 "stca/multi_lang.py"
+                                                             ],
+                            "tests/test_it2_fis.py":  [
+                                                          "stca/brain/it2_fis.py",
+                                                          "stca/brain/membership.py"
+                                                      ],
+                            "tests/test_enterprise_features.py":  [
+                                                                      "stca/advanced_secrets.py",
+                                                                      "stca/audit.py",
+                                                                      "stca/coverage.py",
+                                                                      "stca/hotspots.py"
+                                                                  ],
+                            "tests/test_diff_slicer.py":  [
+                                                              "stca/diff_slicer.py"
+                                                          ],
+                            "tests/test_oss_inspired.py":  [
+                                                               "stca/baseline.py",
+                                                               "stca/consistency.py",
+                                                               "stca/issue_store.py",
+                                                               "stca/models.py",
+                                                               "stca/nullness.py",
+                                                               "stca/strictness.py"
+                                                           ],
+                            "stca/typestate.py":  [
+
+                                                  ],
+                            "tests/test_new_detection.py":  [
+                                                                "stca/contracts.py",
+                                                                "stca/deadcode.py",
+                                                                "stca/flawfinder_db.py",
+                                                                "stca/malicious_patterns.py",
+                                                                "stca/missing_patches.py"
+                                                            ],
+                            "stca/taint_tracker.py":  [
+
+                                                      ],
+                            "stca/unified_cve_db.py":  [
+
+                                                       ],
+                            "tests/test_cache.py":  [
+                                                        "stca/cache.py"
+                                                    ],
+                            "tests/test_precision_engine.py":  [
+                                                                   "stca/bug_seeds.py",
+                                                                   "stca/codebase_miner.py",
+                                                                   "stca/models.py",
+                                                                   "stca/precision.py",
+                                                                   "stca/rule_compiler.py",
+                                                                   "stca/rule_miner.py"
+                                                               ]
+                        },
+    "batchFiles":  [
+                       {
+                           "path":  "stca/symbolic.py",
+                           "language":  "python",
+                           "sizeLines":  479,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/taint_cross_file.py",
+                           "language":  "python",
+                           "sizeLines":  291,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/taint_tracker.py",
+                           "language":  "python",
+                           "sizeLines":  135,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/tree_sitter_analyzer.py",
+                           "language":  "python",
+                           "sizeLines":  142,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/typestate.py",
+                           "language":  "python",
+                           "sizeLines":  206,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/unified_cve_db.py",
+                           "language":  "python",
+                           "sizeLines":  489,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_advanced_layers.py",
+                           "language":  "python",
+                           "sizeLines":  361,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_cache.py",
+                           "language":  "python",
+                           "sizeLines":  58,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_detection_frontier.py",
+                           "language":  "python",
+                           "sizeLines":  285,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_diff_slicer.py",
+                           "language":  "python",
+                           "sizeLines":  72,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_enterprise_features.py",
+                           "language":  "python",
+                           "sizeLines":  356,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_installer.py",
+                           "language":  "python",
+                           "sizeLines":  53,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_it2_fis.py",
+                           "language":  "python",
+                           "sizeLines":  95,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_new_detection.py",
+                           "language":  "python",
+                           "sizeLines":  194,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_orchestrator.py",
+                           "language":  "python",
+                           "sizeLines":  75,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_oss_inspired.py",
+                           "language":  "python",
+                           "sizeLines":  393,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_ported_configs.py",
+                           "language":  "python",
+                           "sizeLines":  263,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_precision_engine.py",
+                           "language":  "python",
+                           "sizeLines":  376,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_scanner_health.py",
+                           "language":  "python",
+                           "sizeLines":  210,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "tests/test_supply_chain.py",
+                           "language":  "python",
+                           "sizeLines":  60,
+                           "fileCategory":  "code"
+                       }
+                   ]
+}

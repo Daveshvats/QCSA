@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import List, Set, Dict, Tuple, Optional
 from dataclasses import dataclass, field
 
-from .cpg import CPG, CPGNode, build_cpg_for_repo, build_cpg_for_file
+from .cpg import CPG, CPGNode, build_cpg_for_repo, build_cpg_for_file, build_cpg_for_repo_multi, build_cpg_for_file_multi
 
 
 # Source patterns: parameter names that are likely user input (case-insensitive)
@@ -226,9 +226,89 @@ def track_taint_cross_file(cpg: CPG,
                 ))
                 continue  # don't expand past a sink
 
-            # expand
+            # v3.3: Also check if this tainted variable is an ARGUMENT to a sink call.
+            # If a tainted variable is an ast_child of a sink call node, that's a flow.
+            # BUT: for SQL sinks (execute, executemany), only the FIRST argument
+            # (the query) is dangerous — subsequent arguments are bound params
+            # which are safe from injection.
+            current_node = cpg.nodes.get(nid)
+            if current_node and current_node.kind == "variable":
+                for call_id, call_node in cpg.nodes.items():
+                    if call_node.kind != "call" or call_node.name not in sink_names:
+                        continue
+                    if call_id == source.id:
+                        continue
+                    # Check if this variable is an ast_child of the call node
+                    for edge_kind, dst in cpg.successors.get(call_id, []):
+                        if edge_kind == "ast_child" and dst == nid:
+                            # v3.3: For SQL sinks, check if this is the query
+                            # argument (first arg) or a bound param (subsequent arg).
+                            # Parameterized queries are safe.
+                            if call_node.name in ("execute", "executemany", "executescript"):
+                                # The FIRST ast_child is the method receiver
+                                # (e.g., 'cursor' in cursor.execute(...)).
+                                # Subsequent ast_children are the arguments.
+                                # arg_position 0 = first argument (the query)
+                                # arg_position 1+ = bound params (safe)
+                                ast_children = [dst2 for e2, dst2 in cpg.successors.get(call_id, [])
+                                                if e2 == "ast_child"]
+                                if len(ast_children) > 0:
+                                    # Find this variable's position among ast_children
+                                    try:
+                                        child_idx = ast_children.index(nid)
+                                        # First child is receiver (index 0)
+                                        # Second child is first arg (index 1 → arg_position 0)
+                                        # Third child is second arg (index 2 → arg_position 1)
+                                        arg_position = child_idx - 1  # subtract receiver
+                                        if arg_position > 0:
+                                            # This is a bound parameter (2nd+ arg) — safe
+                                            continue
+                                    except ValueError:
+                                        pass
+                            if _is_sanitized(cpg, call_id):
+                                continue
+                            pair = (source.id, call_id)
+                            if pair in seen_pairs:
+                                continue
+                            seen_pairs.add(pair)
+                            # Reconstruct path
+                            path: List[str] = []
+                            cur: Optional[str] = nid
+                            while cur is not None:
+                                path.append(cur)
+                                cur = parent.get(cur)
+                            path.reverse()
+                            path.append(call_id)
+                            sink_function = _find_enclosing_function(cpg, call_id)
+                            source_file = source.file
+                            sink_file = call_node.file
+                            cross_file = source_file != sink_file
+                            intermediate_funcs: List[str] = []
+                            for pid in path:
+                                pnode = cpg.nodes.get(pid)
+                                if pnode and pnode.kind == "function":
+                                    intermediate_funcs.append(pnode.name)
+                            cwe, desc = SINK_PATTERNS.get(call_node.name, ("CWE-Other", "Vulnerable sink"))
+                            flows.append(TaintFlow(
+                                source=f"param '{source.name}'" if source.kind == "param" else source.name,
+                                sink=call_node.name,
+                                sink_file=call_node.file,
+                                sink_line=call_node.line,
+                                sink_function=sink_function,
+                                cwe=cwe,
+                                description=desc,
+                                path=path,
+                                cross_file=cross_file,
+                                intermediate_functions=intermediate_funcs,
+                            ))
+                            break
+
+            # expand — v3.3: also follow 'param' edges for interprocedural analysis
+            # v4.3: also follow 'param_cross_file' edges for genuine cross-file
+            # taint propagation (arg at call-site → param in callee body in
+            # a different file)
             for edge_kind, dst in cpg.successors.get(nid, []):
-                if edge_kind in ("data_dep", "call") and dst not in visited:
+                if edge_kind in ("data_dep", "call", "param", "param_cross_file") and dst not in visited:
                     visited[dst] = depth + 1
                     parent[dst] = nid
                     queue.append(dst)
@@ -271,11 +351,11 @@ def track_taint_for_files(files: List[Path],
         return []
     # use the repo-level CPG if we have one, else build per-file
     if repo_root and len(files) > 1:
-        cpg = build_cpg_for_repo(repo_root)
+        cpg = build_cpg_for_repo_multi(repo_root)  # v4.24: multi-lang CPG
     else:
         cpg = CPG()
         for f in files:
-            file_cpg = build_cpg_for_file(f, repo_root)
+            file_cpg = build_cpg_for_file_multi(f, repo_root)  # v4.25: multi-lang
             # merge
             for nid, node in file_cpg.nodes.items():
                 cpg.nodes[nid] = node

@@ -37,7 +37,7 @@ def run_pre_commit(repo_root: Path, block_only: bool = True, time_budget_ms: int
             if ext == ".py":
                 for issue in nullness.analyze_file(f, repo_root):
                     findings.append({"severity": "high", "rule_id": "nullness", "line": issue.line, "message": issue.reason, "file": str(f)})
-                for issue in symbolic.analyze_file(f, repo_root):
+                for issue in symbolic.analyze_file(f):  # v4.14: analyze_file takes only file_path
                     findings.append({"severity": "high", "rule_id": issue.kind, "line": issue.line, "message": issue.description, "file": str(f)})
                 for issue in py_crypto.analyze_file(f, repo_root):
                     findings.append({"severity": issue.severity, "rule_id": issue.rule_id, "line": issue.line, "message": issue.description, "file": str(f)})

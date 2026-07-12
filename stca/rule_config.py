@@ -33,10 +33,6 @@ Config goes in .stca.yaml under "rules":
 """
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.rule_config")
-
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -75,8 +71,8 @@ class RuleConfigManager:
                     paths_exclude=rule_data.get("paths_exclude", []),
                     note=rule_data.get("note", ""),
                 )
-        except Exception as e:
-            logger.warning("Failed to load rule config: %s", e)
+        except Exception:
+            pass
 
     def get_rule_config(self, rule_id: str) -> RuleConfig:
         """Get config for a rule. Returns default if not configured."""

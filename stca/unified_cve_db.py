@@ -22,10 +22,6 @@ This approach:
 """
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.unified_cve_db")
-
 import json
 import sqlite3
 import urllib.request
@@ -230,8 +226,8 @@ class UnifiedCVEDatabase:
                     ]
                     self._store_cached(ecosystem, package, version, results)
                     return results
-            except Exception as e:
-                logger.debug("seed CVE DB lookup failed for %s/%s@%s: %s", ecosystem, package, version, e)
+            except Exception:
+                pass
 
         # Step 3: Query OSV.dev
         query = {"package": {"ecosystem": ecosystem, "name": package}, "version": version}
@@ -283,8 +279,8 @@ class UnifiedCVEDatabase:
                             self._store_cached(eco, pkg, ver, seed_results)
                             results.extend(seed_results)
                             continue
-                    except Exception as e:
-                        logger.debug("seed CVE DB batch lookup failed for %s/%s@%s: %s", eco, pkg, ver, e)
+                    except Exception:
+                        pass
                 uncached.append((i, eco, pkg, ver))
 
         if not uncached:

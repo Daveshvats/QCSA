@@ -129,13 +129,26 @@ def scan_dockerfile(file_path, repo_root=None):
     except: return []
     findings = []
     lines = source.splitlines()
+    # v4.35: Skip Dockerfile rules that L0eIaC layer already covers with
+    # autofix support. The L0e.* findings have L8 autofix patterns wired;
+    # the L0.iac.* equivalents did NOT, so keeping both produced duplicate
+    # findings with no autofix benefit. The skipped rules are:
+    #   DOCKER-ROOT-USER         (≡ L0e.docker-root-user, has autofix)
+    #   DOCKER-SECRET-ENV        (≡ L0e.docker-secret-env, has autofix)
+    #   DOCKER-APT-NO-CLEAN      (≡ L0e.docker-apt-no-cleanup, has autofix)
+    #   DOCKER-NO-PIN-VERSION    (≡ L0e.docker-latest-tag, has autofix)
+    #   DOCKER-NO-HEALTHCHECK    (≡ L0e.docker-no-healthcheck, has autofix)
+    # The remaining iac_scanner Dockerfile rules (DOCKER-ADD-URL, DOCKER-COPY-DOT,
+    # DOCKER-CHMOD-777, DOCKER-APT-NO-FIX) have NO L0e equivalent, so they stay.
+    _L0E_OVERLAP = {
+        "DOCKER-ROOT-USER", "DOCKER-SECRET-ENV", "DOCKER-APT-NO-CLEAN",
+        "DOCKER-NO-PIN-VERSION", "DOCKER-NO-HEALTHCHECK",
+    }
     for rule_id, pattern, severity, desc, fix in DOCKERFILE_RULES:
+        if rule_id in _L0E_OVERLAP:
+            continue  # L0eIaC layer handles these (with autofix support)
         if pattern is None:
-            # Absence-based checks
-            if rule_id == "DOCKER-NO-HEALTHCHECK":
-                if not any(re.match(r'^\s*HEALTHCHECK\b', l, re.IGNORECASE) for l in lines):
-                    findings.append(IaCFinding(file=rel, line=1, rule_id=f"L0.iac.{rule_id}", severity=severity, description=desc, fix=fix))
-            continue
+            continue  # absence-based checks all moved to L0e
         for i, line in enumerate(lines, 1):
             if re.search(pattern, line, re.IGNORECASE):
                 findings.append(IaCFinding(file=rel, line=i, rule_id=f"L0.iac.{rule_id}", severity=severity, description=desc, fix=fix))
@@ -149,16 +162,27 @@ def scan_kubernetes(file_path, repo_root=None):
     rel = str(file_path.relative_to(repo_root)) if repo_root else str(file_path)
     findings = []
     lines = source.splitlines()
+    # v4.35: Skip K8s rules that L0eIaC layer already covers with autofix.
+    # Same rationale as scan_dockerfile — L0e.* findings have L8 autofix
+    # patterns wired; the L0.iac.* equivalents did NOT.
+    _L0E_OVERLAP_K8S = {
+        "K8S-PRIVILEGED-CONTAINER",    # ≡ L0e.k8s-privileged-container (autofix)
+        "K8S-RUN-AS-ROOT",             # ≡ L0e.k8s-run-as-root (autofix)
+        "K8S-HOST-NETWORK",            # ≡ L0e.k8s-host-network (autofix)
+        "K8S-HOST-PID",                # ≡ L0e.k8s-host-pid (autofix)
+        "K8S-IMAGE-LATEST",            # ≡ L0e.k8s-image-latest (autofix)
+        "K8S-NO-RESOURCE-LIMITS",      # ≡ L0e.k8s-no-resource-limits (autofix)
+        "K8S-NO-LIVENESS-PROBE",       # ≡ L0e.k8s-no-liveness-probe
+        "K8S-PRIVILEGE-ESCALATION",    # ≡ L0e.k8s-allow-privilege-escalation
+    }
     for rule_id, pattern, severity, desc, fix in K8S_RULES:
+        if rule_id in _L0E_OVERLAP_K8S:
+            continue
         if pattern is None:
-            # Absence-based checks
-            if rule_id == "K8S-NO-RESOURCE-LIMITS" and "resources:" not in source:
-                findings.append(IaCFinding(file=rel, line=1, rule_id=f"L0.iac.{rule_id}", severity=severity, description=desc, fix=fix))
-            elif rule_id == "K8S-NO-SECURITY-CONTEXT" and "securityContext:" not in source:
+            # Absence-based checks (only the ones with NO L0e equivalent)
+            if rule_id == "K8S-NO-SECURITY-CONTEXT" and "securityContext:" not in source:
                 findings.append(IaCFinding(file=rel, line=1, rule_id=f"L0.iac.{rule_id}", severity=severity, description=desc, fix=fix))
             elif rule_id == "K8S-NO-READ-ONLY-ROOTFS" and "readOnlyRootFilesystem" not in source:
-                findings.append(IaCFinding(file=rel, line=1, rule_id=f"L0.iac.{rule_id}", severity=severity, description=desc, fix=fix))
-            elif rule_id == "K8S-NO-LIVENESS-PROBE" and "livenessProbe:" not in source:
                 findings.append(IaCFinding(file=rel, line=1, rule_id=f"L0.iac.{rule_id}", severity=severity, description=desc, fix=fix))
             elif rule_id == "K8S-NO-READINESS-PROBE" and "readinessProbe:" not in source:
                 findings.append(IaCFinding(file=rel, line=1, rule_id=f"L0.iac.{rule_id}", severity=severity, description=desc, fix=fix))

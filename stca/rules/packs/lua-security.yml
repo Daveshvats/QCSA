@@ -1,0 +1,177 @@
+# STCA Lua Security Rules — 35 rules
+rules:
+  - id: lua-loadstring
+    pattern: "\\bloadstring\\s*\\("
+    severity: critical
+    message: "loadstring — RCE on user input"
+    metadata: {cwe: "CWE-94"}
+  - id: lua-load-string-user
+    pattern: "\\bloadstring\\s*\\([^)]*request"
+    severity: critical
+    message: "loadstring with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: lua-dofile-user
+    pattern: "\\bdofile\\s*\\(\\s*[\\\"'].*\\.\\."
+    severity: high
+    message: "dofile with concat — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: lua-loadfile-user
+    pattern: "\\bloadfile\\s*\\(\\s*[\\\"'].*\\.\\."
+    severity: high
+    message: "loadfile with concat — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: lua-require-user
+    pattern: "\\brequire\\s*\\(\\s*[\\\"'].*\\.\\."
+    severity: medium
+    message: "require with concat — module injection"
+    metadata: {cwe: "CWE-829"}
+  - id: lua-os-execute
+    pattern: "\\bos\\.execute\\s*\\("
+    severity: high
+    message: "os.execute — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: lua-os-execute-user
+    pattern: "\\bos\\.execute\\s*\\([^)]*\\.\\."
+    severity: critical
+    message: "os.execute with concat — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: lua-io-popen
+    pattern: "\\bio\\.popen\\s*\\("
+    severity: high
+    message: "io.popen — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: lua-io-popen-user
+    pattern: "\\bio\\.popen\\s*\\([^)]*\\.\\."
+    severity: critical
+    message: "io.popen with concat — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: lua-os-getenv-secret
+    pattern: "\\bos\\.getenv\\s*\\(\\s*[\\\"']\\w*(?:PASSWORD|SECRET|TOKEN|API_KEY)"
+    severity: medium
+    message: "os.getenv for secret — verify not logged"
+    metadata: {cwe: "CWE-522"}
+  - id: lua-md5
+    pattern: "\\bmd5\\.sumhexa\\b|md5\\.sum\\b"
+    severity: high
+    message: "MD5 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: lua-sha1
+    pattern: "\\bsha1\\b"
+    severity: high
+    message: "SHA1 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: lua-math-random
+    pattern: "\\bmath\\.random\\s*\\("
+    severity: high
+    message: "math.random NOT CSPRNG"
+    metadata: {cwe: "CWE-338"}
+  - id: lua-math-randomseed
+    pattern: "\\bmath\\.randomseed\\s*\\("
+    severity: high
+    message: "math.randomseed predictable — use os.time + urandom"
+    metadata: {cwe: "CWE-338"}
+  - id: lua-hardcoded-secret
+    pattern: "\\b(?:password|secret|api[_-]?key|auth[_-]?token)\\s*=\\s*[\\\"'][^\\\"']{8,}[\\\"']"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: lua-hardcoded-password
+    pattern: "\\bpassword\\s*=\\s*[\\\"'][^\\\"']{8,}[\\\"']"
+    severity: high
+    message: "Hardcoded password"
+    metadata: {cwe: "CWE-798"}
+  - id: lua-http-not-https
+    pattern: "\\bhttp://[a-z]"
+    severity: medium
+    message: "HTTP (not HTTPS) URL"
+    metadata: {cwe: "CWE-319"}
+  - id: lua-ssl-verify-none
+    pattern: "\\bssl\\.verify\\s*=\\s*none|verify\\s*=\\s*[\\\"']none[\\\"']"
+    severity: critical
+    message: "SSL verification disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: lua-global-var
+    pattern: "^\\s*[A-Z_][A-Z_0-9]*\\s*="
+    severity: low
+    message: "Global variable — implicit, may conflict"
+    metadata: {cwe: "CWE-1109"}
+  - id: lua-global-function
+    pattern: "^function\\s+\\w+\\s*\\("
+    severity: low
+    message: "Global function — implicit, prefer local"
+    metadata: {cwe: "CWE-1109"}
+  - id: lua-implicit-global
+    pattern: "^\\s*\\w+\\s*=\\s*[^=]"
+    severity: low
+    message: "Implicit global assignment — use local"
+    metadata: {cwe: "CWE-1109"}
+  - id: lua-table-insert-user
+    pattern: "\\btable\\.insert\\s*\\([^,]+,\\s*\\.\\.\\."
+    severity: low
+    message: "table.insert with varargs — verify bounds"
+    metadata: {cwe: "CWE-129"}
+  - id: lua-string-format-sql
+    pattern: "\\bstring\\.format\\s*\\([^)]*(?:SELECT|INSERT|UPDATE|DELETE)"
+    severity: high
+    message: "string.format with SQL — injection risk"
+    metadata: {cwe: "CWE-89"}
+  - id: lua-string-format-user
+    pattern: "\\bstring\\.format\\s*\\([^)]*\\.\\."
+    severity: medium
+    message: "string.format with concat — format string attack"
+    metadata: {cwe: "CWE-134"}
+  - id: lua-debug-traceback
+    pattern: "\\bdebug\\.traceback\\s*\\("
+    severity: low
+    message: "debug.traceback in production"
+    metadata: {cwe: "CWE-532"}
+  - id: lua-print-prod
+    pattern: "\\bprint\\s*\\("
+    severity: low
+    message: "print in production — use logging library"
+    metadata: {cwe: "CWE-532"}
+  - id: lua-pcall-empty
+    pattern: "\\bpcall\\s*\\([^,]+,\\s*\\w+\\s*\\)\\s*$"
+    severity: medium
+    message: "pcall without error handling — silent failures"
+    metadata: {cwe: "CWE-755"}
+  - id: lua-error-no-msg
+    pattern: "\\berror\\s*\\(\\s*\\)"
+    severity: medium
+    message: "error() without message — hard to debug"
+    metadata: {cwe: "CWE-754"}
+  - id: lua-assert-no-msg
+    pattern: "\\bassert\\s*\\([^,]+\\)\\s*$"
+    severity: low
+    message: "assert without message — unhelpful on failure"
+    metadata: {cwe: "CWE-754"}
+  - id: lua-setmetatable-shared
+    pattern: "\\bsetmetatable\\s*\\(\\s*\\{\\s*\\}\\s*,\\s*\\w+\\s*\\)"
+    severity: low
+    message: "shared metatable — verify mutation safety"
+    metadata: {cwe: "CWE-662"}
+  - id: lua-rawget-user
+    pattern: "\\brawget\\s*\\(\\s*\\w+\\s*,\\s*\\.\\.\\."
+    severity: low
+    message: "rawget with user input — info leak risk"
+    metadata: {cwe: "CWE-200"}
+  - id: lua-string-gsub-user
+    pattern: "\\bstring\\.gsub\\s*\\([^,]+,\\s*[^,]+,\\s*[^)]*\\.\\."
+    severity: medium
+    message: "string.gsub with concat — verify no ReDoS"
+    metadata: {cwe: "CWE-1333"}
+  - id: lua-string-find-user-pattern
+    pattern: "\\bstring\\.find\\s*\\([^,]+,\\s*[^,]+\\s*,\\s*[^,]+\\s*,\\s*nil"
+    severity: medium
+    message: "string.find with user pattern — ReDoS risk"
+    metadata: {cwe: "CWE-1333"}
+  - id: lua-regex-pattern-user
+    pattern: "\\bstring\\.(?:gmatch|match)\\s*\\([^,]+,\\s*\\.\\."
+    severity: medium
+    message: "string match with user pattern — ReDoS risk"
+    metadata: {cwe: "CWE-1333"}
+  - id: lua-cjson-decode-user
+    pattern: "\\bcjson\\.decode\\s*\\(\\s*request"
+    severity: medium
+    message: "cjson.decode on user input — DoS via huge payload"
+    metadata: {cwe: "CWE-400"}

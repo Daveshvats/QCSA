@@ -1,0 +1,1494 @@
+{
+  "nodes": [
+    {
+      "id": "file:stca/brain/membership.py",
+      "type": "file",
+      "name": "membership",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Interval Type-2 Fuzzy Inference System (IT2-FIS) membership functions implementing triangular/trapezoidal MFs and domain-specific membership functions for severity, confidence, blast radius, exploitability, and source reliability.",
+      "tags": ["fuzzy-logic", "membership-functions", "it2-fis", "brain"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/brain/project_tuner.py",
+      "type": "file",
+      "name": "project_tuner",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Per-project FIS tuning via feedback. Tracks TP/FP/FN labels per rule, computes precision/recall stats, and adjusts confidence multipliers to adapt the global FIS to each project's feedback history.",
+      "tags": ["feedback", "tuning", "precision-recall", "brain"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/brain/rules.py",
+      "type": "file",
+      "name": "rules",
+      "filePath": "stca/brain/rules.py",
+      "summary": "The IT2-FIS rule base containing 50 hand-crafted fuzzy rules covering severity, confidence, blast radius, exploitability, and source reliability combinations to produce pass/warn/block decisions.",
+      "tags": ["fuzzy-rules", "decision-logic", "brain"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/brain/tuner.py",
+      "type": "file",
+      "name": "tuner",
+      "filePath": "stca/brain/tuner.py",
+      "summary": "FIS auto-tuner that calibrates IT2-FIS rule weights against ground-truth feedback by widening confidence bands for high-FP layers and lowering severity thresholds for high-FN layers.",
+      "tags": ["auto-tuner", "calibration", "fis", "brain"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/bug_seeds.py",
+      "type": "file",
+      "name": "bug_seeds",
+      "filePath": "stca/bug_seeds.py",
+      "summary": "Bug-seed database containing ~100 curated CWE-specific vulnerability patterns for cross-referencing findings and boosting confidence when patterns match known vulnerability classes.",
+      "tags": ["cwe", "vulnerability-patterns", "cross-reference", "bug-seeds"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/business_logic.py",
+      "type": "file",
+      "name": "business_logic",
+      "filePath": "stca/business_logic.py",
+      "summary": "Business logic understanding module that extracts and verifies domain-level rules: authorization matrix, business state machines, invariants from asserts/raise-if checks, and detects docstring drift.",
+      "tags": ["business-logic", "auth-matrix", "state-machine", "invariants", "doc-drift"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/cache.py",
+      "type": "file",
+      "name": "cache",
+      "filePath": "stca/cache.py",
+      "summary": "Function-level result caching system that stores layer analysis results keyed on function body hashes with 7-day TTL, stored in .stca-cache/ directory.",
+      "tags": ["caching", "performance", "result-cache"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/cli_v2.py",
+      "type": "file",
+      "name": "cli_v2",
+      "filePath": "stca/cli_v2.py",
+      "summary": "v2 CLI commands registering additional stca subcommands for symbolic execution, concurrency analysis, business logic, crypto audit, IAC scanning, supply chain, dashboard, LSP, and other advanced features.",
+      "tags": ["cli", "commands", "v2", "entry-point"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:stca/cli.py",
+      "type": "file",
+      "name": "cli",
+      "filePath": "stca/cli.py",
+      "summary": "Main CLI entry point for STCA pipeline providing commands for init, check, fix, bootstrap, feedback, tuning, coverage, baseline, issue tracking, and all core analysis features.",
+      "tags": ["cli", "entry-point", "click", "commands"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:stca/brain/membership.py:IT2Membership",
+      "type": "class",
+      "name": "IT2Membership",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Interval type-2 membership value as [lower, upper] in [0,1] with footprint of uncertainty, supporting t-norm (intersection) and t-conorm (union) operations.",
+      "tags": ["class", "fuzzy-logic", "it2"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/membership.py:SeverityMF",
+      "type": "class",
+      "name": "SeverityMF",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Severity membership function with four linguistic terms: low, medium, high, critical using IT2 trapezoidal MFs.",
+      "tags": ["class", "membership-function", "severity"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/membership.py:ConfidenceMF",
+      "type": "class",
+      "name": "ConfidenceMF",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Confidence membership function with three linguistic terms: uncertain, moderate, certain using IT2 trapezoidal MFs.",
+      "tags": ["class", "membership-function", "confidence"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/membership.py:BlastRadiusMF",
+      "type": "class",
+      "name": "BlastRadiusMF",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Blast radius membership function with three linguistic terms: function, module, system using IT2 triangular MFs.",
+      "tags": ["class", "membership-function", "blast-radius"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/membership.py:ExploitabilityMF",
+      "type": "class",
+      "name": "ExploitabilityMF",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Exploitability membership function with three linguistic terms: none, indirect, direct using IT2 trapezoidal MFs.",
+      "tags": ["class", "membership-function", "exploitability"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/membership.py:SourceReliabilityMF",
+      "type": "class",
+      "name": "SourceReliabilityMF",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Source reliability membership function with three linguistic terms: unproven, reliable, trusted using IT2 trapezoidal MFs.",
+      "tags": ["class", "membership-function", "source-reliability"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/membership.py:DecisionMF",
+      "type": "class",
+      "name": "DecisionMF",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Decision output membership function with three linguistic terms: pass, warn, block using IT2 triangular MFs.",
+      "tags": ["class", "membership-function", "decision"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/project_tuner.py:FeedbackEntry",
+      "type": "class",
+      "name": "FeedbackEntry",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Data class representing a single human-labeled finding with rule_id, finding_key, kind (tp/fp/fn), and metadata.",
+      "tags": ["class", "feedback", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/project_tuner.py:RuleStats",
+      "type": "class",
+      "name": "RuleStats",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Aggregated statistics for one rule computing precision, recall, FP rate, and confidence multiplier from TP/FP/FN counts.",
+      "tags": ["class", "statistics", "precision-recall"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/project_tuner.py:FeedbackStore",
+      "type": "class",
+      "name": "FeedbackStore",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Persistent JSON-backed store for feedback entries with load/save, rule stats aggregation, and summary generation.",
+      "tags": ["class", "feedback-store", "persistence"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/project_tuner.py:ProjectTuner",
+      "type": "class",
+      "name": "ProjectTuner",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Project-level FIS tuner that reads feedback stats and provides confidence multipliers, suppression checks, and tuning config export.",
+      "tags": ["class", "project-tuner", "fis"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/rules.py:FuzzyRule",
+      "type": "class",
+      "name": "FuzzyRule",
+      "filePath": "stca/brain/rules.py",
+      "summary": "Data class for a single IT2 fuzzy rule with severity, confidence, blast_radius, exploitability, source_reliability premises and a decision output.",
+      "tags": ["class", "fuzzy-rule", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/brain/tuner.py:TuningAdjustment",
+      "type": "class",
+      "name": "TuningAdjustment",
+      "filePath": "stca/brain/tuner.py",
+      "summary": "Data class representing a tuning adjustment for a layer with confidence band widening, severity threshold lowering, and reason.",
+      "tags": ["class", "tuning", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/bug_seeds.py:BugSeed",
+      "type": "class",
+      "name": "BugSeed",
+      "filePath": "stca/bug_seeds.py",
+      "summary": "Data class for a known vulnerability pattern with CWE, name, description, pattern keywords, typical severity, exploitability, and fix difficulty.",
+      "tags": ["class", "bug-seed", "cwe", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:AuthRule",
+      "type": "class",
+      "name": "AuthRule",
+      "filePath": "stca/business_logic.py",
+      "summary": "Data class representing an authorization rule extracted from code with file, line, rule_type, pattern, roles, and function.",
+      "tags": ["class", "auth-rule", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:AuthViolation",
+      "type": "class",
+      "name": "AuthViolation",
+      "filePath": "stca/business_logic.py",
+      "summary": "Data class representing a detected authorization violation with file, line, rule_id, severity, description, fix, and CWE.",
+      "tags": ["class", "auth-violation", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:AuthMatrixExtractor",
+      "type": "class",
+      "name": "AuthMatrixExtractor",
+      "filePath": "stca/business_logic.py",
+      "summary": "Extracts authorization rules from Python decorators, JS decorators, and inline checks using regex patterns.",
+      "tags": ["class", "auth-extractor", "regex", "ast"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:AuthViolationDetector",
+      "type": "class",
+      "name": "AuthViolationDetector",
+      "filePath": "stca/business_logic.py",
+      "summary": "Detects authorization violations by analyzing AST for unprotected functions and missing auth checks.",
+      "tags": ["class", "auth-violation", "detector", "ast"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:BusinessSMViolation",
+      "type": "class",
+      "name": "BusinessSMViolation",
+      "filePath": "stca/business_logic.py",
+      "summary": "Data class for business state machine violations with file, line, rule_id, severity, description, and fix.",
+      "tags": ["class", "state-machine", "violation", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:BusinessStateMachineAnalyzer",
+      "type": "class",
+      "name": "BusinessStateMachineAnalyzer",
+      "filePath": "stca/business_logic.py",
+      "summary": "Analyzes business state machine patterns (order/payment/user/subscription) and checks for invalid transitions.",
+      "tags": ["class", "state-machine", "analyzer"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:Invariant",
+      "type": "class",
+      "name": "Invariant",
+      "filePath": "stca/business_logic.py",
+      "summary": "Data class for mined invariants from asserts and raise-if checks with file, line, function, expression, source, and description.",
+      "tags": ["class", "invariant", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:InvariantMiner",
+      "type": "class",
+      "name": "InvariantMiner",
+      "filePath": "stca/business_logic.py",
+      "summary": "Mines invariants from Python AST by extracting assert statements and raise-if patterns.",
+      "tags": ["class", "invariant-miner", "ast"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:DocDrift",
+      "type": "class",
+      "name": "DocDrift",
+      "filePath": "stca/business_logic.py",
+      "summary": "Data class for docstring drift detection with file, line, function, claim, and mismatch.",
+      "tags": ["class", "doc-drift", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/business_logic.py:DocDriftAnalyzer",
+      "type": "class",
+      "name": "DocDriftAnalyzer",
+      "filePath": "stca/business_logic.py",
+      "summary": "Analyzes drift between docstring claims and actual code behavior by extracting parameters, returns, and exceptions from docstrings.",
+      "tags": ["class", "doc-drift", "analyzer"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:stca/cache.py:ResultCache",
+      "type": "class",
+      "name": "ResultCache",
+      "filePath": "stca/cache.py",
+      "summary": "Persistent function-level result cache with SHA-256 hashing, JSON storage, TTL expiry, and index management.",
+      "tags": ["class", "result-cache", "persistence"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/membership.py:it2_triangular",
+      "type": "function",
+      "name": "it2_triangular",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Factory function creating an IT2 triangular membership function with configurable footprint of uncertainty.",
+      "tags": ["function", "membership-function", "factory"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/membership.py:it2_trapezoidal",
+      "type": "function",
+      "name": "it2_trapezoidal",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Factory function creating an IT2 trapezoidal membership function with configurable footprint of uncertainty.",
+      "tags": ["function", "membership-function", "factory"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/membership.py:encode_blast_radius",
+      "type": "function",
+      "name": "encode_blast_radius",
+      "filePath": "stca/brain/membership.py",
+      "summary": "Encodes blast radius string (function/module/system) to numeric value (0.0/0.5/1.0).",
+      "tags": ["function", "encoding"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/project_tuner.py:_get_default_store",
+      "type": "function",
+      "name": "_get_default_store",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Returns a FeedbackStore instance using the current working directory as the store path.",
+      "tags": ["function", "helper"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/project_tuner.py:set_default_store_path",
+      "type": "function",
+      "name": "set_default_store_path",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Sets the default store path for the feedback store.",
+      "tags": ["function", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/project_tuner.py:record_feedback",
+      "type": "function",
+      "name": "record_feedback",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Convenience function to record a TP/FP/FN label for a finding.",
+      "tags": ["function", "feedback"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/project_tuner.py:get_confidence_multiplier",
+      "type": "function",
+      "name": "get_confidence_multiplier",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Returns the confidence multiplier for a rule based on feedback statistics.",
+      "tags": ["function", "tuning"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/project_tuner.py:is_rule_suppressed",
+      "type": "function",
+      "name": "is_rule_suppressed",
+      "filePath": "stca/brain/project_tuner.py",
+      "summary": "Checks if a rule should be suppressed based on its feedback statistics.",
+      "tags": ["function", "tuning"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/rules.py:get_rules",
+      "type": "function",
+      "name": "get_rules",
+      "filePath": "stca/brain/rules.py",
+      "summary": "Returns a copy of the global fuzzy rule base.",
+      "tags": ["function", "rules"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/tuner.py:compute_adjustments",
+      "type": "function",
+      "name": "compute_adjustments",
+      "filePath": "stca/brain/tuner.py",
+      "summary": "Computes tuning adjustments based on per-layer precision/recall stats, widening confidence bands for high-FP layers and lowering severity thresholds for high-FN layers.",
+      "tags": ["function", "tuning", "computation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/tuner.py:apply_adjustments_to_config",
+      "type": "function",
+      "name": "apply_adjustments_to_config",
+      "filePath": "stca/brain/tuner.py",
+      "summary": "Persists tuning adjustments into .stca.yaml under a tuning section.",
+      "tags": ["function", "tuning", "persistence"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/brain/tuner.py:load_tuning",
+      "type": "function",
+      "name": "load_tuning",
+      "filePath": "stca/brain/tuner.py",
+      "summary": "Loads tuning configuration from .stca.yaml.",
+      "tags": ["function", "tuning", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/bug_seeds.py:cross_reference_finding",
+      "type": "function",
+      "name": "cross_reference_finding",
+      "filePath": "stca/bug_seeds.py",
+      "summary": "Cross-references a finding against the bug-seed database by CWE and pattern keywords to find matching vulnerability patterns.",
+      "tags": ["function", "cross-reference", "cwe"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/bug_seeds.py:boost_finding_confidence",
+      "type": "function",
+      "name": "boost_finding_confidence",
+      "filePath": "stca/bug_seeds.py",
+      "summary": "Boosts a finding's confidence score when it matches a known bug seed pattern.",
+      "tags": ["function", "confidence-boost"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/cli_v2.py:register_v2_commands",
+      "type": "function",
+      "name": "register_v2_commands",
+      "filePath": "stca/cli_v2.py",
+      "summary": "Registers all v2 CLI subcommands to the main click group.",
+      "tags": ["function", "cli", "registration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/cli_v2.py:symbolic_cmd",
+      "type": "function",
+      "name": "symbolic_cmd",
+      "filePath": "stca/cli_v2.py",
+      "summary": "CLI command for running Z3 symbolic execution, abstract interpretation, and type narrowing.",
+      "tags": ["function", "cli", "symbolic"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/cli_v2.py:concurrency_cmd",
+      "type": "function",
+      "name": "concurrency_cmd",
+      "filePath": "stca/cli_v2.py",
+      "summary": "CLI command for detecting async/concurrency bugs in Python asyncio, JS Promises, and Go channels.",
+      "tags": ["function", "cli", "concurrency"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/cli_v2.py:business_logic_cmd",
+      "type": "function",
+      "name": "business_logic_cmd",
+      "filePath": "stca/cli_v2.py",
+      "summary": "CLI command for running business logic analysis including auth matrix, state machines, invariants, and doc drift.",
+      "tags": ["function", "cli", "business-logic"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/cli.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "stca/cli.py",
+      "summary": "Main CLI entry point group for the STCA pipeline.",
+      "tags": ["function", "cli", "entry-point"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/cli.py:check",
+      "type": "function",
+      "name": "check",
+      "filePath": "stca/cli.py",
+      "summary": "Core CLI command that runs the full STCA analysis pipeline on a repository.",
+      "tags": ["function", "cli", "check", "orchestrator"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/cli.py:_generate_sbom",
+      "type": "function",
+      "name": "_generate_sbom",
+      "filePath": "stca/cli.py",
+      "summary": "Generates a Software Bill of Materials (SBOM) from package manager files (requirements.txt, package.json, go.mod, Cargo.lock, etc.).",
+      "tags": ["function", "sbom", "supply-chain"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:stca/cli.py:doctor",
+      "type": "function",
+      "name": "doctor",
+      "filePath": "stca/cli.py",
+      "summary": "CLI command that runs a comprehensive health check of the STCA installation and configuration.",
+      "tags": ["function", "cli", "health-check"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:stca/brain/__init__.py",
+      "target": "file:stca/brain/it2_fis.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/brain/__init__.py",
+      "target": "file:stca/brain/membership.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/brain/__init__.py",
+      "target": "file:stca/brain/rules.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/brain/it2_fis.py",
+      "target": "file:stca/brain/membership.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/brain/it2_fis.py",
+      "target": "file:stca/brain/rules.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/brain/aggregator.py",
+      "target": "file:stca/brain/it2_fis.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/brain/aggregator.py",
+      "target": "file:stca/brain/membership.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/brain/aggregator.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/brain/bayesian.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/baseline.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/bootstrap/harness_gen.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/bootstrap/invariant_inference.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/bootstrap/property_gen.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/cache.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/config.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/feedback/rule_capture.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/feedback/stats.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/installer.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/llm/client.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/orchestrator.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/report/tui.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/rules/__init__.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cli.py",
+      "target": "file:stca/cli_v2.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/advanced_secrets.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/code_quality.py",
+      "target": "file:stca/multi_lang.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/cpg_queries.py",
+      "target": "file:stca/cpg.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/crypto_audit.py",
+      "target": "file:stca/multi_lang.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/diff_slicer.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/feedback/__init__.py",
+      "target": "file:stca/feedback/rule_capture.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/feedback/__init__.py",
+      "target": "file:stca/feedback/stats.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/feedback/stats.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/jsx_auth.py",
+      "target": "file:stca/business_logic.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/advanced_secrets.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/architecture.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/audit.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/baseline.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/brain/aggregator.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/bug_seeds.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/cache.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/config.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/consistency.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/contracts.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/coverage.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/cpg_queries.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/cpg.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/diff_slicer.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/differential.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/doc_audit.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/feedback/stats.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/flawfinder_db.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/hotspots.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/html_scanner.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/impact_analysis.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/issue_store.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/js_cpg.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/js_pattern_scanner.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/layers/__init__.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/layers/l0b_supply_chain.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/layers/l0c_dependencies.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/layers/l0d_behavioral.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/layers/l0e_iac.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/layers/l0f_commit_risk.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/layers/l8_autofix.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/llm/client.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/llm/prm.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/malicious_patterns.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/metamorphic.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/missing_patches.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/nullness.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/pii_detection.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/precision.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/pysa_integration.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/root_cause.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/strictness.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/suppressions.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/taint_cross_file.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/orchestrator.py",
+      "target": "file:stca/typestate.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/pysa_integration.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/report/__init__.py",
+      "target": "file:stca/report/html.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/report/__init__.py",
+      "target": "file:stca/report/sarif.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/report/__init__.py",
+      "target": "file:stca/report/tui.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/report/dashboard.py",
+      "target": "file:stca/report/html.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/report/html.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/report/sarif.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/report/tui.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/source_discovery.py",
+      "target": "file:stca/multi_lang.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/taint_cross_file.py",
+      "target": "file:stca/cpg.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/tree_sitter_analyzer.py",
+      "target": "file:stca/multi_lang.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/bootstrap/__init__.py",
+      "target": "file:stca/bootstrap/harness_gen.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/bootstrap/__init__.py",
+      "target": "file:stca/bootstrap/invariant_inference.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/bootstrap/__init__.py",
+      "target": "file:stca/bootstrap/property_gen.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/brain/__init__.py",
+      "target": "file:stca/brain/it2_fis.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/brain/__init__.py",
+      "target": "file:stca/brain/membership.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/brain/__init__.py",
+      "target": "file:stca/brain/rules.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/feedback/__init__.py",
+      "target": "file:stca/feedback/rule_capture.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/feedback/__init__.py",
+      "target": "file:stca/feedback/stats.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/base.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l0_fast.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l1_property.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l2_mutation.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l3_invariants.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l4_fuzz.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l5_policy.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l6_symbolic.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l7_simulation.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/llm/__init__.py",
+      "target": "file:stca/llm/client.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/llm/__init__.py",
+      "target": "file:stca/llm/prm.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/report/__init__.py",
+      "target": "file:stca/report/html.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/report/__init__.py",
+      "target": "file:stca/report/sarif.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/report/__init__.py",
+      "target": "file:stca/report/tui.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:stca/lsp/__init__.py",
+      "target": "file:stca/lsp/server.py",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_advanced_layers.py",
+      "target": "file:stca/brain/tuner.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_advanced_layers.py",
+      "target": "file:stca/layers/l0d_behavioral.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_advanced_layers.py",
+      "target": "file:stca/layers/l0e_iac.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_advanced_layers.py",
+      "target": "file:stca/layers/l0f_commit_risk.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_advanced_layers.py",
+      "target": "file:stca/layers/l8_autofix.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_advanced_layers.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_advanced_layers.py",
+      "target": "file:stca/suppressions.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_advanced_layers.py",
+      "target": "file:stca/taint_tracker.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_cache.py",
+      "target": "file:stca/cache.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_detection_frontier.py",
+      "target": "file:stca/cpg_queries.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_detection_frontier.py",
+      "target": "file:stca/cpg.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_detection_frontier.py",
+      "target": "file:stca/differential.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_detection_frontier.py",
+      "target": "file:stca/metamorphic.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_detection_frontier.py",
+      "target": "file:stca/taint_cross_file.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_detection_frontier.py",
+      "target": "file:stca/typestate.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_diff_slicer.py",
+      "target": "file:stca/diff_slicer.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_enterprise_features.py",
+      "target": "file:stca/advanced_secrets.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_enterprise_features.py",
+      "target": "file:stca/audit.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_enterprise_features.py",
+      "target": "file:stca/coverage.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_enterprise_features.py",
+      "target": "file:stca/hotspots.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_installer.py",
+      "target": "file:stca/installer.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_it2_fis.py",
+      "target": "file:stca/brain/it2_fis.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_it2_fis.py",
+      "target": "file:stca/brain/membership.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_new_detection.py",
+      "target": "file:stca/contracts.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_new_detection.py",
+      "target": "file:stca/deadcode.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_new_detection.py",
+      "target": "file:stca/flawfinder_db.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_new_detection.py",
+      "target": "file:stca/malicious_patterns.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_new_detection.py",
+      "target": "file:stca/missing_patches.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_orchestrator.py",
+      "target": "file:stca/brain/aggregator.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_orchestrator.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_oss_inspired.py",
+      "target": "file:stca/baseline.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_oss_inspired.py",
+      "target": "file:stca/consistency.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_oss_inspired.py",
+      "target": "file:stca/issue_store.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_oss_inspired.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_oss_inspired.py",
+      "target": "file:stca/nullness.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_oss_inspired.py",
+      "target": "file:stca/strictness.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ported_configs.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ported_configs.py",
+      "target": "file:stca/profiles.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ported_configs.py",
+      "target": "file:stca/rule_config.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_precision_engine.py",
+      "target": "file:stca/bug_seeds.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_precision_engine.py",
+      "target": "file:stca/codebase_miner.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_precision_engine.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_precision_engine.py",
+      "target": "file:stca/precision.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_precision_engine.py",
+      "target": "file:stca/rule_compiler.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_precision_engine.py",
+      "target": "file:stca/rule_miner.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_scanner_health.py",
+      "target": "file:stca/config.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_scanner_health.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_scanner_health.py",
+      "target": "file:stca/orchestrator.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_scanner_health.py",
+      "target": "file:stca/report/sarif.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_supply_chain.py",
+      "target": "file:stca/layers/l0b_supply_chain.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_supply_chain.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:examples/sample-python-repo/test_app.py",
+      "target": "file:examples/sample-python-repo/app.py",
+      "type": "imports",
+      "weight": 0.7
+    }
+  ]
+}

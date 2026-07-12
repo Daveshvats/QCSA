@@ -1,0 +1,257 @@
+# STCA C# Security Rules — 51 rules
+rules:
+  - id: csharp-eval-like
+    pattern: "\\bCSharpCodeProvider\\b|\\.CompileAssemblyFromSource\\b"
+    severity: critical
+    message: "C# code compilation — RCE if user input"
+    metadata: {cwe: "CWE-94"}
+  - id: csharp-process-start
+    pattern: "\\bProcess\\.Start\\s*\\("
+    severity: high
+    message: "Process.Start — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: csharp-process-start-args
+    pattern: "\\bProcessStartInfo\\s*\\([^)]*\\)\\s*\\.\\s*Arguments\\s*=\\s*[\\\"\\']"
+    severity: high
+    message: "ProcessStartInfo.Arguments with string — injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: csharp-process-shell-true
+    pattern: "\\bUseShellExecute\\s*=\\s*true"
+    severity: medium
+    message: "UseShellExecute=true — shell interpretation risk"
+    metadata: {cwe: "CWE-78"}
+  - id: csharp-md5
+    pattern: "\\bMD5\\.Create\\s*\\(|MD5CryptoServiceProvider\\b"
+    severity: high
+    message: "MD5 broken — use SHA256"
+    metadata: {cwe: "CWE-327"}
+  - id: csharp-sha1
+    pattern: "\\bSHA1\\.Create\\s*\\(|SHA1CryptoServiceProvider\\b"
+    severity: high
+    message: "SHA1 broken — use SHA256"
+    metadata: {cwe: "CWE-327"}
+  - id: csharp-des
+    pattern: "\\bDES\\.Create\\s*\\(|DESCryptoServiceProvider\\b"
+    severity: critical
+    message: "DES broken — 56-bit key"
+    metadata: {cwe: "CWE-327"}
+  - id: csharp-3des
+    pattern: "\\bTripleDES\\b|TripleDESCryptoServiceProvider\\b"
+    severity: high
+    message: "3DES weak — use AES"
+    metadata: {cwe: "CWE-327"}
+  - id: csharp-rc2
+    pattern: "\\bRC2\\b|RC2CryptoServiceProvider\\b"
+    severity: critical
+    message: "RC2 broken"
+    metadata: {cwe: "CWE-327"}
+  - id: csharp-rsa-no-padding
+    pattern: "\\bRSAEncryptionPadding\\.Pkcs1\\b"
+    severity: high
+    message: "RSA PKCS1 padding — Bleichenbacher attack"
+    metadata: {cwe: "CWE-780"}
+  - id: csharp-ecb-mode
+    pattern: "\\bCipherMode\\.ECB\\b"
+    severity: critical
+    message: "AES-ECB — deterministic, leaks patterns"
+    metadata: {cwe: "CWE-327"}
+  - id: csharp-cbc-no-mac
+    pattern: "\\bCipherMode\\.CBC\\b"
+    severity: medium
+    message: "CBC without MAC — malleable ciphertext"
+    metadata: {cwe: "CWE-327"}
+  - id: csharp-random-not-crypto
+    pattern: "\\bnew Random\\s*\\("
+    severity: high
+    message: "Random not CSPRNG — use RandomNumberGenerator"
+    metadata: {cwe: "CWE-338"}
+  - id: csharp-random-next-token
+    pattern: "\\bRandom\\.Next\\s*\\("
+    severity: high
+    message: "Random.Next not CSPRNG — use RandomNumberGenerator"
+    metadata: {cwe: "CWE-338"}
+  - id: csharp-hardcoded-conn-str
+    pattern: "\\bConnectionString\\s*=\\s*[\\\"\\'][^\\\"\\']{20,}[\\\"\\']"
+    severity: high
+    message: "Hardcoded connection string"
+    metadata: {cwe: "CWE-798"}
+  - id: csharp-hardcoded-password
+    pattern: "\\b(?:Password|Pwd|password)\\s*=\\s*[\\\"\\'][^\\\"\\']{8,}[\\\"\\']"
+    severity: high
+    message: "Hardcoded password"
+    metadata: {cwe: "CWE-798"}
+  - id: csharp-hardcoded-secret
+    pattern: "\\b(?:ApiKey|Secret|Token|AuthToken)\\s*=\\s*[\\\"\\'][^\\\"\\']{8,}[\\\"\\']"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: csharp-sql-string-format
+    pattern: "\\b(?:SqlCommand|SqlCommandBuilder)\\s*\\(\\s*\\$?[\\\"\\'].*\\{"
+    severity: high
+    message: "SQL with string interpolation — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: csharp-sql-concat
+    pattern: "\\b(?:SqlCommand|SqlCommandBuilder)\\s*\\(\\s*[\\\"\\'][^\\\"\\']*\\s*\\+\\s*\\w"
+    severity: high
+    message: "SQL with concat — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: csharp-sql-executescalar-string
+    pattern: "\\.ExecuteScalar\\s*\\(\\s*\\$?[\\\"\\'].*\\{"
+    severity: high
+    message: "ExecuteScalar with interpolated SQL — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: csharp-sql-no-parameterized
+    pattern: "\\bSqlCommand\\s*\\(\\s*[\\\"\\'][^\\\"\\']*\\s*\\+\\s*"
+    severity: high
+    message: "SQL without parameters — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: csharp-response-write-user
+    pattern: "\\bResponse\\.Write\\s*\\(\\s*Request\\."
+    severity: high
+    message: "Response.Write(Request.*) — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: csharp-html-raw-user
+    pattern: "\\bHtml\\.Raw\\s*\\(\\s*Request\\."
+    severity: critical
+    message: "Html.Raw(Request.*) — XSS bypass"
+    metadata: {cwe: "CWE-79"}
+  - id: csharp-redirect-user
+    pattern: "\\bResponse\\.Redirect\\s*\\(\\s*Request\\."
+    severity: high
+    message: "Response.Redirect(Request.*) — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: csharp-transfer-user
+    pattern: "\\bServer\\.Transfer\\s*\\(\\s*Request\\."
+    severity: high
+    message: "Server.Transfer(Request.*) — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: csharp-execute-user
+    pattern: "\\bServer\\.Execute\\s*\\(\\s*Request\\."
+    severity: high
+    message: "Server.Execute(Request.*) — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: csharp-map-path-user
+    pattern: "\\bServer\\.MapPath\\s*\\(\\s*Request\\."
+    severity: high
+    message: "Server.MapPath(Request.*) — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: csharp-binary-formatter
+    pattern: "\\bBinaryFormatter\\b"
+    severity: critical
+    message: "BinaryFormatter — RCE on deserialization"
+    metadata: {cwe: "CWE-502"}
+  - id: csharp-xmlserializer-type
+    pattern: "\\bnew XmlSerializer\\s*\\(\\s*Type\\.GetType\\s*\\(\\s*Request\\."
+    severity: critical
+    message: "XmlSerializer with user type — RCE"
+    metadata: {cwe: "CWE-502"}
+  - id: csharp-datacontract-type
+    pattern: "\\bDataContractSerializer\\s*\\(\\s*Type\\.GetType\\s*\\(\\s*Request\\."
+    severity: critical
+    message: "DataContractSerializer with user type — RCE"
+    metadata: {cwe: "CWE-502"}
+  - id: csharp-javascriptserializer
+    pattern: "\\bJavaScriptSerializer\\b\\.Deserialize\\s*\\("
+    severity: high
+    message: "JavaScriptSerializer — verify type, RCE risk"
+    metadata: {cwe: "CWE-502"}
+  - id: csharp-losformatter
+    pattern: "\\bLosFormatter\\b"
+    severity: critical
+    message: "LosFormatter — RCE on deserialization"
+    metadata: {cwe: "CWE-502"}
+  - id: csharp-net-datacontract
+    pattern: "\\bNetDataContractSerializer\\b"
+    severity: critical
+    message: "NetDataContractSerializer — RCE"
+    metadata: {cwe: "CWE-502"}
+  - id: csharp-soapformatter
+    pattern: "\\bSoapFormatter\\b"
+    severity: critical
+    message: "SoapFormatter — RCE on deserialization"
+    metadata: {cwe: "CWE-502"}
+  - id: csharp-xml-xmlreader
+    pattern: "\\bXmlReader\\.Create\\s*\\([^)]*\\)\\s*(?!.*DtdProcessing\\s*=\\s*Prohibit)"
+    severity: high
+    message: "XmlReader without DTD prohibit — XXE"
+    metadata: {cwe: "CWE-611"}
+  - id: csharp-xml-document-load
+    pattern: "\\bXmlDocument\\s*\\.\\s*Load\\s*\\("
+    severity: medium
+    message: "XmlDocument.Load — verify XXE protection"
+    metadata: {cwe: "CWE-611"}
+  - id: csharp-xdocument-load
+    pattern: "\\bXDocument\\.Load\\s*\\("
+    severity: medium
+    message: "XDocument.Load — verify XXE protection"
+    metadata: {cwe: "CWE-611"}
+  - id: csharp-xmltextreader
+    pattern: "\\bnew XmlTextReader\\s*\\("
+    severity: medium
+    message: "XmlTextReader — set DtdProcessing.Prohibit"
+    metadata: {cwe: "CWE-611"}
+  - id: csharp-async-void
+    pattern: "\\basync\\s+void\\s+\\w+\\s*\\("
+    severity: medium
+    message: "async void — exceptions can crash process"
+    metadata: {cwe: "CWE-754"}
+  - id: csharp-wait-deadlock
+    pattern: "\\.Wait\\s*\\(\\s*\\)|\\.Result\\b"
+    severity: medium
+    message: ".Wait()/.Result — deadlock risk in async"
+    metadata: {cwe: "CWE-833"}
+  - id: csharp-getawaiter-getresult
+    pattern: "\\.GetAwaiter\\s*\\(\\s*\\)\\.GetResult\\s*\\("
+    severity: medium
+    message: "GetAwaiter().GetResult() — deadlock risk"
+    metadata: {cwe: "CWE-833"}
+  - id: csharp-thread-sleep-loop
+    pattern: "\\bwhile\\s*\\([^)]*\\)\\s*\\{[^}]*Thread\\.Sleep"
+    severity: low
+    message: "Thread.Sleep in loop — busy wait"
+    metadata: {cwe: "CWE-833"}
+  - id: csharp-debug-write
+    pattern: "\\bDebug\\.WriteLine\\s*\\("
+    severity: low
+    message: "Debug.WriteLine — removed in release"
+    metadata: {cwe: "CWE-532"}
+  - id: csharp-console-write
+    pattern: "\\bConsole\\.WriteLine\\s*\\("
+    severity: low
+    message: "Console.WriteLine in production"
+    metadata: {cwe: "CWE-532"}
+  - id: csharp-assert-debug
+    pattern: "\\bDebug\\.Assert\\s*\\("
+    severity: low
+    message: "Debug.Assert — removed in release"
+    metadata: {cwe: "CWE-749"}
+  - id: csharp-trace-write
+    pattern: "\\bTrace\\.WriteLine\\s*\\("
+    severity: low
+    message: "Trace.WriteLine — verify listeners"
+    metadata: {cwe: "CWE-532"}
+  - id: csharp-empty-catch
+    pattern: "\\bcatch\\s*\\([^)]*\\)\\s*\\{\\s*\\}"
+    severity: medium
+    message: "Empty catch — errors swallowed"
+    metadata: {cwe: "CWE-755"}
+  - id: csharp-catch-exception
+    pattern: "\\bcatch\\s*\\(\\s*Exception\\s+\\w+\\s*\\)"
+    severity: medium
+    message: "catch Exception — too broad"
+    metadata: {cwe: "CWE-396"}
+  - id: csharp-throw-ex
+    pattern: "\\bthrow\\s+ex\\s*;"
+    severity: high
+    message: "throw ex — loses stack trace, use throw"
+    metadata: {cwe: "CWE-778"}
+  - id: csharp-rethrow-no-arg
+    pattern: "\\bthrow\\s*;"
+    severity: low
+    message: "bare throw — verify context"
+    metadata: {cwe: "CWE-778"}
+  - id: csharp-string-compare-invariant
+    pattern: "\\bstring\\.Compare\\s*\\([^,]+,\\s*[^,]+,\\s*StringComparison\\.InvariantCulture"
+    severity: low
+    message: "InvariantCulture — slow, verify intent"
+    metadata: {cwe: "CWE-697"}

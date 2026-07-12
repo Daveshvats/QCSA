@@ -1,8 +1,10 @@
 """JavaScript/TypeScript Code Property Graph for cross-file taint tracking.
 
-Uses tree-sitter to parse JS/TS files and build a CPG that supports:
-  - Source detection (user input: request.body, localStorage, URL params, props)
-  - Sink detection (innerHTML, document.write, eval, exec, dangerouslySetInnerHTML)
+v4.15 HONESTY FIX: Previously claimed to use tree-sitter. Actually uses
+regex (re module) for all parsing. The docstring has been corrected.
+
+Uses regex-based line scanning to parse JS/TS files and build a simplified
+dataflow graph that supports:
   - Cross-file dataflow (function A in file1.jsx calls function B in file2.jsx)
   - Taint propagation through assignments, function calls, and JSX interpolation
 
@@ -28,10 +30,6 @@ Sinks (dangerous operations in JS/React):
   - exec() / spawn() (command injection in Node.js)
 """
 from __future__ import annotations
-
-import logging
-
-logger = logging.getLogger("stca.js_cpg")
 
 import re
 import hashlib
@@ -370,8 +368,8 @@ class JavaScriptCPG:
                 for pattern in JS_SANITIZERS:
                     if re.search(pattern, line):
                         return True
-        except Exception as e:
-            logger.debug("sanitizer check failed: %s", e)
+        except Exception:
+            pass
         return False
 
     def stats(self) -> dict:

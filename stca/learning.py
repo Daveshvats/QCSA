@@ -9,10 +9,7 @@ training corpora.
   - GNNOnCPG:              tiny per-language graph-feature scorer over the CPG
 """
 from __future__ import annotations
-
-import logging
-
-logger = logging.getLogger("stca.learning")
+from .text_utils import extract_block as _shared_extract_block
 
 import hashlib
 import json
@@ -81,8 +78,8 @@ class CodeEmbeddings:
     def save(self, path: Path) -> None:
         try:
             path.write_text(json.dumps(self.vectors), encoding="utf-8")
-        except Exception as e:
-            logger.warning("Failed to save learning vectors to %s: %s", path, e)
+        except Exception:
+            pass
 
     def load(self, path: Path) -> None:
         try:
@@ -243,24 +240,8 @@ class GNNOnCPG:
                 function=name, file=file, line=line,
                 score=score, features=feats, language=self.language))
         return out
-
     def _extract_block(self, source: str, start: int) -> str:
-        depth = 1
-        i = start
-        while i < len(source) and depth > 0:
-            if source[i] == "{": depth += 1
-            elif source[i] == "}": depth -= 1
-            i += 1
-        body = source[start:i]
-        if not body:
-            # python: indent-based
-            body_lines: List[str] = []
-            for line in source[start:].splitlines():
-                if line.strip() == "" or line.startswith("    ") or line.startswith("\t"):
-                    body_lines.append(line)
-                else:
-                    break
-            body = "\n".join(body_lines)
+        return _shared_extract_block(source, start)
         return body
 
     def _extract_features(self, args_str: str, body: str) -> Dict[str, float]:

@@ -1,0 +1,792 @@
+# STCA Java/Spring Deep Rules — 158 rules
+rules:
+  - id: spring-no-auth-annotation
+    pattern: "@(?:Get|Post|Put|Delete|Patch|Request)Mapping\\s*\\(\\s*['\\\"]/(?:api|admin)[^'\\\"]*['\\\"](?!.*@(?:PreAuthorize|Secured|RolesAllowed|PermitAll))"
+    severity: high
+    message: "Spring endpoint without auth annotation"
+    metadata: {cwe: "CWE-862"}
+  - id: spring-permit-all
+    pattern: "@PermitAll\\b"
+    severity: medium
+    message: "@PermitAll — verify intent"
+    metadata: {cwe: "CWE-862"}
+  - id: spring-redirect-user
+    pattern: "return\\s+\\\"redirect:\\\"\\s*\\+\\s*(?:request|input|user|req\\.getParameter)"
+    severity: high
+    message: "Spring redirect with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: spring-forward-user
+    pattern: "return\\s+\\\"forward:\\\"\\s*\\+\\s*(?:request|input|user|req\\.getParameter)"
+    severity: high
+    message: "Spring forward with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: spring-model-add-attribute-user-secret
+    pattern: "model\\.addAttribute\\s*\\(\\s*['\\\"]\\w*(?:password|secret|token|api[_-]?key)['\\\"]"
+    severity: high
+    message: "Model attribute with secret — info leak"
+    metadata: {cwe: "CWE-532"}
+  - id: spring-thymeleaf-utext
+    pattern: "th:utext\\s*="
+    severity: high
+    message: "Thymeleaf th:utext — XSS bypass (unescaped)"
+    metadata: {cwe: "CWE-79"}
+  - id: spring-thymeleaf-inline
+    pattern: "th:inline\\s*=\\s*\\\"text\\\""
+    severity: medium
+    message: "Thymeleaf th:inline text — verify auto-escape"
+    metadata: {cwe: "CWE-79"}
+  - id: spring-jdbc-template-query-concat
+    pattern: "jdbcTemplate\\.(?:query|update|execute)\\s*\\(\\s*\\\"[^\\\"]*\\\"\\s*\\+"
+    severity: critical
+    message: "JdbcTemplate with concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: spring-jdbc-template-query-format
+    pattern: "jdbcTemplate\\.(?:query|update|execute)\\s*\\(\\s*String\\.format"
+    severity: critical
+    message: "JdbcTemplate with String.format — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: spring-jpa-query-concat
+    pattern: "@Query\\s*\\(\\s*\\\"[^\\\"]*\\\"\\s*\\+"
+    severity: critical
+    message: "@Query with concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: spring-jpa-query-native-concat
+    pattern: "@Query\\s*\\(\\s*value\\s*=\\s*\\\"[^\\\"]*\\\"\\s*\\+.*nativeQuery\\s*=\\s*true"
+    severity: critical
+    message: "@Query native with concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: spring-resttemplate-verify-false
+    pattern: "new\\s+RestTemplate\\s*\\(\\s*\\)\\s*;\\s*\\n.*setHttpsVerifier|RestTemplate.*setRequestFactory.*setVerifyHostname\\s*\\(\\s*false"
+    severity: high
+    message: "RestTemplate SSL verify disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: spring-cors-allow-all
+    pattern: "@CrossOrigin\\s*\\(\\s*origins\\s*=\\s*\\\"\\\\*\\\"|@CrossOrigin\\s*\\(\\s*origins\\s*=\\s*\\{\\\"\\\\*\\\"\\}"
+    severity: high
+    message: "Spring CORS wildcard origin"
+    metadata: {cwe: "CWE-942"}
+  - id: spring-cors-allow-credentials-all
+    pattern: "@CrossOrigin\\s*\\(\\s*[^)]*allowCredentials\\s*=\\s*true[^)]*origins\\s*=\\s*\\\"\\\\*\\\""
+    severity: critical
+    message: "Spring CORS credentials + wildcard"
+    metadata: {cwe: "CWE-942"}
+  - id: spring-csrf-disabled
+    pattern: "http\\.csrf\\s*\\(\\s*\\)\\.disable"
+    severity: high
+    message: "Spring CSRF disabled"
+    metadata: {cwe: "CWE-352"}
+  - id: spring-frame-options-disabled
+    pattern: "http\\.headers\\s*\\(\\s*\\)\\.frameOptions\\s*\\(\\s*\\)\\.disable"
+    severity: medium
+    message: "Spring X-Frame-Options disabled — clickjacking"
+    metadata: {cwe: "CWE-1021"}
+  - id: spring-session-fixation
+    pattern: "sessionManagement\\s*\\(\\s*\\)\\.sessionFixation\\s*\\(\\s*\\)\\.none"
+    severity: high
+    message: "Spring session fixation protection disabled"
+    metadata: {cwe: "CWE-384"}
+  - id: spring-actuator-exposed
+    pattern: "management\\.endpoints\\.web\\.exposure\\.include\\s*=\\s*\\*"
+    severity: high
+    message: "Spring Actuator all endpoints exposed"
+    metadata: {cwe: "CWE-200"}
+  - id: spring-actuator-sensitives
+    pattern: "endpoints\\.\\w+\\.sensitive\\s*=\\s*false"
+    severity: high
+    message: "Spring Actuator sensitive endpoint exposed"
+    metadata: {cwe: "CWE-200"}
+  - id: spring-h2-console-enabled
+    pattern: "spring\\.h2\\.console\\.enabled\\s*=\\s*true"
+    severity: high
+    message: "H2 console enabled in production — RCE risk"
+    metadata: {cwe: "CWE-489"}
+  - id: spring-devtools-enabled
+    pattern: "spring\\.devtools\\.restart\\.enabled\\s*=\\s*true"
+    severity: medium
+    message: "Spring DevTools enabled — not for production"
+    metadata: {cwe: "CWE-489"}
+  - id: spring-banner-on
+    pattern: "spring\\.main\\.banner-mode\\s*=\\s*console"
+    severity: low
+    message: "Spring banner on — info leak"
+    metadata: {cwe: "CWE-200"}
+  - id: spring-security-debug
+    pattern: "org\\.springframework\\.security.*DEBUG|logging\\.level\\.org\\.springframework\\.security\\s*=\\s*DEBUG"
+    severity: medium
+    message: "Spring Security debug logging — info leak"
+    metadata: {cwe: "CWE-489"}
+  - id: spring-property-injection
+    pattern: "@Value\\s*\\(\\s*\\\"\\$\\{[^}]*(?:request|param|header)"
+    severity: high
+    message: "@Value with user-controlled property — injection"
+    metadata: {cwe: "CWE-94"}
+  - id: spring-spel-user
+    pattern: "parser\\.parseExpression\\s*\\(\\s*(?:request|input|user|req\\.getParameter)"
+    severity: critical
+    message: "SpEL expression with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: spring-model-attribute-no-binding
+    pattern: "@ModelAttribute\\s*\\(\\s*[^)]*\\)\\s*(?!.*BindingResult)"
+    severity: medium
+    message: "@ModelAttribute without BindingResult — mass assignment"
+    metadata: {cwe: "CWE-915"}
+  - id: spring-multipart-no-limit
+    pattern: "spring\\.servlet\\.multipart\\.max-file-size\\s*=\\s*-1|spring\\.servlet\\.multipart\\.max-request-size\\s*=\\s*-1"
+    severity: medium
+    message: "Spring multipart no size limit — DoS risk"
+    metadata: {cwe: "CWE-400"}
+  - id: spring-logging-secret
+    pattern: "logging\\.level\\.\\w+\\s*=\\s*TRACE(?![^;]*password|secret|token)"
+    severity: low
+    message: "TRACE logging — verify no secrets logged"
+    metadata: {cwe: "CWE-532"}
+  - id: spring-property-hardcoded-secret
+    pattern: "(?:password|secret|api[_-]?key|token)\\s*[:=]\\s*[^$\\{][^\\s$]{8,}"
+    severity: high
+    message: "Spring property hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: spring-datasource-hardcoded
+    pattern: "spring\\.datasource\\.(?:username|password)\\s*=\\s*[^$\\{]"
+    severity: high
+    message: "Spring datasource hardcoded credentials"
+    metadata: {cwe: "CWE-798"}
+  - id: spring-jwt-hardcoded
+    pattern: "jwt\\.secret\\s*=\\s*['\\\"][^'\\\"]{8,}['\\\"]|app\\.jwt\\.secret\\s*=\\s*['\\\"][^'\\\"]{8,}['\\\"]"
+    severity: high
+    message: "Spring JWT hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: spring-encryption-key-hardcoded
+    pattern: "(?:encrypt|decrypt)\\.key\\s*=\\s*['\\\"][^'\\\"]{8,}['\\\"]|jasypt\\.encryptor\\.password\\s*=\\s*['\\\"]"
+    severity: high
+    message: "Spring encryption key hardcoded"
+    metadata: {cwe: "CWE-798"}
+  - id: spring-user-detail-password-plain
+    pattern: "return\\s+new\\s+User\\s*\\([^)]*password"
+    severity: medium
+    message: "Spring User with plain password — verify encoder"
+    metadata: {cwe: "CWE-256"}
+  - id: spring-noop-password-encoder
+    pattern: "NoOpPasswordEncoder\\.getInstance|@Bean.*NoOpPasswordEncoder"
+    severity: critical
+    message: "NoOpPasswordEncoder — plain text passwords"
+    metadata: {cwe: "CWE-256"}
+  - id: spring-md5-password-encoder
+    pattern: "MessageDigestPasswordEncoder\\s*\\(\\s*\\\"md5\\\""
+    severity: high
+    message: "MD5 password encoder — broken"
+    metadata: {cwe: "CWE-327"}
+  - id: spring-sha1-password-encoder
+    pattern: "MessageDigestPasswordEncoder\\s*\\(\\s*\\\"sha1\\\""
+    severity: high
+    message: "SHA1 password encoder — broken"
+    metadata: {cwe: "CWE-327"}
+  - id: spring-bcrypt-low-rounds
+    pattern: "BCryptPasswordEncoder\\s*\\(\\s*[1-9]\\s*\\)"
+    severity: medium
+    message: "BCrypt with low rounds (<10) — weak"
+    metadata: {cwe: "CWE-916"}
+  - id: spring-method-security-disabled
+    pattern: "@EnableGlobalMethodSecurity\\s*\\(\\s*prePostEnabled\\s*=\\s*false"
+    severity: high
+    message: "Method-level security disabled"
+    metadata: {cwe: "CWE-862"}
+  - id: spring-security-none
+    pattern: "ConfigureAdapter.*antMatchers.*permitAll|antMatchers\\s*\\(\\s*\\\"/\\\\*\\\\*\\\"\\s*\\)\\.permitAll"
+    severity: high
+    message: "Spring Security permitAll for all paths"
+    metadata: {cwe: "CWE-862"}
+  - id: spring-https-cookie-secure-false
+    pattern: "server\\.servlet\\.session\\.cookie\\.secure\\s*=\\s*false"
+    severity: high
+    message: "Spring session cookie secure=false"
+    metadata: {cwe: "CWE-614"}
+  - id: java-runtime-exec
+    pattern: "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\("
+    severity: high
+    message: "Runtime.exec — injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: java-runtime-exec-user
+    pattern: "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: critical
+    message: "Runtime.exec with user input — RCE"
+    metadata: {cwe: "CWE-78"}
+  - id: java-runtime-exec-concat
+    pattern: "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\(\\s*\\\"[^\\\"]*\\\"\\s*\\+"
+    severity: critical
+    message: "Runtime.exec with concat — injection"
+    metadata: {cwe: "CWE-78"}
+  - id: java-processbuilder
+    pattern: "new\\s+ProcessBuilder\\s*\\("
+    severity: medium
+    message: "ProcessBuilder — verify args"
+    metadata: {cwe: "CWE-78"}
+  - id: java-processbuilder-user
+    pattern: "new\\s+ProcessBuilder\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: critical
+    message: "ProcessBuilder with user input — RCE"
+    metadata: {cwe: "CWE-78"}
+  - id: java-processbuilder-concat
+    pattern: "new\\s+ProcessBuilder\\s*\\(\\s*[^)]*\\+"
+    severity: high
+    message: "ProcessBuilder with concat — injection"
+    metadata: {cwe: "CWE-78"}
+  - id: java-scriptengine-eval
+    pattern: "ScriptEngine.*\\.eval\\s*\\("
+    severity: critical
+    message: "ScriptEngine.eval — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: java-scriptengine-eval-user
+    pattern: "ScriptEngine.*\\.eval\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: critical
+    message: "ScriptEngine.eval with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: java-class-forname-user
+    pattern: "Class\\.forName\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: critical
+    message: "Class.forName with user input — RCE"
+    metadata: {cwe: "CWE-470"}
+  - id: java-class-forname-concat
+    pattern: "Class\\.forName\\s*\\(\\s*\\\"[^\\\"]*\\\"\\s*\\+"
+    severity: high
+    message: "Class.forName with concat — RCE risk"
+    metadata: {cwe: "CWE-470"}
+  - id: java-sql-statement-execute
+    pattern: "\\.execute(?:Query|Update)?\\s*\\(\\s*\\\"[^\\\"]*\\\"\\s*\\+"
+    severity: high
+    message: "Statement.execute with concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: java-sql-statement-execute-format
+    pattern: "\\.execute(?:Query|Update)?\\s*\\(\\s*String\\.format"
+    severity: high
+    message: "Statement.execute with String.format — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: java-sql-prepared-concat
+    pattern: "PreparedStatement.*\\+\\s*\\\"[^\\\"]*\\\"\\s*\\+"
+    severity: high
+    message: "PreparedStatement with concat — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: java-sql-createstatement
+    pattern: "createStatement\\s*\\(\\s*\\)"
+    severity: medium
+    message: "createStatement — verify parameterization"
+    metadata: {cwe: "CWE-89"}
+  - id: java-objectinputstream
+    pattern: "new\\s+ObjectInputStream\\s*\\("
+    severity: critical
+    message: "ObjectInputStream — RCE on deserialization"
+    metadata: {cwe: "CWE-502"}
+  - id: java-readobject
+    pattern: "\\.readObject\\s*\\("
+    severity: critical
+    message: "readObject — RCE on untrusted data"
+    metadata: {cwe: "CWE-502"}
+  - id: java-xmlreader-xxe
+    pattern: "XMLReaderFactory\\.createXMLReader|SAXParserFactory\\.newInstance\\s*\\("
+    severity: high
+    message: "XML reader — XXE risk"
+    metadata: {cwe: "CWE-611"}
+  - id: java-documentbuilder-xxe
+    pattern: "DocumentBuilderFactory\\.newInstance\\s*\\("
+    severity: high
+    message: "DocumentBuilder — set FEATURE_SECURE_PROCESSING"
+    metadata: {cwe: "CWE-611"}
+  - id: java-saxparser-xxe
+    pattern: "SAXParserFactory\\.newInstance\\s*\\("
+    severity: high
+    message: "SAXParser — XXE risk"
+    metadata: {cwe: "CWE-611"}
+  - id: java-xmlmapper-xxe
+    pattern: "new\\s+XmlMapper\\s*\\("
+    severity: high
+    message: "XmlMapper — XXE risk"
+    metadata: {cwe: "CWE-611"}
+  - id: java-jaxb-xxe
+    pattern: "JAXBContext\\.newInstance.*createUnmarshaller"
+    severity: high
+    message: "JAXB Unmarshaller — XXE risk"
+    metadata: {cwe: "CWE-611"}
+  - id: java-stax-xxe
+    pattern: "XMLInputFactory\\.newInstance\\s*\\("
+    severity: high
+    message: "StAX XMLInputFactory — XXE risk"
+    metadata: {cwe: "CWE-611"}
+  - id: java-message-digest-md5
+    pattern: "MessageDigest\\.getInstance\\s*\\(\\s*\\\"MD5\\\""
+    severity: high
+    message: "MD5 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: java-message-digest-sha1
+    pattern: "MessageDigest\\.getInstance\\s*\\(\\s*\\\"SHA-?1\\\""
+    severity: high
+    message: "SHA1 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: java-cipher-des
+    pattern: "Cipher\\.getInstance\\s*\\(\\s*\\\"DES\\\""
+    severity: critical
+    message: "DES broken"
+    metadata: {cwe: "CWE-327"}
+  - id: java-cipher-aes-ecb
+    pattern: "Cipher\\.getInstance\\s*\\(\\s*\\\"AES/ECB"
+    severity: critical
+    message: "AES-ECB — deterministic"
+    metadata: {cwe: "CWE-327"}
+  - id: java-cipher-rsa-no-padding
+    pattern: "Cipher\\.getInstance\\s*\\(\\s*\\\"RSA/ECB/NoPadding\\\""
+    severity: high
+    message: "RSA NoPadding — Bleichenbacher attack"
+    metadata: {cwe: "CWE-780"}
+  - id: java-cipher-blowfish
+    pattern: "Cipher\\.getInstance\\s*\\(\\s*\\\"Blowfish\\\""
+    severity: medium
+    message: "Blowfish — verify use case"
+    metadata: {cwe: "CWE-327"}
+  - id: java-cipher-rc4
+    pattern: "Cipher\\.getInstance\\s*\\(\\s*\\\"RC4\\\""
+    severity: critical
+    message: "RC4 broken"
+    metadata: {cwe: "CWE-327"}
+  - id: java-keygenerator-des
+    pattern: "KeyGenerator\\.getInstance\\s*\\(\\s*\\\"DES\\\""
+    severity: critical
+    message: "DES key generator"
+    metadata: {cwe: "CWE-327"}
+  - id: java-keygenerator-aes-56
+    pattern: "KeyGenerator\\.getInstance\\s*\\(\\s*\\\"AES\\\"\\s*\\)\\s*;\\s*\\n.*init\\s*\\(\\s*56\\b"
+    severity: high
+    message: "AES with 56-bit key — too short"
+    metadata: {cwe: "CWE-326"}
+  - id: java-keygenerator-aes-128
+    pattern: "KeyGenerator\\.getInstance\\s*\\(\\s*\\\"AES\\\"\\s*\\)\\s*;\\s*\\n.*init\\s*\\(\\s*128\\b"
+    severity: low
+    message: "AES-128 — acceptable but 256 preferred"
+    metadata: {cwe: "CWE-326"}
+  - id: java-securerandom-sha1prng
+    pattern: "SecureRandom\\.getInstance\\s*\\(\\s*\\\"SHA1PRNG\\\""
+    severity: medium
+    message: "SHA1PRNG — verify platform default"
+    metadata: {cwe: "CWE-338"}
+  - id: java-securerandom-set-seed
+    pattern: "securerandom\\.setSeed\\s*\\("
+    severity: high
+    message: "SecureRandom.setSeed — may weaken randomness"
+    metadata: {cwe: "CWE-338"}
+  - id: java-math-random
+    pattern: "Math\\.random\\s*\\(\\s*\\)"
+    severity: high
+    message: "Math.random not CSPRNG"
+    metadata: {cwe: "CWE-338"}
+  - id: java-util-random
+    pattern: "new\\s+Random\\s*\\(\\s*\\)|new\\s+java\\.util\\.Random"
+    severity: high
+    message: "java.util.Random not CSPRNG"
+    metadata: {cwe: "CWE-338"}
+  - id: java-threadlocal-random
+    pattern: "ThreadLocalRandom\\."
+    severity: medium
+    message: "ThreadLocalRandom not CSPRNG"
+    metadata: {cwe: "CWE-338"}
+  - id: java-ssl-trust-all
+    pattern: "X509TrustManager\\s*\\{[^}]*checkServerTrusted\\s*\\([^)]*\\)\\s*\\{\\s*\\}"
+    severity: critical
+    message: "SSL TrustManager accepts all — MITM"
+    metadata: {cwe: "CWE-295"}
+  - id: java-ssl-trust-all-2
+    pattern: "TrustManager\\s*\\[\\]\\s*\\{[^}]*new\\s+X509TrustManager\\s*\\(\\)\\s*\\{[^}]*getAcceptedIssuers\\s*\\(\\s*\\)\\s*\\{\\s*return\\s+null"
+    severity: critical
+    message: "TrustManager returns null — MITM"
+    metadata: {cwe: "CWE-295"}
+  - id: java-ssl-hostname-verifier-all
+    pattern: "HostnameVerifier\\s*\\{[^}]*verify\\s*\\([^)]*\\)\\s*\\{\\s*return\\s+true"
+    severity: critical
+    message: "HostnameVerifier always returns true — MITM"
+    metadata: {cwe: "CWE-295"}
+  - id: java-ssl-default-hostname-verifier
+    pattern: "setHostnameVerifier\\s*\\(\\s*AllowAllHostnameVerifier"
+    severity: critical
+    message: "AllowAllHostnameVerifier — MITM"
+    metadata: {cwe: "CWE-295"}
+  - id: java-system-exit
+    pattern: "System\\.exit\\s*\\("
+    severity: medium
+    message: "System.exit — prevents container reuse"
+    metadata: {cwe: "CWE-754"}
+  - id: java-thread-sleep
+    pattern: "Thread\\.sleep\\s*\\("
+    severity: low
+    message: "Thread.sleep — blocking"
+    metadata: {cwe: "CWE-833"}
+  - id: java-thread-yield
+    pattern: "Thread\\.yield\\s*\\("
+    severity: low
+    message: "Thread.yield — unreliable"
+    metadata: {cwe: "CWE-833"}
+  - id: java-print-stack-trace
+    pattern: "\\.printStackTrace\\s*\\("
+    severity: medium
+    message: "printStackTrace — use logger"
+    metadata: {cwe: "CWE-532"}
+  - id: java-system-out-print
+    pattern: "System\\.out\\.print(?:ln)?\\s*\\("
+    severity: low
+    message: "System.out.print in production — use logger"
+    metadata: {cwe: "CWE-532"}
+  - id: java-system-err-print
+    pattern: "System\\.err\\.print(?:ln)?\\s*\\("
+    severity: low
+    message: "System.err.print in production"
+    metadata: {cwe: "CWE-532"}
+  - id: java-empty-catch
+    pattern: "catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}"
+    severity: medium
+    message: "Empty catch — errors swallowed"
+    metadata: {cwe: "CWE-755"}
+  - id: java-catch-exception
+    pattern: "catch\\s*\\(\\s*Exception\\s+\\w+\\s*\\)"
+    severity: medium
+    message: "catch Exception — too broad"
+    metadata: {cwe: "CWE-396"}
+  - id: java-catch-throwable
+    pattern: "catch\\s*\\(\\s*Throwable\\s+\\w+\\s*\\)"
+    severity: high
+    message: "catch Throwable — too broad, masks fatal errors"
+    metadata: {cwe: "CWE-396"}
+  - id: java-throw-ex
+    pattern: "throw\\s+new\\s+\\w*Exception\\s*\\("
+    severity: low
+    message: "throw Exception — verify catch hierarchy"
+    metadata: {cwe: "CWE-754"}
+  - id: java-throwable-throw
+    pattern: "throw\\s+new\\s+Throwable\\s*\\("
+    severity: medium
+    message: "throw Throwable — masks fatal errors"
+    metadata: {cwe: "CWE-754"}
+  - id: java-assert
+    pattern: "\\bassert\\s+\\w"
+    severity: low
+    message: "assert — disabled with -da, use real check"
+    metadata: {cwe: "CWE-617"}
+  - id: java-finalize
+    pattern: "void\\s+finalize\\s*\\(\\s*\\)"
+    severity: medium
+    message: "finalize — deprecated, unpredictable"
+    metadata: {cwe: "CWE-586"}
+  - id: java-clone
+    pattern: "Object\\s+clone\\s*\\(\\s*\\)"
+    severity: medium
+    message: "clone — shallow copy, verify deep copy needed"
+    metadata: {cwe: "CWE-662"}
+  - id: java-deprecated-api
+    pattern: "@Deprecated\\b"
+    severity: low
+    message: "Deprecated API — replace usage"
+    metadata: {cwe: "CWE-477"}
+  - id: java-sun-misc-unsafe
+    pattern: "sun\\.misc\\.Unsafe"
+    severity: high
+    message: "sun.misc.Unsafe — internal API, UB risk"
+    metadata: {cwe: "CWE-749"}
+  - id: java-reflect-access
+    pattern: "setAccessible\\s*\\(\\s*true\\s*\\)"
+    severity: medium
+    message: "setAccessible(true) — breaks encapsulation"
+    metadata: {cwe: "CWE-749"}
+  - id: java-hardcoded-password
+    pattern: "(?:password|passwd|pwd)\\s*=\\s*\\\"[^\\\"]{6,}\\\""
+    severity: high
+    message: "hardcoded password"
+    metadata: {cwe: "CWE-798"}
+  - id: java-hardcoded-token
+    pattern: "(?:token|api[_-]?key|auth[_-]?token)\\s*=\\s*\\\"[^\\\"]{8,}\\\""
+    severity: high
+    message: "hardcoded token/API key"
+    metadata: {cwe: "CWE-798"}
+  - id: java-aws-hardcoded
+    pattern: "accessKeyId\\s*=\\s*\\\"AKIA|secretAccessKey\\s*=\\s*\\\"[A-Za-z0-9/+=]{40}\\\""
+    severity: critical
+    message: "AWS hardcoded credentials"
+    metadata: {cwe: "CWE-798"}
+  - id: java-private-key-hardcoded
+    pattern: "privateKey\\s*=\\s*\\\"-----BEGIN|privateKey\\s*=\\s*\\\"MII"
+    severity: critical
+    message: "hardcoded private key"
+    metadata: {cwe: "CWE-321"}
+  - id: java-db-password-hardcoded
+    pattern: "password\\s*=\\s*\\\"[^\\\"]+\\\".*url\\s*=\\s*\\\"jdbc:"
+    severity: high
+    message: "DB password hardcoded in connection string"
+    metadata: {cwe: "CWE-798"}
+  - id: java-ldap-password-hardcoded
+    pattern: "Context\\.SECURITY_CREDENTIALS\\s*,\\s*\\\"[^\\\"]+\\\""
+    severity: high
+    message: "LDAP hardcoded password"
+    metadata: {cwe: "CWE-798"}
+  - id: java-jndi-injection
+    pattern: "InitialContext\\.lookup\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: critical
+    message: "JNDI lookup with user input — RCE (Log4Shell pattern)"
+    metadata: {cwe: "CWE-74"}
+  - id: java-jndi-ldap-remote
+    pattern: "InitialContext\\.lookup\\s*\\(\\s*\\\"ldap://[^\\\"/]+\\\""
+    severity: critical
+    message: "JNDI LDAP lookup to remote — RCE risk"
+    metadata: {cwe: "CWE-74"}
+  - id: java-jndi-rmi-remote
+    pattern: "InitialContext\\.lookup\\s*\\(\\s*\\\"rmi://[^\\\"/]+\\\""
+    severity: critical
+    message: "JNDI RMI lookup to remote — RCE risk"
+    metadata: {cwe: "CWE-74"}
+  - id: java-jndi-dns-remote
+    pattern: "InitialContext\\.lookup\\s*\\(\\s*\\\"dns://[^\\\"/]+\\\""
+    severity: high
+    message: "JNDI DNS lookup to remote"
+    metadata: {cwe: "CWE-74"}
+  - id: java-log4j-jndi
+    pattern: "\\\\$\\{jndi:ldap:|\\\\$\\{jndi:rmi:|\\\\$\\{jndi:dns:"
+    severity: critical
+    message: "Log4j JNDI interpolation — Log4Shell RCE"
+    metadata: {cwe: "CWE-502"}
+  - id: java-log4j-version-vulnerable
+    pattern: "log4j.*2\\.(?:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)\\."
+    severity: critical
+    message: "Log4j 2.x < 2.17.1 — Log4Shell vulnerable"
+    metadata: {cwe: "CWE-502"}
+  - id: java-jackson-default-typing
+    pattern: "enableDefaultTyping\\s*\\(\\s*\\)|activateDefaultTyping\\s*\\(\\s*(?:LaissezFaireSubTypeValidator|BasicPolymorphicTypeValidator)"
+    severity: critical
+    message: "Jackson default typing — polymorphic deserialization RCE"
+    metadata: {cwe: "CWE-502"}
+  - id: java-jackson-annotations
+    pattern: "@JsonTypeInfo\\s*\\(\\s*use\\s*=\\s*JsonTypeInfo\\.Id\\.CLASS|@JsonTypeInfo\\s*\\(\\s*use\\s*=\\s*JsonTypeInfo\\.Id\\.MINIMAL_CLASS"
+    severity: high
+    message: "Jackson @JsonTypeInfo with CLASS — polymorphic RCE risk"
+    metadata: {cwe: "CWE-502"}
+  - id: java-velocity-template-user
+    pattern: "Velocity\\.evaluate\\s*\\(\\s*[^,]+,\\s*[^,]+,\\s*[^,]+,\\s*(?:request|input|user|req\\.getParameter)"
+    severity: critical
+    message: "Velocity template with user input — SSTI/RCE"
+    metadata: {cwe: "CWE-1336"}
+  - id: java-freemarker-template-user
+    pattern: "new\\s+Template\\s*\\(\\s*[^,]+,\\s*new\\s+StringReader\\s*\\(\\s*(?:request|input|user|req\\.getParameter)"
+    severity: critical
+    message: "FreeMarker template with user input — SSTI/RCE"
+    metadata: {cwe: "CWE-1336"}
+  - id: java-thymeleaf-template-user
+    pattern: "SpringTemplateEngine.*process\\s*\\(\\s*(?:request|input|user|req\\.getParameter)"
+    severity: critical
+    message: "Thymeleaf template with user input — SSTI/RCE"
+    metadata: {cwe: "CWE-1336"}
+  - id: java-file-user
+    pattern: "new\\s+File\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "File with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: java-fileinputstream-user
+    pattern: "new\\s+FileInputStream\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "FileInputStream with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: java-fileoutputstream-user
+    pattern: "new\\s+FileOutputStream\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "FileOutputStream with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: java-filereader-user
+    pattern: "new\\s+FileReader\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "FileReader with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: java-filewriter-user
+    pattern: "new\\s+FileWriter\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "FileWriter with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: java-randomaccessfile-user
+    pattern: "new\\s+RandomAccessFile\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "RandomAccessFile with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: java-pbe-encrypt
+    pattern: "PBEKeySpec|PBEParameterSpec|Cipher\\.getInstance\\s*\\(\\s*\\\"PBE"
+    severity: medium
+    message: "PBE encryption — verify iteration count and salt"
+    metadata: {cwe: "CWE-916"}
+  - id: java-urlconnection-http
+    pattern: "new\\s+URL\\s*\\(\\s*\\\"http://|HttpURLConnection.*connect"
+    severity: medium
+    message: "HTTP (not HTTPS) — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: java-httpclient-http
+    pattern: "HttpRequest\\.newBuilder\\s*\\(\\s*[^)]*\\\"http://"
+    severity: medium
+    message: "HttpClient HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: java-okhttp-http
+    pattern: "HttpUrl\\.parse\\s*\\(\\s*\\\"http://|\\.url\\s*\\(\\s*\\\"http://"
+    severity: medium
+    message: "OkHttp HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: java-scheduledexecutor-shutdown
+    pattern: "scheduledExecutor\\.shutdown(?:Now)?\\s*\\(\\s*\\)"
+    severity: low
+    message: "Executor shutdown — verify tasks complete"
+    metadata: {cwe: "CWE-754"}
+  - id: java-completablefuture-get
+    pattern: "\\.get\\s*\\(\\s*\\)\\s*;\\s*$|\\.join\\s*\\(\\s*\\)\\s*;$"
+    severity: medium
+    message: "CompletableFuture.get/join — blocking"
+    metadata: {cwe: "CWE-833"}
+  - id: java-synchronized-this
+    pattern: "synchronized\\s*\\(\\s*this\\s*\\)"
+    severity: medium
+    message: "synchronized(this) — use private lock"
+    metadata: {cwe: "CWE-667"}
+  - id: java-synchronized-string
+    pattern: "synchronized\\s*\\(\\s*\\\"[^\\\"]+\\\"\\s*\\)"
+    severity: high
+    message: "synchronized on String — interned, deadlock risk"
+    metadata: {cwe: "CWE-667"}
+  - id: java-volatile-array
+    pattern: "volatile\\s+\\w+\\[\\]"
+    severity: medium
+    message: "volatile array — only reference is volatile, not elements"
+    metadata: {cwe: "CWE-662"}
+  - id: java-thread-start-run
+    pattern: "\\.run\\s*\\(\\s*\\)\\s*;"
+    severity: high
+    message: "Thread.run() instead of start() — runs in current thread"
+    metadata: {cwe: "CWE-754"}
+  - id: java-interrupted-swallowed
+    pattern: "catch\\s*\\(\\s*InterruptedException[^)]*\\)\\s*\\{\\s*\\}"
+    severity: medium
+    message: "InterruptedException swallowed — verify interrupt flag"
+    metadata: {cwe: "CWE-755"}
+  - id: java-interrupted-reset-missing
+    pattern: "catch\\s*\\(\\s*InterruptedException[^)]*\\)(?!.*Thread\\.currentThread\\(\\)\\.interrupt)"
+    severity: medium
+    message: "InterruptedException without re-interrupt — verify"
+    metadata: {cwe: "CWE-755"}
+  - id: java-null-check-missing
+    pattern: "\\.\\w+\\s*\\(.*\\)(?!.*null)"
+    severity: low
+    message: "Method call without null check — verify"
+    metadata: {cwe: "CWE-690"}
+  - id: java-optional-get
+    pattern: "\\.get\\s*\\(\\s*\\)"
+    severity: medium
+    message: "Optional.get() without isPresent() — NoSuchElementException"
+    metadata: {cwe: "CWE-754"}
+  - id: java-optional-or-else-null
+    pattern: "\\.orElse\\s*\\(\\s*null\\s*\\)"
+    severity: medium
+    message: "Optional.orElse(null) — defeats Optional purpose"
+    metadata: {cwe: "CWE-690"}
+  - id: java-stream-collect-to-list
+    pattern: "\\.collect\\s*\\(\\s*Collectors\\.toList\\s*\\(\\s*\\)\\s*\\)"
+    severity: low
+    message: "Collectors.toList() — consider toUnmodifiableList()"
+    metadata: {cwe: "CWE-754"}
+  - id: java-string-format-user
+    pattern: "String\\.format\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: medium
+    message: "String.format with user input — format string risk"
+    metadata: {cwe: "CWE-134"}
+  - id: java-pattern-compile-user
+    pattern: "Pattern\\.compile\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "Pattern.compile with user input — ReDoS risk"
+    metadata: {cwe: "CWE-1333"}
+  - id: java-string-split-user
+    pattern: "\\.split\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "String.split with user input — ReDoS risk"
+    metadata: {cwe: "CWE-1333"}
+  - id: java-string-replace-all-user
+    pattern: "\\.replaceAll\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "String.replaceAll with user input — ReDoS risk"
+    metadata: {cwe: "CWE-1333"}
+  - id: java-string-matches-user
+    pattern: "\\.matches\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: high
+    message: "String.matches with user input — ReDoS risk"
+    metadata: {cwe: "CWE-1333"}
+  - id: java-integer-parseint-user
+    pattern: "Integer\\.parseInt\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: medium
+    message: "Integer.parseInt with user input — NumberFormatException"
+    metadata: {cwe: "CWE-754"}
+  - id: java-long-parselong-user
+    pattern: "Long\\.parseLong\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: medium
+    message: "Long.parseLong with user input — NumberFormatException"
+    metadata: {cwe: "CWE-754"}
+  - id: java-double-parsedouble-user
+    pattern: "Double\\.parseDouble\\s*\\(\\s*(?:request|input|user|req\\.getParameter|args)"
+    severity: medium
+    message: "Double.parseDouble with user input — NumberFormatException"
+    metadata: {cwe: "CWE-754"}
+  - id: java-beanutils-populate
+    pattern: "BeanUtils\\.populate\\s*\\("
+    severity: high
+    message: "BeanUtils.populate — mass assignment risk"
+    metadata: {cwe: "CWE-915"}
+  - id: java-beanutils-setproperty
+    pattern: "BeanUtils\\.setProperty\\s*\\("
+    severity: high
+    message: "BeanUtils.setProperty — mass assignment risk"
+    metadata: {cwe: "CWE-915"}
+  - id: java-propertyutils-setproperty
+    pattern: "PropertyUtils\\.setProperty\\s*\\("
+    severity: high
+    message: "PropertyUtils.setProperty — mass assignment risk"
+    metadata: {cwe: "CWE-915"}
+  - id: java-struts-action-no-validation
+    pattern: "@(?:Action|Result)\\s*\\((?!.*validation|.*validate)"
+    severity: medium
+    message: "Struts action without validation — verify"
+    metadata: {cwe: "CWE-20"}
+  - id: java-struts-ognl-user
+    pattern: "OgnlUtil\\.getValue\\s*\\(\\s*(?:request|input|user|req\\.getParameter)"
+    severity: critical
+    message: "Struts OGNL with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: java-struts-servletactionredirect
+    pattern: "ServletActionRedirectResult.*location\\s*=\\s*(?:request|input|user|req\\.getParameter)"
+    severity: high
+    message: "Struts redirect with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: java-grpc-no-tls
+    pattern: "usePlaintext\\s*\\(\\s*\\)"
+    severity: high
+    message: "gRPC plaintext — no TLS"
+    metadata: {cwe: "CWE-319"}
+  - id: java-grpc-insecure-channel
+    pattern: "InsecureChannelCredentials"
+    severity: high
+    message: "gRPC insecure channel credentials"
+    metadata: {cwe: "CWE-295"}
+  - id: java-aws-sdk-no-credentials
+    pattern: "DefaultCredentialsChain\\.builder|EnvironmentVariableCredentialsProvider"
+    severity: low
+    message: "AWS credentials from env — verify IAM role"
+    metadata: {cwe: "CWE-798"}
+  - id: java-aws-s3-bucket-public
+    pattern: "withCannedAcl\\s*\\(\\s*CannedAccessControlList\\.PublicRead"
+    severity: critical
+    message: "S3 bucket PublicRead ACL"
+    metadata: {cwe: "CWE-732"}
+  - id: java-aws-s3-no-encryption
+    pattern: "withServerSideEncryptionAlgorithm\\s*\\(\\s*null|SSEAlgorithm\\.AES256(?!.*\\.withServerSideEncryption)"
+    severity: medium
+    message: "S3 bucket without encryption"
+    metadata: {cwe: "CWE-311"}
+  - id: java-aws-rds-public
+    pattern: "withPubliclyAccessible\\s*\\(\\s*true"
+    severity: critical
+    message: "RDS publicly accessible"
+    metadata: {cwe: "CWE-732"}
+  - id: java-aws-ec2-ssh-open
+    pattern: "withIpv6Ranges.*CidrBlocks.*0\\.0\\.0\\.0/0|withCidrBlocks.*0\\.0\\.0\\.0/0.*fromPort.*22"
+    severity: high
+    message: "EC2 SSH open to world"
+    metadata: {cwe: "CWE-732"}

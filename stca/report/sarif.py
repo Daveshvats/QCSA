@@ -81,6 +81,24 @@ def to_sarif(result: PipelineResult, repo_root: Path) -> dict:
             },
         })
 
+    # Build toolExecutionNotifications from layer timings + scanner health
+    notifications = [
+        {"level": "note", "message": {"text": f"Layer {layer} took {t:.2f}s"}}
+        for layer, t in result.layer_timings.items()
+    ]
+    for entry in result.scanner_health:
+        level = entry.get("level", "warning")
+        scanner = entry.get("scanner", "unknown")
+        err = entry.get("error", "")
+        err_type = entry.get("error_type", "Exception")
+        text = f"Scanner '{scanner}' failed: {err_type}: {err}"
+        if level == "warning":
+            notifications.append({"level": "warning", "message": {"text": text}})
+        else:
+            notifications.append({"level": "note", "message": {"text": text}})
+
+    execution_successful = result.scanner_error_count == 0
+
     return {
         "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/schemas/sarif-schema-2.1.0.json",
         "version": "2.1.0",
@@ -95,34 +113,9 @@ def to_sarif(result: PipelineResult, repo_root: Path) -> dict:
             },
             "results": results,
             "invocations": [{
-                # v3.1: executionSuccessful is False if any scanner failed,
-                # because the results may be incomplete (missing findings
-                # from the failed scanner).
-                "executionSuccessful": not result.has_scanner_errors,
+                "executionSuccessful": execution_successful,
                 "endTimeUtc": datetime.now(timezone.utc).isoformat(),
-                "toolExecutionNotifications": [
-                    {"level": "note", "message": {"text": f"Layer {layer} took {t:.2f}s"}}
-                    for layer, t in result.layer_timings.items()
-                ] + [
-                    # v3.1: surface scanner failures as SARIF notifications
-                    # so they appear in GitHub Code Scanning / VS Code SARIF Viewer
-                    {
-                        "level": "warning",
-                        "message": {
-                            "text": f"Scanner '{h.get('scanner', '?')}' failed: "
-                                    f"{h.get('error', '')} "
-                                    f"({h.get('error_type', '?')})"
-                        },
-                        "exception": {
-                            "kind": h.get("error_type", "Exception"),
-                            "message": h.get("error", ""),
-                            "stack": {
-                                "rendered": h.get("traceback", "") or h.get("error", "")
-                            } if h.get("traceback") else None,
-                        } if h.get("traceback") else None,
-                    }
-                    for h in result.scanner_health
-                ],
+                "toolExecutionNotifications": notifications,
             }],
         }],
     }

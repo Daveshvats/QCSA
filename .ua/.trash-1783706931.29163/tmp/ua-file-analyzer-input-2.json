@@ -1,0 +1,243 @@
+{
+    "projectRoot":  "C:\\Users\\deves\\Downloads\\stca-pipeline-complete-v2.6\\stca-pipeline",
+    "batchImportData":  {
+                            "stca/feedback/rule_capture.py":  [
+
+                                                              ],
+                            "stca/js_pattern_scanner.py":  [
+
+                                                           ],
+                            "stca/duplication.py":  [
+
+                                                    ],
+                            "stca/js_multiline.py":  [
+
+                                                     ],
+                            "stca/hotspots.py":  [
+
+                                                 ],
+                            "stca/feedback/stats.py":  [
+                                                           "stca/models.py"
+                                                       ],
+                            "stca/doc_audit.py":  [
+
+                                                  ],
+                            "stca/knowledge_base.py":  [
+
+                                                       ],
+                            "stca/feedback/__init__.py":  [
+                                                              "stca/feedback/rule_capture.py",
+                                                              "stca/feedback/stats.py"
+                                                          ],
+                            "stca/ffi_analyzer.py":  [
+
+                                                     ],
+                            "stca/layers/base.py":  [
+                                                        "stca/config.py",
+                                                        "stca/models.py"
+                                                    ],
+                            "stca/interprocedural.py":  [
+
+                                                        ],
+                            "stca/issue_store.py":  [
+
+                                                    ],
+                            "stca/html_scanner.py":  [
+
+                                                     ],
+                            "stca/js_quality.py":  [
+
+                                                   ],
+                            "stca/layers/__init__.py":  [
+                                                            "stca/layers/base.py",
+                                                            "stca/layers/l0_fast.py",
+                                                            "stca/layers/l1_property.py",
+                                                            "stca/layers/l2_mutation.py",
+                                                            "stca/layers/l3_invariants.py",
+                                                            "stca/layers/l4_fuzz.py",
+                                                            "stca/layers/l5_policy.py",
+                                                            "stca/layers/l6_symbolic.py",
+                                                            "stca/layers/l7_simulation.py"
+                                                        ],
+                            "stca/jsx_auth.py":  [
+                                                     "stca/business_logic.py"
+                                                 ],
+                            "stca/incremental.py":  [
+
+                                                    ],
+                            "stca/iac_scanner.py":  [
+
+                                                    ],
+                            "stca/flawfinder_db.py":  [
+
+                                                      ],
+                            "stca/js_cpg.py":  [
+
+                                               ],
+                            "stca/extra_rules.py":  [
+
+                                                    ],
+                            "stca/layers/l0_fast.py":  [
+                                                           "stca/layers/base.py",
+                                                           "stca/models.py"
+                                                       ],
+                            "stca/impact_analysis.py":  [
+
+                                                        ],
+                            "stca/installer.py":  [
+
+                                                  ]
+                        },
+    "batchFiles":  [
+                       {
+                           "path":  "stca/doc_audit.py",
+                           "language":  "python",
+                           "sizeLines":  157,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/duplication.py",
+                           "language":  "python",
+                           "sizeLines":  135,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/extra_rules.py",
+                           "language":  "python",
+                           "sizeLines":  150,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/feedback/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  5,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/feedback/rule_capture.py",
+                           "language":  "python",
+                           "sizeLines":  78,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/feedback/stats.py",
+                           "language":  "python",
+                           "sizeLines":  83,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/ffi_analyzer.py",
+                           "language":  "python",
+                           "sizeLines":  977,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/flawfinder_db.py",
+                           "language":  "python",
+                           "sizeLines":  352,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/hotspots.py",
+                           "language":  "python",
+                           "sizeLines":  321,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/html_scanner.py",
+                           "language":  "python",
+                           "sizeLines":  191,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/iac_scanner.py",
+                           "language":  "python",
+                           "sizeLines":  235,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/impact_analysis.py",
+                           "language":  "python",
+                           "sizeLines":  235,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/incremental.py",
+                           "language":  "python",
+                           "sizeLines":  315,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/installer.py",
+                           "language":  "python",
+                           "sizeLines":  404,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/interprocedural.py",
+                           "language":  "python",
+                           "sizeLines":  1202,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/issue_store.py",
+                           "language":  "python",
+                           "sizeLines":  251,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/js_cpg.py",
+                           "language":  "python",
+                           "sizeLines":  390,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/js_multiline.py",
+                           "language":  "python",
+                           "sizeLines":  154,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/js_pattern_scanner.py",
+                           "language":  "python",
+                           "sizeLines":  502,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/js_quality.py",
+                           "language":  "python",
+                           "sizeLines":  220,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/jsx_auth.py",
+                           "language":  "python",
+                           "sizeLines":  219,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/knowledge_base.py",
+                           "language":  "python",
+                           "sizeLines":  572,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/__init__.py",
+                           "language":  "python",
+                           "sizeLines":  21,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/base.py",
+                           "language":  "python",
+                           "sizeLines":  51,
+                           "fileCategory":  "code"
+                       },
+                       {
+                           "path":  "stca/layers/l0_fast.py",
+                           "language":  "python",
+                           "sizeLines":  408,
+                           "fileCategory":  "code"
+                       }
+                   ]
+}

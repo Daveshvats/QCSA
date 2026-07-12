@@ -1,0 +1,600 @@
+{
+  "nodes": [
+    {
+      "id": "file:stca/doc_audit.py",
+      "type": "file",
+      "name": "doc_audit",
+      "filePath": "stca/doc_audit.py",
+      "summary": "Documentation audit module inspired by Valknut. Checks for missing docstrings, stale docstrings, missing module docs, and counts TODO/FIXME/HACK comments as code smell indicators.",
+      "tags": ["documentation", "audit", "code-quality", "ast"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/duplication.py",
+      "type": "file",
+      "name": "duplication",
+      "filePath": "stca/duplication.py",
+      "summary": "Code duplication detection using token-based sliding window hashing (CPD-style). Tokenizes Python and text files, hashes windows of N tokens, and finds collisions to identify copy-paste bugs.",
+      "tags": ["duplication", "code-quality", "hashing", "tokenization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/extra_rules.py",
+      "type": "file",
+      "name": "extra_rules",
+      "filePath": "stca/extra_rules.py",
+      "summary": "Expanded security rules supplementing multi_lang.py with additional crypto, XSS, injection, and framework-specific patterns across Python, JavaScript, Go, Java, and C++.",
+      "tags": ["security-rules", "patterns", "multi-language"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/feedback/__init__.py",
+      "type": "file",
+      "name": "feedback",
+      "filePath": "stca/feedback/__init__.py",
+      "summary": "Feedback loop package that tracks per-layer precision/recall and captures escaped bugs. Exports StatsTracker and RuleCapture.",
+      "tags": ["feedback", "package-init"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/feedback/rule_capture.py",
+      "type": "file",
+      "name": "rule_capture",
+      "filePath": "stca/feedback/rule_capture.py",
+      "summary": "Captures escaped bugs by generating Semgrep rule templates. When a bug escapes to production, creates a YAML rule file that L0 Semgrep will catch on future commits.",
+      "tags": ["feedback", "rule-generation", "semgrep", "escaped-bugs"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/feedback/stats.py",
+      "type": "file",
+      "name": "stats",
+      "filePath": "stca/feedback/stats.py",
+      "summary": "Per-layer precision/recall tracking that feeds into the IT2-FIS as source_reliability signal. Layers with high false-positive rates get downweighted; layers catching real bugs get upweighted.",
+      "tags": ["feedback", "precision", "recall", "fis", "reliability"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py",
+      "type": "file",
+      "name": "ffi_analyzer",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Full cross-language FFI boundary analyzer inspired by i-CodeCNES. Detects type mismatches, buffer overflows, memory management errors, GIL violations, reference counting issues, and dangerous C function calls at the Python-to-C boundary via ctypes/cffi/pybind11/Cython.",
+      "tags": ["ffi", "cross-language", "security", "c-extension", "memory-safety"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:stca/flawfinder_db.py",
+      "type": "file",
+      "name": "flawfinder_db",
+      "filePath": "stca/flawfinder_db.py",
+      "summary": "Curated database of dangerous C/C++ functions inspired by Flawfinder. Each function entry has risk level (1-5), CWE, explanation, and safer alternative for use by the FIS aggregation layer.",
+      "tags": ["security", "c-cpp", "dangerous-functions", "flawfinder"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/hotspots.py",
+      "type": "file",
+      "name": "hotspots",
+      "filePath": "stca/hotspots.py",
+      "summary": "Security hotspot review workflow with tamper-evident audit trail. Tracks hotspots through detection, review, and time-decay re-review cycles with cryptographic chaining for compliance.",
+      "tags": ["security", "hotspot", "audit-trail", "review-workflow"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/html_scanner.py",
+      "type": "file",
+      "name": "html_scanner",
+      "filePath": "stca/html_scanner.py",
+      "summary": "HTML/config security scanner that detects missing CSP headers, hardcoded secrets in .env files, security misconfigs in build configs, and devtools in production package.json.",
+      "tags": ["security", "html", "config", "csp", "headers"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/iac_scanner.py",
+      "type": "file",
+      "name": "iac_scanner",
+      "filePath": "stca/iac_scanner.py",
+      "summary": "Infrastructure as Code scanner covering Terraform, Dockerfile, Kubernetes, CloudFormation, Helm, and Pulumi. Detects misconfigurations like public S3 buckets, open security groups, and privileged containers.",
+      "tags": ["iac", "terraform", "docker", "kubernetes", "cloudformation", "security"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/impact_analysis.py",
+      "type": "file",
+      "name": "impact_analysis",
+      "filePath": "stca/impact_analysis.py",
+      "summary": "Impact analysis inspired by gossiphs. Builds a call graph from AST, computes blast radius for changed functions (direct/transitive callers), and identifies affected test files.",
+      "tags": ["impact-analysis", "call-graph", "blast-radius", "diff"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/incremental.py",
+      "type": "file",
+      "name": "incremental",
+      "filePath": "stca/incremental.py",
+      "summary": "Incremental scanning engine with file-level content-hash caching, Python import dependency tracking, differential analysis, watch mode, and parallel scanning via ProcessPoolExecutor.",
+      "tags": ["incremental", "caching", "parallel", "watch-mode", "performance"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/installer.py",
+      "type": "file",
+      "name": "installer",
+      "filePath": "stca/installer.py",
+      "summary": "Tool auto-installer that downloads and installs external tools (gitleaks, semgrep, opa, kani, mutmut, atheris) with SHA256 verification. Supports Python pip tools and Go/Rust binary downloads.",
+      "tags": ["installer", "tool-management", "setup", "dependencies"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/interprocedural.py",
+      "type": "file",
+      "name": "interprocedural",
+      "filePath": "stca/interprocedural.py",
+      "summary": "Advanced interprocedural taint analysis engine combining function summary generation, cross-file call resolution, branch constraint tracking, and trace caching. Supports Python, JavaScript, Go, Java, and C/C++.",
+      "tags": ["taint-analysis", "interprocedural", "dataflow", "multi-language"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:stca/issue_store.py",
+      "type": "file",
+      "name": "issue_store",
+      "filePath": "stca/issue_store.py",
+      "summary": "SQLite-backed issue store for finding lifecycle and trend tracking. Tracks issue states (open/confirmed/fixed/wontfix/baselined), history, and trend data for stca trend reporting.",
+      "tags": ["issue-tracking", "sqlite", "lifecycle", "trends"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/js_cpg.py",
+      "type": "file",
+      "name": "js_cpg",
+      "filePath": "stca/js_cpg.py",
+      "summary": "JavaScript/TypeScript Code Property Graph for cross-file taint tracking using tree-sitter. Detects XSS, eval injection, and command injection across JS/TS/JSX/TSX files with source/sink detection.",
+      "tags": ["javascript", "cpg", "taint", "xss", "tree-sitter"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/js_multiline.py",
+      "type": "file",
+      "name": "js_multiline",
+      "filePath": "stca/js_multiline.py",
+      "summary": "Multi-line pattern matcher for JS/TS files using re.DOTALL. Catches 12 patterns that span multiple lines (token before role check, async issues, etc.) that line-based scanners miss.",
+      "tags": ["javascript", "multiline", "patterns", "regex"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/js_pattern_scanner.py",
+      "type": "file",
+      "name": "js_pattern_scanner",
+      "filePath": "stca/js_pattern_scanner.py",
+      "summary": "Dedicated JavaScript/TypeScript regex-based pattern scanner for JSX/TSX files where semgrep has known issues. Covers 20+ audit findings including hardcoded keys, JWT in localStorage, and XSS patterns.",
+      "tags": ["javascript", "sast", "regex", "jsx", "tsx", "patterns"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:stca/js_quality.py",
+      "type": "file",
+      "name": "js_quality",
+      "filePath": "stca/js_quality.py",
+      "summary": "JS code quality analyzer computing cyclomatic complexity, toxicity scores, Halstead volume, nesting depth, parameter count, and file health grades without requiring a JS parser.",
+      "tags": ["javascript", "code-quality", "metrics", "complexity"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/jsx_auth.py",
+      "type": "file",
+      "name": "jsx_auth",
+      "filePath": "stca/jsx_auth.py",
+      "summary": "JSX-aware authorization extraction for React/Next.js codebases. Detects HOC patterns, hooks, component wrappers, permission checks, and route guards to find pages missing auth.",
+      "tags": ["react", "nextjs", "authorization", "jsx", "security"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/knowledge_base.py",
+      "type": "file",
+      "name": "knowledge_base",
+      "filePath": "stca/knowledge_base.py",
+      "summary": "Builtin function behavior database inspired by Kunlun-M. Stores per-function taint metadata (passthrough, safe, source, sink) for interprocedural analysis across multiple languages.",
+      "tags": ["knowledge-base", "taint", "function-behavior", "multi-language"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:stca/layers/__init__.py",
+      "type": "file",
+      "name": "layers",
+      "filePath": "stca/layers/__init__.py",
+      "summary": "Pipeline layers package. Imports and exports all analysis layers (L0-L7) and the ALL_LAYERS set for pipeline orchestration.",
+      "tags": ["package-init", "layers", "pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/base.py",
+      "type": "file",
+      "name": "base",
+      "filePath": "stca/layers/base.py",
+      "summary": "Abstract base class for all pipeline layers. Defines the LayerBase interface with the run() method contract: given repo root, hunks, and config, return Findings. Layers are independent and idempotent.",
+      "tags": ["layers", "abstract-base", "interface", "pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/layers/l0_fast.py",
+      "type": "file",
+      "name": "l0_fast",
+      "filePath": "stca/layers/l0_fast.py",
+      "summary": "L0 Fast hooks layer running in under 5 seconds. Catches hardcoded secrets (gitleaks or regex fallback), Python lint errors (ruff), and SAST patterns (semgrep or built-in mini-ruleset). Catches ~25% of real bugs without LLM.",
+      "tags": ["layers", "l0", "fast", "secrets", "sast", "semgrep"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py:class:CFunctionSignature",
+      "type": "class",
+      "name": "CFunctionSignature",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Data class representing a parsed C function signature with name, return type, parameters, source file, variadic flag, and header file reference.",
+      "tags": ["ffi", "data-model", "c-signature"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py:class:FFICall",
+      "type": "class",
+      "name": "FFICall",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Data class representing a detected FFI call from Python to C with library, function name, arguments, inferred types, and return value tracking.",
+      "tags": ["ffi", "data-model", "call-detection"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py:class:CExtensionSource",
+      "type": "class",
+      "name": "CExtensionSource",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Data class for analyzed C extension source files tracking PyInit presence, PyObject usage, GIL operations, and reference count operations.",
+      "tags": ["ffi", "data-model", "c-extension"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py:class:FFIViolation",
+      "type": "class",
+      "name": "FFIViolation",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Data class for FFI boundary violations with type, severity, location, C function context, description, fix suggestion, and CWE reference.",
+      "tags": ["ffi", "data-model", "violation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py:class:FFIUsageDetector",
+      "type": "class",
+      "name": "FFIUsageDetector",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Scans Python files for FFI calls via ctypes, cffi, pybind11, and Cython. Parses AST to extract call signatures, library references, arguments, and return type tracking.",
+      "tags": ["ffi", "detector", "ast-parsing", "ctypes", "cffi"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py:class:CHeaderParser",
+      "type": "class",
+      "name": "CHeaderParser",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Parses C header files to extract function signatures. Uses regex to match function declarations and infer parameter types for cross-language type checking.",
+      "tags": ["ffi", "parser", "c-headers"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py:class:CExtensionAnalyzer",
+      "type": "class",
+      "name": "CExtensionAnalyzer",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Analyzes C extension source files (.c, .cpp, .pyx) for GIL usage patterns, reference counting operations, and PyInit entry points.",
+      "tags": ["ffi", "analyzer", "c-extension", "gil", "refcount"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:stca/ffi_analyzer.py:class:FFIViolationDetector",
+      "type": "class",
+      "name": "FFIViolationDetector",
+      "filePath": "stca/ffi_analyzer.py",
+      "summary": "Detects 10 categories of FFI violations: type mismatches, null pointers, dangerous C functions, missing error checking, string encoding, buffer size, signed/unsigned mismatch, GIL violations, refcount imbalance, and memory management issues.",
+      "tags": ["ffi", "detector", "violation-detection", "security"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:stca/layers/l0_fast.py:func:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "stca/layers/l0_fast.py",
+      "summary": "Main entry point for L0 fast scanning. Orchestrates gitleaks, ruff, and semgrep execution with fallback regex patterns when tools are not installed.",
+      "tags": ["layer", "l0", "entry-point"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:stca/feedback/__init__.py",
+      "target": "file:stca/feedback/rule_capture.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/feedback/__init__.py",
+      "target": "file:stca/feedback/stats.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/feedback/stats.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/jsx_auth.py",
+      "target": "file:stca/business_logic.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/base.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l0_fast.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l1_property.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l2_mutation.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l3_invariants.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l4_fuzz.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l5_policy.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l6_symbolic.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l7_simulation.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/base.py",
+      "target": "file:stca/config.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/base.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/l0_fast.py",
+      "target": "file:stca/layers/base.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/l0_fast.py",
+      "target": "file:stca/models.py",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/base.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l0_fast.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l1_property.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l2_mutation.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l3_invariants.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l4_fuzz.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l5_policy.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l6_symbolic.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/layers/__init__.py",
+      "target": "file:stca/layers/l7_simulation.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/feedback/__init__.py",
+      "target": "file:stca/feedback/rule_capture.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/feedback/__init__.py",
+      "target": "file:stca/feedback/stats.py",
+      "type": "contains",
+      "weight": 0.9
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py",
+      "target": "file:stca/ffi_analyzer.py:class:CFunctionSignature",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py",
+      "target": "file:stca/ffi_analyzer.py:class:FFICall",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py",
+      "target": "file:stca/ffi_analyzer.py:class:CExtensionSource",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py",
+      "target": "file:stca/ffi_analyzer.py:class:FFIViolation",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py",
+      "target": "file:stca/ffi_analyzer.py:class:FFIUsageDetector",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py",
+      "target": "file:stca/ffi_analyzer.py:class:CHeaderParser",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py",
+      "target": "file:stca/ffi_analyzer.py:class:CExtensionAnalyzer",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py",
+      "target": "file:stca/ffi_analyzer.py:class:FFIViolationDetector",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/layers/l0_fast.py",
+      "target": "file:stca/layers/l0_fast.py:func:run",
+      "type": "defines",
+      "weight": 0.8
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py:class:FFIUsageDetector",
+      "target": "file:stca/ffi_analyzer.py:class:FFICall",
+      "type": "creates",
+      "weight": 0.6
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py:class:FFIViolationDetector",
+      "target": "file:stca/ffi_analyzer.py:class:FFIViolation",
+      "type": "creates",
+      "weight": 0.6
+    },
+    {
+      "source": "file:stca/ffi_analyzer.py:class:FFIViolationDetector",
+      "target": "file:stca/ffi_analyzer.py:class:CHeaderParser",
+      "type": "uses",
+      "weight": 0.5
+    },
+    {
+      "source": "file:stca/feedback/rule_capture.py",
+      "target": "file:stca/feedback/stats.py",
+      "type": "related-to",
+      "weight": 0.4
+    },
+    {
+      "source": "file:stca/hotspots.py",
+      "target": "file:stca/issue_store.py",
+      "type": "related-to",
+      "weight": 0.4
+    },
+    {
+      "source": "file:stca/impact_analysis.py",
+      "target": "file:stca/incremental.py",
+      "type": "related-to",
+      "weight": 0.4
+    },
+    {
+      "source": "file:stca/js_pattern_scanner.py",
+      "target": "file:stca/js_multiline.py",
+      "type": "related-to",
+      "weight": 0.5
+    },
+    {
+      "source": "file:stca/js_cpg.py",
+      "target": "file:stca/js_pattern_scanner.py",
+      "type": "related-to",
+      "weight": 0.5
+    },
+    {
+      "source": "file:stca/jsx_auth.py",
+      "target": "file:stca/js_cpg.py",
+      "type": "related-to",
+      "weight": 0.4
+    },
+    {
+      "source": "file:stca/knowledge_base.py",
+      "target": "file:stca/interprocedural.py",
+      "type": "used-by",
+      "weight": 0.7
+    },
+    {
+      "source": "file:stca/layers/l0_fast.py",
+      "target": "file:stca/flawfinder_db.py",
+      "type": "related-to",
+      "weight": 0.4
+    }
+  ]
+}

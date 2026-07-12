@@ -1,8 +1,11 @@
 """Cryptographic correctness analyzer.
 
-Detects weak crypto in Python (hashlib, Crypto, cryptography), JS (CryptoJS,
-jsonwebtoken, crypto), Go (md5/sha1/des/math/rand), Java (MessageDigest,
-Cipher), and C/C++ (MD5/SHA1/strcpy). Also detects unsafe secret comparisons
+v4.15 HONESTY FIX: Docstring previously claimed Go/Java/C++ support.
+Actually only Python and JS/TS are implemented (verified by suffix checks).
+Go/Java/C/C++ rules are defined but the scan functions return [] for them.
+
+Detects weak crypto in Python (hashlib, Crypto, cryptography) and JS/TS
+(CryptoJS, jsonwebtoken, crypto). Also detects unsafe secret comparisons
 (== on passwords/tokens), PBKDF2 without salt, and static IVs.
 
 Note: `_is_secret_comparison` requires BOTH operands to be secret-named to

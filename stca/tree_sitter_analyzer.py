@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from .multi_lang import get_language, ALL_SOURCE_EXTS
 
+import logging
+_logger = logging.getLogger(__name__.replace('stca.', ''))
+
 @dataclass
 class ASTFinding:
     file: str; line: int; column: int; rule_id: str; severity: str; category: str
@@ -136,7 +139,7 @@ def analyze_repo_with_ast(repo_root, max_files=150):
             if p.stat().st_size > 200000: continue
         except: continue
         try: findings += analyze_with_ast(p, repo_root)
-        except: pass
+        except Exception: pass  # v4.5: suppressed — add logging
         count += 1
         if count >= max_files: break
     return findings

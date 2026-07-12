@@ -1,3 +1,7 @@
+# v4.9: TODO — Wire into orchestrator. This module is written but not yet
+# connected to the pipeline. See v4.9 plan for BayesianSecondOpinion wiring.
+
+
 """Bayesian Belief Network — second-opinion aggregator over the FIS output.
 
 The FIS produces a (decision, confidence_interval) pair deterministically.
@@ -177,6 +181,13 @@ class BayesianSecondOpinion:
                 p_warn += w * wn
                 p_pass += w * p
         # apply evidence multipliers (multiplicative on P(block))
+        # v4.10: Fixed dead-branch bug AND the inversion. v4.9 fixed the
+        # dead branch but inverted the logic for fp_history/test_exclusion.
+        # _multiplier returns LOW values for high FP history (untrustworthy).
+        # So for fp_history/test_exclusion: high value → low m → should
+        # INCREASE pass (mult_pass *= (2.0 - m)) and DECREASE block.
+        # For other signals: high value → high m → should INCREASE block
+        # (mult_block *= m) and DECREASE pass.
         mult_block = 1.0
         mult_pass = 1.0
         for name in ("confidence", "exploitability", "reliability",
@@ -184,14 +195,18 @@ class BayesianSecondOpinion:
             value = getattr(evidence, name)
             m = _multiplier(name, value)
             if name in {"fp_history", "test_exclusion"}:
-                mult_block *= m
+                # High FP/exclusion → low m → boost pass, reduce block
+                mult_pass *= (2.0 - m)  # inverse: low m → high boost
+                mult_block *= m           # low m → reduce block
             else:
+                # High confidence/exploitability → high m → boost block, reduce pass
                 mult_block *= m
+                mult_pass *= (2.0 - m)  # inverse
         # apply test_exclusion very strongly
         if evidence.test_exclusion > 0.5:
             mult_block *= (1.0 - evidence.test_exclusion)
         p_block *= mult_block
-        p_pass *= (2.0 - mult_block) if mult_block < 1.0 else 1.0
+        p_pass *= mult_pass  # v4.9: use the actual mult_pass, not derived from mult_block
         # renormalize
         total = p_block + p_warn + p_pass
         if total == 0:

@@ -1,0 +1,257 @@
+# STCA SQL Security Rules — 51 rules
+rules:
+  - id: sql-select-star
+    pattern: "\\bSELECT\\s+\\*"
+    severity: low
+    message: "SELECT * — fetches unnecessary columns, performance hit"
+    metadata: {cwe: "CWE-400"}
+  - id: sql-no-where-update
+    pattern: "\\bUPDATE\\s+\\w+\\s+SET(?![^;]*\\bWHERE\\b)"
+    severity: high
+    message: "UPDATE without WHERE — affects all rows"
+    metadata: {cwe: "CWE-939"}
+  - id: sql-no-where-delete
+    pattern: "\\bDELETE\\s+FROM\\s+\\w+(?![^;]*\\bWHERE\\b)"
+    severity: critical
+    message: "DELETE without WHERE — drops all rows"
+    metadata: {cwe: "CWE-939"}
+  - id: sql-drop-table
+    pattern: "\\bDROP\\s+TABLE\\b"
+    severity: critical
+    message: "DROP TABLE — destructive, verify intent"
+    metadata: {cwe: "CWE-732"}
+  - id: sql-truncate-table
+    pattern: "\\bTRUNCATE\\s+TABLE\\b"
+    severity: critical
+    message: "TRUNCATE — destructive, non-transactional"
+    metadata: {cwe: "CWE-732"}
+  - id: sql-drop-database
+    pattern: "\\bDROP\\s+DATABASE\\b"
+    severity: critical
+    message: "DROP DATABASE — catastrophic"
+    metadata: {cwe: "CWE-732"}
+  - id: sql-grant-all
+    pattern: "\\bGRANT\\s+ALL\\b"
+    severity: high
+    message: "GRANT ALL — excessive privileges"
+    metadata: {cwe: "CWE-732"}
+  - id: sql-create-user-no-password
+    pattern: "\\bCREATE\\s+USER\\b[^;]*(?!.*IDENTIFIED\\s+BY)"
+    severity: high
+    message: "CREATE USER without password"
+    metadata: {cwe: "CWE-521"}
+  - id: sql-weak-password
+    pattern: "\\bIDENTIFIED\\s+BY\\s+['\\\"](password|123456|admin|root|test)['\\\"]"
+    severity: critical
+    message: "Weak password"
+    metadata: {cwe: "CWE-521"}
+  - id: sql-hardcoded-password
+    pattern: "\\bIDENTIFIED\\s+BY\\s+['\\\"][^'\\\"]{1,8}['\\\"]"
+    severity: high
+    message: "Short hardcoded password"
+    metadata: {cwe: "CWE-521"}
+  - id: sql-admin-admin
+    pattern: "\\bCREATE\\s+USER\\s+['\\\"]admin['\\\"]\\s+IDENTIFIED\\s+BY\\s+['\\\"]admin['\\\"]"
+    severity: critical
+    message: "admin/admin credentials"
+    metadata: {cwe: "CWE-521"}
+  - id: sql-no-transaction-commit
+    pattern: "\\b(INSERT|UPDATE|DELETE)\\b[^;]*;(?!\\s*(COMMIT|BEGIN))"
+    severity: medium
+    message: "DML without explicit transaction — auto-commit risk"
+    metadata: {cwe: "CWE-754"}
+  - id: sql-commit-without-begin
+    pattern: "\\bCOMMIT\\b(?!.*BEGIN)"
+    severity: medium
+    message: "COMMIT without BEGIN — verify transaction scope"
+    metadata: {cwe: "CWE-754"}
+  - id: sql-sleep-in-query
+    pattern: "\\bSLEEP\\s*\\("
+    severity: high
+    message: "SLEEP() — DoS vector"
+    metadata: {cwe: "CWE-400"}
+  - id: sql-benchmark
+    pattern: "\\bBENCHMARK\\s*\\("
+    severity: high
+    message: "BENCHMARK() — DoS vector"
+    metadata: {cwe: "CWE-400"}
+  - id: sql-load-file
+    pattern: "\\bLOAD_FILE\\s*\\("
+    severity: high
+    message: "LOAD_FILE() — file read via SQL"
+    metadata: {cwe: "CWE-73"}
+  - id: sql-into-outfile
+    pattern: "\\bINTO\\s+OUTFILE\\b"
+    severity: critical
+    message: "INTO OUTFILE — file write via SQL"
+    metadata: {cwe: "CWE-73"}
+  - id: sql-into-dumpfile
+    pattern: "\\bINTO\\s+DUMPFILE\\b"
+    severity: critical
+    message: "INTO DUMPFILE — file write via SQL"
+    metadata: {cwe: "CWE-73"}
+  - id: sql-load-data-infile
+    pattern: "\\bLOAD\\s+DATA\\s+(?:LOCAL\\s+)?INFILE\\b"
+    severity: high
+    message: "LOAD DATA INFILE — file read"
+    metadata: {cwe: "CWE-73"}
+  - id: sql-concat-query
+    pattern: "\\bCONCAT\\s*\\([^)]*\\$\\{"
+    severity: medium
+    message: "CONCAT with template — verify no injection"
+    metadata: {cwe: "CWE-89"}
+  - id: sql-exec-dynamic
+    pattern: "\\bEXECUTE\\s+(?:IMMEDIATE|@)\\s*[\\(\\s]+['\\\"]"
+    severity: high
+    message: "EXECUTE IMMEDIATE with literal — verify no injection"
+    metadata: {cwe: "CWE-89"}
+  - id: sql-sp-executesql-string
+    pattern: "\\bsp_executesql\\s*\\(\\s*N['\\\"]"
+    severity: high
+    message: "sp_executesql with literal — verify parameterization"
+    metadata: {cwe: "CWE-89"}
+  - id: sql-union-select
+    pattern: "\\bUNION\\s+(?:ALL\\s+)?SELECT\\b"
+    severity: medium
+    message: "UNION SELECT — verify not used for injection"
+    metadata: {cwe: "CWE-89"}
+  - id: sql-information-schema
+    pattern: "\\binformation_schema\\.(tables|columns|schemata)"
+    severity: medium
+    message: "information_schema access — info leak risk"
+    metadata: {cwe: "CWE-200"}
+  - id: sql-sysobjects
+    pattern: "\\bsysobjects\\b|sys\\.tables|sys\\.columns"
+    severity: medium
+    message: "system catalog access — info leak risk"
+    metadata: {cwe: "CWE-200"}
+  - id: sql-disable-trigger
+    pattern: "\\bDISABLE\\s+TRIGGER\\b"
+    severity: medium
+    message: "DISABLE TRIGGER — security control bypass"
+    metadata: {cwe: "CWE-358"}
+  - id: sql-enable-trigger
+    pattern: "\\bENABLE\\s+TRIGGER\\b"
+    severity: low
+    message: "ENABLE TRIGGER — verify intent"
+    metadata: {cwe: "CWE-358"}
+  - id: sql-alter-role
+    pattern: "\\bALTER\\s+ROLE\\b"
+    severity: high
+    message: "ALTER ROLE — privilege escalation risk"
+    metadata: {cwe: "CWE-269"}
+  - id: sql-set-role
+    pattern: "\\bSET\\s+ROLE\\b"
+    severity: high
+    message: "SET ROLE — privilege escalation risk"
+    metadata: {cwe: "CWE-269"}
+  - id: sql-grant-with-admin
+    pattern: "\\bGRANT\\s+\\w+\\s+WITH\\s+ADMIN\\s+OPTION"
+    severity: critical
+    message: "GRANT WITH ADMIN OPTION — privilege delegation"
+    metadata: {cwe: "CWE-269"}
+  - id: sql-grant-with-grant
+    pattern: "\\bGRANT\\s+\\w+\\s+WITH\\s+GRANT\\s+OPTION"
+    severity: critical
+    message: "GRANT WITH GRANT OPTION — privilege delegation"
+    metadata: {cwe: "CWE-269"}
+  - id: sql-public-symlink
+    pattern: "\\bCREATE\\s+(?:OR\\s+REPLACE\\s+)?(?:PUBLIC\\s+)?SYNONYM\\b"
+    severity: medium
+    message: "PUBLIC SYNONYM — verify exposure"
+    metadata: {cwe: "CWE-732"}
+  - id: sql-public-dblink
+    pattern: "\\bCREATE\\s+(?:PUBLIC\\s+)?DATABASE\\s+LINK\\b"
+    severity: high
+    message: "PUBLIC DATABASE LINK — credential leak risk"
+    metadata: {cwe: "CWE-732"}
+  - id: sql-stored-proc-exec
+    pattern: "\\bEXEC(?:UTE)?\\s+\\w+\\s*@?\\w*\\s*;"
+    severity: medium
+    message: "EXEC stored procedure — verify input not user-controlled"
+    metadata: {cwe: "CWE-78"}
+  - id: sql-sp-adduser
+    pattern: "\\bsp_adduser\\b|sp_addlogin\\b"
+    severity: high
+    message: "sp_adduser/sp_addlogin — verify intent"
+    metadata: {cwe: "CWE-269"}
+  - id: sql-sp-password
+    pattern: "\\bsp_password\\b"
+    severity: medium
+    message: "sp_password — legacy, verify use"
+    metadata: {cwe: "CWE-521"}
+  - id: sql-xp-cmdshell
+    pattern: "\\bxp_cmdshell\\b"
+    severity: critical
+    message: "xp_cmdshell — RCE via SQL Server"
+    metadata: {cwe: "CWE-78"}
+  - id: sql-xp-enumerrorlog
+    pattern: "\\bxp_enumerrorlogs\\b|xp_readerrorlog\\b"
+    severity: high
+    message: "xp_* — info leak"
+    metadata: {cwe: "CWE-200"}
+  - id: sql-sp-configure
+    pattern: "\\bsp_configure\\b"
+    severity: high
+    message: "sp_configure — server config change"
+    metadata: {cwe: "CWE-732"}
+  - id: sql-allow-replication
+    pattern: "\\bsp_repladdcolumn\\b|sp_repldone\\b"
+    severity: medium
+    message: "replication stored proc — verify intent"
+    metadata: {cwe: "CWE-732"}
+  - id: sql-no-encryption-function
+    pattern: "\\bINSERT\\s+INTO\\s+\\w+\\s*\\([^)]*(?:password|passwd|pwd|secret|token)(?![^)]*encrypt\\(|hash\\()"
+    severity: high
+    message: "Storing password without hashing"
+    metadata: {cwe: "CWE-916"}
+  - id: sql-md5-in-query
+    pattern: "\\bMD5\\s*\\("
+    severity: high
+    message: "MD5 in SQL — broken hash"
+    metadata: {cwe: "CWE-327"}
+  - id: sql-sha1-in-query
+    pattern: "\\bSHA1\\s*\\("
+    severity: high
+    message: "SHA1 in SQL — broken hash"
+    metadata: {cwe: "CWE-327"}
+  - id: sql-password-plain
+    pattern: "\\bpassword\\s*=\\s*['\\\"][^'\\\"]+['\\\"]"
+    severity: high
+    message: "Password in plain text comparison"
+    metadata: {cwe: "CWE-521"}
+  - id: sql-like-leading-wildcard
+    pattern: "\\bLIKE\\s+['\\\"]%"
+    severity: low
+    message: "LIKE with leading % — full table scan"
+    metadata: {cwe: "CWE-400"}
+  - id: sql-order-by-random
+    pattern: "\\bORDER\\s+BY\\s+RAND\\s*\\("
+    severity: medium
+    message: "ORDER BY RAND() — full table sort, DoS risk"
+    metadata: {cwe: "CWE-400"}
+  - id: sql-subquery-in-select
+    pattern: "\\bSELECT\\s+[^,]+,\\s*\\(\\s*SELECT"
+    severity: medium
+    message: "Correlated subquery in SELECT — performance risk"
+    metadata: {cwe: "CWE-400"}
+  - id: sql-distinct-large
+    pattern: "\\bSELECT\\s+DISTINCT\\s+\\w+,\\s*\\w+,\\s*\\w+,\\s*\\w+,\\s*\\w+"
+    severity: low
+    message: "DISTINCT on many columns — performance risk"
+    metadata: {cwe: "CWE-400"}
+  - id: sql-cross-join
+    pattern: "\\bCROSS\\s+JOIN\\b"
+    severity: medium
+    message: "CROSS JOIN — cartesian product, DoS risk"
+    metadata: {cwe: "CWE-400"}
+  - id: sql-no-limit-update
+    pattern: "\\bUPDATE\\s+\\w+[^;]*(?!.*\\bLIMIT\\s+\\d+)"
+    severity: medium
+    message: "UPDATE without LIMIT — full table update"
+    metadata: {cwe: "CWE-939"}
+  - id: sql-no-limit-delete
+    pattern: "\\bDELETE\\s+FROM\\s+\\w+[^;]*(?!.*\\bLIMIT\\s+\\d+)"
+    severity: medium
+    message: "DELETE without LIMIT — full table delete"
+    metadata: {cwe: "CWE-939"}

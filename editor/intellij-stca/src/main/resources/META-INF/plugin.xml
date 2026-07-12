@@ -1,0 +1,112 @@
+<idea-plugin>
+    <id>com.stca.pipeline.intellij</id>
+    <name>STCA Pipeline</name>
+    <vendor email="support@stca.dev" url="https://github.com/local/stca-pipeline">STCA Pipeline</vendor>
+
+    <description><![CDATA[
+        <h3>STCA Pipeline — Static + Test + Constraint Analysis</h3>
+        <p>Real-time squiggles, quality gates, auto-fix, and rule mining for 20+ languages.</p>
+        <p>Connects to the STCA LSP server for sub-second feedback.</p>
+        <ul>
+          <li><b>Languages:</b> Python, JavaScript, TypeScript, Go, Java, Rust, C/C++, PHP, Ruby, C#, Swift, Scala, Kotlin, SQL, Bash, Dart, Lua, R, Haskell, Elixir</li>
+          <li><b>Quality gates:</b> SonarQube-style thresholds (strict/balanced/permissive presets)</li>
+          <li><b>Auto-fix:</b> 107 patterns across 10+ languages</li>
+          <li><b>Secret detection:</b> 275+ patterns (AWS, Stripe, GitHub, OpenAI, etc.)</li>
+          <li><b>Rule mining:</b> Auto-derive rules from your bug-fix commits</li>
+          <li><b>Unique:</b> Fuzzy brain, LLM verify, counterfactual, metamorphic, knowledge graph</li>
+        </ul>
+        <p>Install: <code>pip install stca-pipeline</code>, then restart IDE.</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <b>0.1.0</b> — Initial release.<br>
+        LSP client, 7 commands, quality gates, auto-fix, rule mining.
+    ]]></change-notes>
+
+    <!-- Minimum IDE build -->
+    <idea-version since-build="231" until-build="241.*"/>
+
+    <!-- Dependencies (IntelliJ platform modules) -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+
+    <!-- Extension points -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Application-level settings -->
+        <applicationService
+            serviceImplementation="com.stca.pipeline.settings.StcaSettingsService"/>
+
+        <!-- Configurable for Settings > Tools > STCA -->
+        <applicationConfigurable
+            parentId="tools"
+            instance="com.stca.pipeline.settings.StcaSettingsConfigurable"
+            id="com.stca.pipeline.settings.StcaSettingsConfigurable"
+            displayName="STCA Pipeline"
+            nonDefaultProject="true"/>
+
+        <!-- LSP server support (IntelliJ 2023.1+) -->
+        <platform.lsp.serverSupport
+            implementation="com.stca.pipeline.lsp.StcaLspServerSupport"/>
+
+        <!-- Annotator (fallback when LSP not available) -->
+        <annotator
+            language="STCA"
+            implementationClass="com.stca.pipeline.annotator.StcaAnnotator"/>
+
+        <!-- Tool window for STCA output -->
+        <toolWindow
+            id="STCA"
+            anchor="bottom"
+            factoryClass="com.stca.pipeline.ui.StcaToolWindowFactory"
+            icon="com.stca.pipeline.icons.StcaIcons.STCA"/>
+
+        <!-- Status bar widget -->
+        <statusBarWidgetFactory
+            id="StcaStatusBar"
+            implementation="com.stca.pipeline.ui.StcaStatusBarWidgetFactory"/>
+
+        <!-- Inspection (for batch mode) -->
+        <localInspection
+            language="STCA"
+            bundle="com.stca.pipeline.messages.StcaBundle"
+            key="inspection.display.name"
+            groupKey="inspection.group.name"
+            enabledByDefault="true"
+            level="WARNING"
+            implementationClass="com.stca.pipeline.inspection.StcaInspection"/>
+    </extensions>
+
+    <!-- Actions -->
+    <actions>
+        <group id="Stca.Actions" text="STCA" description="STCA Pipeline actions">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="Stca.CheckRepo"
+                    class="com.stca.pipeline.action.CheckRepoAction"
+                    text="Run Full Check on Repo"
+                    description="Run stca check --full"/>
+            <action id="Stca.CheckFile"
+                    class="com.stca.pipeline.action.CheckFileAction"
+                    text="Check Current File"
+                    description="Re-analyze the current file"/>
+            <action id="Stca.ApplyFix"
+                    class="com.stca.pipeline.action.ApplyFixAction"
+                    text="Apply Auto-fix"
+                    description="Apply stca fix --apply"/>
+            <action id="Stca.ShowUncertain"
+                    class="com.stca.pipeline.action.ShowUncertainAction"
+                    text="Toggle Uncertain Findings (30-70%)"
+                    description="Show only findings worth human review"/>
+            <action id="Stca.Gate"
+                    class="com.stca.pipeline.action.GateAction"
+                    text="Run Quality Gate"
+                    description="SonarQube-style thresholds"/>
+            <action id="Stca.Mine"
+                    class="com.stca.pipeline.action.MineAction"
+                    text="Mine Rules from Git History"
+                    description="Auto-derive rules from bug-fix commits"/>
+            <action id="Stca.Restart"
+                    class="com.stca.pipeline.action.RestartAction"
+                    text="Restart LSP Server"/>
+        </group>
+    </actions>
+</idea-plugin>

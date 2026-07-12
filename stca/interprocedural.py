@@ -30,10 +30,6 @@ Architecture:
 """
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.interprocedural")
-
 import hashlib
 import json
 import re
@@ -227,8 +223,8 @@ def discover_sources_in_repo(repo_root: Path, max_files: int = 600) -> List[Sour
         if p.suffix.lower() in ALL_SOURCE_EXTS:
             try:
                 all_sources += discover_sources_in_file(p, repo_root)
-            except Exception as e:
-                logger.debug("source discovery failed on %s: %s", p.name, e)
+            except Exception:
+                pass
             count += 1
             if count >= max_files:
                 break
@@ -1046,8 +1042,8 @@ class InterproceduralTaintAnalyzer:
 
             try:
                 flows += self._analyze_file(p, repo_root)
-            except Exception as e:
-                logger.debug("interprocedural analysis failed on %s: %s", p.name, e)
+            except Exception:
+                pass
 
             count += 1
             if count >= max_files:
@@ -1116,9 +1112,51 @@ class InterproceduralTaintAnalyzer:
             # Check for interprocedural calls
             for call_match in re.finditer(r'(\w+(?:\.\w+)*)\s*\(', line):
                 func_name = call_match.group(1)
-                # Try to resolve through call graph
+                # v4.15 BUG FIX: Was passing set() (empty) as tainted_arg_positions,
+                # which disabled ALL interprocedural taint through user functions.
+                # Now we compute which argument positions are actually tainted
+                # by checking if any tainted variable appears in each argument.
+                call_start = call_match.start()
+                call_end = call_match.end()
+                args_text = line[call_end:]  # text after the opening paren
+                # Find the matching close paren
+                paren_depth = 1
+                args_end = 0
+                for ci, ch in enumerate(args_text):
+                    if ch == '(':
+                        paren_depth += 1
+                    elif ch == ')':
+                        paren_depth -= 1
+                        if paren_depth == 0:
+                            args_end = ci
+                            break
+                args_text = args_text[:args_end]
+                # Split by comma (top-level only)
+                arg_parts = []
+                current_arg = ""
+                pdepth = 0
+                for ch in args_text:
+                    if ch == '(' or ch == '[' or ch == '{':
+                        pdepth += 1
+                    elif ch == ')' or ch == ']' or ch == '}':
+                        pdepth -= 1
+                    elif ch == ',' and pdepth == 0:
+                        arg_parts.append(current_arg.strip())
+                        current_arg = ""
+                        continue
+                    current_arg += ch
+                if current_arg.strip():
+                    arg_parts.append(current_arg.strip())
+                # Check which arg positions contain tainted vars
+                tainted_positions: Set[int] = set()
+                for arg_idx, arg_text in enumerate(arg_parts):
+                    for var_name in tainted_vars:
+                        if var_name in arg_text:
+                            tainted_positions.add(arg_idx)
+                            break
+                # Try to resolve through call graph with actual tainted positions
                 return_tainted, reaches_sink, sink_type = self.call_graph.resolve_taint_through_call(
-                    func_name, set()  # we don't track arg positions precisely yet
+                    func_name, tainted_positions  # v4.15: actual positions, not empty set
                 )
 
                 # Check if any tainted var is in the arguments

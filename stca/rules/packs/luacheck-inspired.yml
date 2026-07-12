@@ -1,0 +1,162 @@
+# Adapted rule pack — concepts from this tool adapted to Python
+# Source: https://luacheck.readthedocs.io/en/stable/
+# luacheck focuses on: globals, read-only, unused, recursion, redefined, shadow
+# We adapt these to Python's module/class system.
+
+rules:
+  # === Globals (luacheck: global) ===
+  - id: luacheck-undefined-global
+    pattern-regex: '^\s*([a-z][a-zA-Z_]*)\s*='
+    message: "Possible undefined global (luacheck: global) — module-level variable assigned. Verify it's not a typo of a builtin."
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: globals, original: undefined_global }
+
+  - id: luacheck-global-used-in-function
+    pattern: |
+      $GLOBAL = $VALUE
+      ...
+      def $FUNC(...):
+        ...
+        $GLOBAL
+    message: "Global accessed in function (luacheck: global) — consider passing as parameter for testability"
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: globals, original: global_in_function }
+
+  # === Read-only (luacheck: read_only) ===
+  - id: luacheck-modify-builtin
+    pattern-either:
+      - pattern: list.append = $X
+      - pattern: dict.update = $X
+      - pattern: str.split = $X
+    message: "Modifying builtin (luacheck: read_only) — don't monkey-patch builtin types"
+    languages: [python]
+    severity: ERROR
+    metadata: { source: luacheck, category: read_only, original: read_only_global }
+
+  - id: luacheck-reassign-import
+    pattern: |
+      import $MODULE
+      ...
+      $MODULE = $OTHER
+    message: "Reassigning imported module (luacheck: read_only) — don't reassign import names"
+    languages: [python]
+    severity: ERROR
+    metadata: { source: luacheck, category: read_only, original: read_only_global }
+
+  # === Unused (luacheck: unused) ===
+  - id: luacheck-unused-variable
+    pattern: |
+      $VAR = $VALUE
+      # $VAR never used again
+    message: "Unused variable (luacheck: unused) — variable assigned but never read"
+    languages: [python]
+    severity: WARNING
+    metadata: { source: luacheck, category: unused, original: unused_variable }
+
+  - id: luacheck-unused-argument
+    pattern: |
+      def $FUNC($ARG, ...):
+        ...
+        # $ARG never used in body
+    message: "Unused argument (luacheck: unused) — function parameter never used. Prefix with _ if intentional."
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: unused, original: unused_argument }
+
+  - id: luacheck-unused-loop-variable
+    pattern: |
+      for $I in $ITER:
+        ...
+        # $I never used in body
+    message: "Unused loop variable (luacheck: unused) — loop variable never used. Use _ instead."
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: unused, original: unused_loop_variable }
+
+  # === Recursion (luacheck: recursion) ===
+  - id: luacheck-unbounded-recursion
+    pattern: |
+      def $FUNC(...):
+        ...
+        return $FUNC(...)
+    message: "Unbounded recursion (luacheck: recursion) — function calls itself without obvious base case. Verify there's a termination condition."
+    languages: [python]
+    severity: WARNING
+    metadata: { source: luacheck, category: recursion, original: unbounded_recursion }
+
+  # === Redefined (luacheck: redefined) ===
+  - id: luacheck-shadow-builtin
+    pattern-either:
+      - pattern: list = $X
+      - pattern: dict = $X
+      - pattern: str = $X
+      - pattern: int = $X
+      - pattern: float = $X
+      - pattern: type = $X
+      - pattern: id = $X
+    message: "Shadowing builtin (luacheck: redefined) — variable name shadows a builtin. Rename to avoid confusion."
+    languages: [python]
+    severity: WARNING
+    metadata: { source: luacheck, category: redefined, original: redefined_builtin }
+
+  - id: luacheck-shadow-argument
+    pattern: |
+      def $FUNC($ARG):
+        ...
+        $ARG = $OTHER
+    message: "Shadowing argument (luacheck: redefined) — parameter reassigned in body. Use a different variable name."
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: redefined, original: redefined_argument }
+
+  # === Shadow (luacheck: shadow) ===
+  - id: luacheck-shadow-outer-scope
+    pattern: |
+      $VAR = $VALUE
+      ...
+      def $FUNC(...):
+        ...
+        $VAR = $OTHER
+    message: "Shadowing outer scope (luacheck: shadow) — inner variable shadows outer. Rename for clarity."
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: shadow, original: shadowing }
+
+  - id: luacheck-shadow-loop-variable
+    pattern: |
+      for $I in $OUTER:
+        ...
+        for $I in $INNER:
+          ...
+    message: "Shadowing loop variable (luacheck: shadow) — inner loop uses same variable name as outer"
+    languages: [python]
+    severity: WARNING
+    metadata: { source: luacheck, category: shadow, original: shadowing_loop }
+
+  # === Type (luacheck: type) ===
+  - id: luacheck-inconsistent-type
+    pattern: |
+      $VAR = $INT
+      ...
+      $VAR = $STR
+    message: "Inconsistent type (luacheck: type) — variable changes type during execution"
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: type, original: inconsistent_type }
+
+  # === Format (luacheck: format) ===
+  - id: luacheck-trailing-whitespace
+    pattern-regex: ' +$'
+    message: "Trailing whitespace (luacheck: format) — remove trailing spaces"
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: format, original: trailing_whitespace }
+
+  - id: luacheck-mixed-line-endings
+    pattern-regex: '\r\n'
+    message: "Mixed line endings (luacheck: format) — file uses CRLF; Unix uses LF"
+    languages: [python]
+    severity: INFO
+    metadata: { source: luacheck, category: format, original: mixed_endings }

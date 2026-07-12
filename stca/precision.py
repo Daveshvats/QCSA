@@ -20,10 +20,6 @@ Together these three mechanisms can reduce false positives by 50-80%.
 """
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.precision")
-
 import json
 import math
 import re
@@ -64,20 +60,27 @@ def find_corroborating_findings(findings: List) -> List[CorroborationBoost]:
     for (file, line), group in by_location.items():
         if len(group) < 2:
             continue
-        # get unique layers
-        layers = list({f.layer.value for f in group})
-        if len(layers) < 2:
-            continue  # same layer flagging twice doesn't count
+        # v4.3: Use (layer, engine) instead of just layer for corroboration.
+        # Previously, findings from different detectors that share L0_FAST
+        # (typestate.py, v4_restored.py, multi_language_bl.py, etc.) were
+        # treated as same-layer and skipped. Now we use the engine field
+        # to distinguish them — two findings from different engines count
+        # as independent corroboration even if they share the same layer ID.
+        engines = list({(f.layer.value, getattr(f, 'engine', '') or f.rule_id.split('.')[0])
+                       for f in group})
+        if len(engines) < 2:
+            continue  # same engine flagging twice doesn't count
 
-        # boost is proportional to number of agreeing layers
-        boost = min(0.2, 0.05 * len(layers))
-        reason = f"{len(layers)} layers agree: {', '.join(layers)}"
+        # boost is proportional to number of agreeing engines
+        boost = min(0.2, 0.05 * len(engines))
+        layer_names = [e[0] for e in engines]
+        reason = f"{len(engines)} engines agree: {', '.join(set(layer_names))}"
 
         # boost each finding in the group
         for f in group:
             boosts.append(CorroborationBoost(
                 finding_fingerprint=f.fingerprint,
-                agreeing_layers=layers,
+                agreeing_layers=layer_names,
                 boost=boost,
                 reason=reason,
             ))
@@ -121,10 +124,15 @@ class FPPattern:
 class FPLearner:
     """Learns which (rule, file) patterns produce false positives."""
 
-    def __init__(self, repo_root: Path):
+    def __init__(self, repo_root: Path, learn_mode: bool = False):  # v4.24: default False
         self.repo_root = repo_root
         self.fp_file = repo_root / FP_LEARNING_FILE
         self.patterns: Dict[str, FPPattern] = {}
+        # v4.12: When learn_mode is False, record_occurrence updates in-memory
+        # counters but does NOT write to disk. This prevents auto-suppression
+        # after 5 runs on unchanged code without user labeling.
+        self._learn_mode = learn_mode
+        self._dirty = False  # track unsaved changes
         self._load()
 
     def _load(self) -> None:
@@ -135,8 +143,8 @@ class FPLearner:
             for p_dict in data.get("patterns", []):
                 key = f"{p_dict['rule_id']}|{p_dict['file_pattern']}"
                 self.patterns[key] = FPPattern(**p_dict)
-        except Exception as e:
-            logger.warning("Failed to load FP patterns from %s: %s", self.fp_file, e)
+        except Exception:
+            pass
 
     def _save(self) -> None:
         data = {
@@ -150,9 +158,13 @@ class FPLearner:
     def _make_key(self, rule_id: str, file_path: str) -> str:
         """Create a pattern key. Generalize file paths to reduce cardinality."""
         # use just the directory + filename pattern
+        # v4.8: Use <dir>/<basename> instead of */<basename> to prevent
+        # over-generalization. Previously, auth/login.py and payments/login.py
+        # collapsed to the same pattern */login.py, so a FP in one suppressed
+        # findings in the other. Now we keep the immediate parent directory.
         parts = file_path.split("/")
         if len(parts) > 1:
-            file_pattern = f"*/{parts[-1]}"
+            file_pattern = f"{parts[-2]}/{parts[-1]}"
         else:
             file_pattern = file_path
         return f"{rule_id}|{file_pattern}"
@@ -170,7 +182,13 @@ class FPLearner:
         p.occurrence_count += 1
         p.last_seen = datetime.now().isoformat()
         self._check_auto_suppress(p)
-        self._save()
+        # v4.12: Only persist to disk in learn mode. Previously every run
+        # wrote to disk, meaning 5 runs on unchanged code could auto-suppress
+        # a rule without the user ever labeling anything.
+        if self._learn_mode:
+            self._save()
+        else:
+            self._dirty = True
 
     def record_false_positive(self, rule_id: str, file_path: str) -> None:
         """Record that a finding was a false positive.
@@ -298,8 +316,8 @@ class ConfidenceCalibrator:
                         b.total = b_dict.get("total", 0)
                         b.correct = b_dict.get("correct", 0)
                         break
-        except Exception as e:
-            logger.warning("Failed to load calibrator bins from %s: %s", self.cal_file, e)
+        except Exception:
+            pass
 
     def _save(self) -> None:
         data = {

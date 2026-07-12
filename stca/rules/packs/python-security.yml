@@ -70,7 +70,7 @@ rules:
     metadata: { cwe: "CWE-259", owasp: "A07" }
 
   - id: py-hardcoded-secret
-    pattern-regex: '(?i)(api_key|secret|token)\s*=\s*["\'][a-zA-Z0-9]{20,}["\']'
+    pattern-regex: "(?i)(api_key|secret|token)\\s*=\\s*[\"'][a-zA-Z0-9]{20,}[\"']"
     message: Hardcoded API key/secret/token
     languages: [python]
     severity: ERROR
@@ -137,14 +137,14 @@ rules:
     metadata: { cwe: "CWE-489", owasp: "A05" }
 
   - id: py-print-secret
-    pattern-regex: '(?i)print\(.*?(password|secret|token|api_key|credit_card).*?\)'
+    pattern-regex: "(?i)print\\(.*?(password|secret|token|api_key|credit_card).*?\\)"
     message: Print statement references secret/PII
     languages: [python]
     severity: WARNING
     metadata: { cwe: "CWE-532", owasp: "A09" }
 
   - id: py-logger-secret
-    pattern-regex: '(?i)logger\.\w+\(.*?(password|secret|token|api_key|credit_card).*?\)'
+    pattern-regex: "(?i)logger\\.\\w+\\(.*?(password|secret|token|api_key|credit_card).*?\\)"
     message: Log statement references secret/PII
     languages: [python]
     severity: WARNING
@@ -176,7 +176,7 @@ rules:
 
   # === Business logic antipatterns ===
   - id: py-bare-except
-    pattern: except:
+    pattern: "except:"
     message: Bare except — swallows all exceptions including KeyboardInterrupt
     languages: [python]
     severity: WARNING
@@ -190,14 +190,14 @@ rules:
     metadata: { cwe: "CWE-617" }
 
   - id: py-mutable-default-arg
-    pattern: def $FUNC(..., $ARG=[]):
+    pattern: "def $FUNC(..., $ARG=[]):"
     message: Mutable default argument — shared across calls, common bug
     languages: [python]
     severity: WARNING
     metadata: { cwe: "CWE-733" }
 
   - id: py-broad-except-exception
-    pattern: except Exception:
+    pattern: "except Exception:"
     message: Broad except Exception — may hide bugs
     languages: [python]
     severity: INFO

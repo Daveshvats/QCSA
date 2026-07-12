@@ -1,0 +1,320 @@
+{
+  "nodes": [
+    {
+      "id": "file:stca/symbolic.py",
+      "type": "file",
+      "name": "symbolic",
+      "filePath": "stca/symbolic.py",
+      "summary": "Z3-based symbolic execution, interval abstract interpretation, and type narrowing analysis for detecting runtime errors and assertion violations in Python code.",
+      "tags": ["symbolic-execution", "abstract-interpretation", "z3", "type-narrowing", "static-analysis", "bug-detection"],
+      "complexity": "complex",
+      "exports": ["SymbolicFinding", "Z3SymbolicExecutor", "Interval", "AbstractFinding", "AbstractInterpreter", "TypeNarrower", "analyze_file"]
+    },
+    {
+      "id": "file:stca/taint_cross_file.py",
+      "type": "file",
+      "name": "taint_cross_file",
+      "filePath": "stca/taint_cross_file.py",
+      "summary": "Cross-file taint flow tracking using the code property graph (CPG) to detect data flowing from source parameters to dangerous sinks across function and file boundaries.",
+      "tags": ["taint-analysis", "cpg", "cross-file", "security", "data-flow"],
+      "complexity": "moderate",
+      "exports": ["TaintFlow", "track_taint_cross_file", "_is_sanitized", "_find_enclosing_function", "track_taint_for_files"]
+    },
+    {
+      "id": "file:stca/taint_tracker.py",
+      "type": "file",
+      "name": "taint_tracker",
+      "filePath": "stca/taint_tracker.py",
+      "summary": "Single-file Python taint analysis using AST walking to detect data flows from user-controlled parameters to dangerous function calls like eval, exec, and SQL.",
+      "tags": ["taint-analysis", "ast", "security", "data-flow", "single-file"],
+      "complexity": "moderate",
+      "exports": ["TaintFlow", "track_taint_python", "_expr_uses_taint", "_get_call_name"]
+    },
+    {
+      "id": "file:stca/tree_sitter_analyzer.py",
+      "type": "file",
+      "name": "tree_sitter_analyzer",
+      "filePath": "stca/tree_sitter_analyzer.py",
+      "summary": "Multi-language AST analysis using tree-sitter for Java and Python to detect unused imports, bare except clauses, and optional type issues.",
+      "tags": ["tree-sitter", "multi-language", "ast-analysis", "unused-imports", "code-quality"],
+      "complexity": "moderate",
+      "exports": ["ASTFinding", "_get_parser", "_parse_file", "_node_text", "_walk", "analyze_java_ast", "analyze_python_ast", "analyze_with_ast", "analyze_repo_with_ast"]
+    },
+    {
+      "id": "file:stca/typestate.py",
+      "type": "file",
+      "name": "typestate",
+      "filePath": "stca/typestate.py",
+      "summary": "Typestate analysis that tracks object lifecycle protocols (e.g., open/close, lock/unlock) to detect protocol violations like use-after-close and missing resource initialization.",
+      "tags": ["typestate", "protocol-checking", "resource-management", "lifecycle", "bug-detection"],
+      "complexity": "moderate",
+      "exports": ["TypestateViolation", "analyze_typestate", "_analyze_function_typestate", "_match_protocol"]
+    },
+    {
+      "id": "file:stca/unified_cve_db.py",
+      "type": "file",
+      "name": "unified_cve_db",
+      "filePath": "stca/unified_cve_db.py",
+      "summary": "Unified CVE vulnerability database with SQLite caching and OSV API integration for looking up CVEs across Maven, npm, and Python ecosystems from SBOM, pom.xml, package.json, and requirements.txt files.",
+      "tags": ["cve", "vulnerability-database", "osv", "supply-chain", "sbom", "dependency-scanning"],
+      "complexity": "complex",
+      "exports": ["UnifiedCVE", "UnifiedCVEDatabase", "scan_sbom_unified", "scan_pom_xml_unified", "scan_package_json_unified", "scan_requirements_unified"]
+    },
+    {
+      "id": "file:tests/test_advanced_layers.py",
+      "type": "file",
+      "name": "test_advanced_layers",
+      "filePath": "tests/test_advanced_layers.py",
+      "summary": "Tests for advanced detection layers including taint tracking, suppression filtering, IaC scanning (Dockerfile/K8s/Terraform/GHA), commit risk analysis, brain tuner adjustments, and autofix transformations.",
+      "tags": ["test", "taint-tracking", "iac", "commit-risk", "autofix", "suppression"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_cache.py",
+      "type": "file",
+      "name": "test_cache",
+      "filePath": "tests/test_cache.py",
+      "summary": "Tests for the ResultCache module covering cache misses, put/get operations, keying by function body and layer, invalidation, and stats.",
+      "tags": ["test", "cache"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_detection_frontier.py",
+      "type": "file",
+      "name": "test_detection_frontier",
+      "filePath": "tests/test_detection_frontier.py",
+      "summary": "Tests for cutting-edge detection features: CPG construction, cross-file taint tracking, typestate analysis, metamorphic testing, differential analysis, CPG queries, and LLM verification.",
+      "tags": ["test", "cpg", "taint", "typestate", "metamorphic", "differential", "llm-verify"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_diff_slicer.py",
+      "type": "file",
+      "name": "test_diff_slicer",
+      "filePath": "tests/test_diff_slicer.py",
+      "summary": "Tests for the diff slicer module: parsing unified diffs to extract files, line ranges, added/removed lines, and extracting callees from Python and JavaScript code.",
+      "tags": ["test", "diff-parsing", "impact-analysis"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_enterprise_features.py",
+      "type": "file",
+      "name": "test_enterprise_features",
+      "filePath": "tests/test_enterprise_features.py",
+      "summary": "Tests for enterprise features: entropy-based secret detection, hotspot detection/review/audit chains, audit logging with tamper detection, coverage report parsing (coverage.py/jacoco/istanbul/go), Pysa integration, and git history secret scanning.",
+      "tags": ["test", "secrets", "hotspots", "audit", "coverage", "pysa", "git-history"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_installer.py",
+      "type": "file",
+      "name": "test_installer",
+      "filePath": "tests/test_installer.py",
+      "summary": "Tests for the tool installer: platform ID format, tool registry completeness, layer assignments, pip installable names, GitHub repos for binary tools, and tool installation checks.",
+      "tags": ["test", "installer", "tool-registry"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_it2_fis.py",
+      "type": "file",
+      "name": "test_it2_fis",
+      "filePath": "tests/test_it2_fis.py",
+      "summary": "Tests for the interval type-2 fuzzy inference system (IT2FIS): critical/low/high severity decisions, uncertainty footprint calculation, IT2 membership AND/OR operations, and footprint of uncertainty measurement.",
+      "tags": ["test", "fuzzy-logic", "it2fis", "membership-functions"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_new_detection.py",
+      "type": "file",
+      "name": "test_new_detection",
+      "filePath": "tests/test_new_detection.py",
+      "summary": "Tests for new detection modules: missing patch scanning, contract extraction (pre/postconditions), dead code analysis, Flawfinder-style dangerous function scanning, and malicious pattern detection (base64 exec, SSH key theft, import-time subprocess).",
+      "tags": ["test", "missing-patches", "contracts", "deadcode", "flawfinder", "malicious-patterns"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_orchestrator.py",
+      "type": "file",
+      "name": "test_orchestrator",
+      "filePath": "tests/test_orchestrator.py",
+      "summary": "Tests for the brain Aggregator: no findings returns pass, critical findings block, low findings pass, high severity warns, and final decision is the maximum of individual decisions.",
+      "tags": ["test", "aggregator", "decision-making"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_oss_inspired.py",
+      "type": "file",
+      "name": "test_oss_inspired",
+      "filePath": "tests/test_oss_inspired.py",
+      "summary": "Tests for OSS-inspired features: baseline management (create/filter/update/remove), strictness levels (1-9), nullness checking, issue store CRUD, consistency detection (mixed formatting/logging/none checks), and Finding model category support.",
+      "tags": ["test", "baseline", "strictness", "nullness", "issue-store", "consistency"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_ported_configs.py",
+      "type": "file",
+      "name": "test_ported_configs",
+      "filePath": "tests/test_ported_configs.py",
+      "summary": "Tests for ported rule configuration from luacheck/detekt: built-in profiles (7 profiles), custom profile loading, profile merging, rule config management (enable/disable/severity overrides), and combined profile+rule resolution.",
+      "tags": ["test", "profiles", "rule-config", "luacheck", "detekt", "configuration"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_precision_engine.py",
+      "type": "file",
+      "name": "test_precision_engine",
+      "filePath": "tests/test_precision_engine.py",
+      "summary": "Tests for the precision engine: bug-seed cross-referencing, FP learner training/prediction, confidence calibration, corroboration logic, codebase rule mining (assertions/guards/docstrings), and bug-fix commit rule generation.",
+      "tags": ["test", "precision", "false-positive", "bug-seeds", "rule-mining", "calibration"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_scanner_health.py",
+      "type": "file",
+      "name": "test_scanner_health",
+      "filePath": "tests/test_scanner_health.py",
+      "summary": "Tests for v3.1 scanner health tracking: PipelineResult health fields, error counting, JSON serialization, SARIF toolExecutionNotifications, --strict-scanners CLI gate, and orchestrator health reset between runs.",
+      "tags": ["test", "scanner-health", "sarif", "strict-scanners", "error-tracking"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_supply_chain.py",
+      "type": "file",
+      "name": "test_supply_chain",
+      "filePath": "tests/test_supply_chain.py",
+      "summary": "Tests for the L0b supply chain layer: typosquat detection in requirements.txt, EOL Python version detection in Dockerfiles, and known bad package dictionary coverage.",
+      "tags": ["test", "supply-chain", "typosquat", "eol-versions"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {"source": "file:stca/taint_cross_file.py", "target": "file:stca/cpg.py", "type": "imports"},
+    {"source": "file:stca/tree_sitter_analyzer.py", "target": "file:stca/multi_lang.py", "type": "imports"},
+
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/brain/tuner.py", "type": "imports"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/layers/l0d_behavioral.py", "type": "imports"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/layers/l0e_iac.py", "type": "imports"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/layers/l0f_commit_risk.py", "type": "imports"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/layers/l8_autofix.py", "type": "imports"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/models.py", "type": "imports"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/suppressions.py", "type": "imports"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/taint_tracker.py", "type": "imports"},
+
+    {"source": "file:tests/test_cache.py", "target": "file:stca/cache.py", "type": "imports"},
+
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/cpg_queries.py", "type": "imports"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/cpg.py", "type": "imports"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/differential.py", "type": "imports"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/metamorphic.py", "type": "imports"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/taint_cross_file.py", "type": "imports"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/typestate.py", "type": "imports"},
+
+    {"source": "file:tests/test_diff_slicer.py", "target": "file:stca/diff_slicer.py", "type": "imports"},
+
+    {"source": "file:tests/test_enterprise_features.py", "target": "file:stca/advanced_secrets.py", "type": "imports"},
+    {"source": "file:tests/test_enterprise_features.py", "target": "file:stca/audit.py", "type": "imports"},
+    {"source": "file:tests/test_enterprise_features.py", "target": "file:stca/coverage.py", "type": "imports"},
+    {"source": "file:tests/test_enterprise_features.py", "target": "file:stca/hotspots.py", "type": "imports"},
+
+    {"source": "file:tests/test_installer.py", "target": "file:stca/installer.py", "type": "imports"},
+
+    {"source": "file:tests/test_it2_fis.py", "target": "file:stca/brain/it2_fis.py", "type": "imports"},
+    {"source": "file:tests/test_it2_fis.py", "target": "file:stca/brain/membership.py", "type": "imports"},
+
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/contracts.py", "type": "imports"},
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/deadcode.py", "type": "imports"},
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/flawfinder_db.py", "type": "imports"},
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/malicious_patterns.py", "type": "imports"},
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/missing_patches.py", "type": "imports"},
+
+    {"source": "file:tests/test_orchestrator.py", "target": "file:stca/brain/aggregator.py", "type": "imports"},
+    {"source": "file:tests/test_orchestrator.py", "target": "file:stca/models.py", "type": "imports"},
+
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/baseline.py", "type": "imports"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/consistency.py", "type": "imports"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/issue_store.py", "type": "imports"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/models.py", "type": "imports"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/nullness.py", "type": "imports"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/strictness.py", "type": "imports"},
+
+    {"source": "file:tests/test_ported_configs.py", "target": "file:stca/models.py", "type": "imports"},
+    {"source": "file:tests/test_ported_configs.py", "target": "file:stca/profiles.py", "type": "imports"},
+    {"source": "file:tests/test_ported_configs.py", "target": "file:stca/rule_config.py", "type": "imports"},
+
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/bug_seeds.py", "type": "imports"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/codebase_miner.py", "type": "imports"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/models.py", "type": "imports"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/precision.py", "type": "imports"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/rule_compiler.py", "type": "imports"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/rule_miner.py", "type": "imports"},
+
+    {"source": "file:tests/test_scanner_health.py", "target": "file:stca/config.py", "type": "imports"},
+    {"source": "file:tests/test_scanner_health.py", "target": "file:stca/models.py", "type": "imports"},
+    {"source": "file:tests/test_scanner_health.py", "target": "file:stca/orchestrator.py", "type": "imports"},
+    {"source": "file:tests/test_scanner_health.py", "target": "file:stca/report/sarif.py", "type": "imports"},
+
+    {"source": "file:tests/test_supply_chain.py", "target": "file:stca/layers/l0b_supply_chain.py", "type": "imports"},
+    {"source": "file:tests/test_supply_chain.py", "target": "file:stca/models.py", "type": "imports"},
+
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/taint_tracker.py", "type": "tested_by"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/suppressions.py", "type": "tested_by"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/layers/l0d_behavioral.py", "type": "tested_by"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/layers/l0e_iac.py", "type": "tested_by"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/layers/l0f_commit_risk.py", "type": "tested_by"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/brain/tuner.py", "type": "tested_by"},
+    {"source": "file:tests/test_advanced_layers.py", "target": "file:stca/layers/l8_autofix.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_cache.py", "target": "file:stca/cache.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/cpg.py", "type": "tested_by"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/cpg_queries.py", "type": "tested_by"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/taint_cross_file.py", "type": "tested_by"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/typestate.py", "type": "tested_by"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/metamorphic.py", "type": "tested_by"},
+    {"source": "file:tests/test_detection_frontier.py", "target": "file:stca/differential.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_diff_slicer.py", "target": "file:stca/diff_slicer.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_enterprise_features.py", "target": "file:stca/advanced_secrets.py", "type": "tested_by"},
+    {"source": "file:tests/test_enterprise_features.py", "target": "file:stca/hotspots.py", "type": "tested_by"},
+    {"source": "file:tests/test_enterprise_features.py", "target": "file:stca/audit.py", "type": "tested_by"},
+    {"source": "file:tests/test_enterprise_features.py", "target": "file:stca/coverage.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_installer.py", "target": "file:stca/installer.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_it2_fis.py", "target": "file:stca/brain/it2_fis.py", "type": "tested_by"},
+    {"source": "file:tests/test_it2_fis.py", "target": "file:stca/brain/membership.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/missing_patches.py", "type": "tested_by"},
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/contracts.py", "type": "tested_by"},
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/deadcode.py", "type": "tested_by"},
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/flawfinder_db.py", "type": "tested_by"},
+    {"source": "file:tests/test_new_detection.py", "target": "file:stca/malicious_patterns.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_orchestrator.py", "target": "file:stca/brain/aggregator.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/baseline.py", "type": "tested_by"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/strictness.py", "type": "tested_by"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/nullness.py", "type": "tested_by"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/issue_store.py", "type": "tested_by"},
+    {"source": "file:tests/test_oss_inspired.py", "target": "file:stca/consistency.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_ported_configs.py", "target": "file:stca/profiles.py", "type": "tested_by"},
+    {"source": "file:tests/test_ported_configs.py", "target": "file:stca/rule_config.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/precision.py", "type": "tested_by"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/bug_seeds.py", "type": "tested_by"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/codebase_miner.py", "type": "tested_by"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/rule_miner.py", "type": "tested_by"},
+    {"source": "file:tests/test_precision_engine.py", "target": "file:stca/rule_compiler.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_scanner_health.py", "target": "file:stca/orchestrator.py", "type": "tested_by"},
+    {"source": "file:tests/test_scanner_health.py", "target": "file:stca/models.py", "type": "tested_by"},
+
+    {"source": "file:tests/test_supply_chain.py", "target": "file:stca/layers/l0b_supply_chain.py", "type": "tested_by"},
+
+    {"source": "file:stca/symbolic.py", "target": "file:stca/typestate.py", "type": "related_to", "label": "both perform advanced static analysis for bug detection"},
+    {"source": "file:stca/taint_cross_file.py", "target": "file:stca/taint_tracker.py", "type": "related_to", "label": "cross-file vs single-file taint analysis"},
+    {"source": "file:stca/unified_cve_db.py", "target": "file:stca/layers/l0b_supply_chain.py", "type": "related_to", "label": "unified CVE DB supports supply chain scanning"}
+  ]
+}

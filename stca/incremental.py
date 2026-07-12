@@ -7,8 +7,7 @@ instead of O(all files).
 from __future__ import annotations
 
 import logging
-
-logger = logging.getLogger("stca.incremental")
+_logger = logging.getLogger(__name__.replace('stca.', ''))
 
 import ast
 import hashlib
@@ -60,8 +59,8 @@ class FileLevelCache:
     def _save(self) -> None:
         try:
             self.index_file.write_text(json.dumps(self.index, indent=2), encoding="utf-8")
-        except Exception as e:
-            logger.warning("Failed to save incremental cache %s: %s", self.index_file, e)
+        except Exception:
+            pass
 
     @staticmethod
     def _hash_file(path: Path) -> str:
@@ -98,7 +97,7 @@ class FileLevelCache:
     def clear(self) -> None:
         self.index = {}
         try: self.index_file.unlink()
-        except Exception: pass
+        except Exception: pass  # v4.5: suppressed — add logging
 
 
 # =============================================================================

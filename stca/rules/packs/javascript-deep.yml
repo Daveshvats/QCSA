@@ -1,0 +1,797 @@
+# STCA JavaScript/TypeScript Deep (Express/Node/React/general) Rules — 159 rules
+rules:
+  - id: ex-helmet-missing
+    pattern: "const\\s+app\\s*=\\s*express\\s*\\(\\s*\\)(?!.*helmet)"
+    severity: low
+    message: "Express without helmet — missing security headers"
+    metadata: {cwe: "CWE-693"}
+  - id: ex-cors-wildcard
+    pattern: "app\\.use\\s*\\(\\s*cors\\s*\\(\\s*\\{[^}]*origin\\s*:\\s*['\\\"]\\*['\\\"]"
+    severity: high
+    message: "Express CORS wildcard origin"
+    metadata: {cwe: "CWE-942"}
+  - id: ex-cors-credentials-wildcard
+    pattern: "app\\.use\\s*\\(\\s*cors\\s*\\(\\s*\\{[^}]*credentials\\s*:\\s*true[^}]*origin\\s*:\\s*['\\\"]\\*['\\\"]"
+    severity: critical
+    message: "Express CORS credentials + wildcard — CSRF"
+    metadata: {cwe: "CWE-942"}
+  - id: ex-body-limit-large
+    pattern: "express\\.json\\s*\\(\\s*\\{\\s*limit\\s*:\\s*['\\\"]?\\d{4,}"
+    severity: medium
+    message: "Express body limit > 10MB — DoS risk"
+    metadata: {cwe: "CWE-400"}
+  - id: ex-no-body-limit
+    pattern: "express\\.json\\s*\\(\\s*\\)(?!.*limit)"
+    severity: medium
+    message: "Express JSON without body limit — DoS risk"
+    metadata: {cwe: "CWE-400"}
+  - id: ex-static-root
+    pattern: "express\\.static\\s*\\(\\s*['\\\"]\\/['\\\"]"
+    severity: medium
+    message: "Express static at root — may expose sensitive files"
+    metadata: {cwe: "CWE-548"}
+  - id: ex-static-user
+    pattern: "express\\.static\\s*\\(\\s*(?:req|request|input|user)"
+    severity: high
+    message: "express.static with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: ex-res-sendfile-user
+    pattern: "res\\.sendFile\\s*\\(\\s*(?:req|request|input|user|params)"
+    severity: high
+    message: "res.sendFile with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: ex-res-sendfile-no-root
+    pattern: "res\\.sendFile\\s*\\(\\s*[^,]+\\s*\\)(?!.*root)"
+    severity: medium
+    message: "res.sendFile without root option — path traversal risk"
+    metadata: {cwe: "CWE-22"}
+  - id: ex-res-download-user
+    pattern: "res\\.download\\s*\\(\\s*(?:req|request|input|user|params)"
+    severity: high
+    message: "res.download with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: ex-res-redirect-user
+    pattern: "res\\.redirect\\s*\\(\\s*(?:req|request|input|user|params|req\\.query|req\\.body)"
+    severity: high
+    message: "res.redirect with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: ex-res-redirect-301-user
+    pattern: "res\\.redirect\\s*\\(\\s*301\\s*,\\s*(?:req|request|input|user|params)"
+    severity: high
+    message: "res.redirect 301 with user input — permanent open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: ex-res-render-user
+    pattern: "res\\.render\\s*\\(\\s*[^,]+\\s*,\\s*\\{[^}]*(?:req|request|input|user|params)"
+    severity: medium
+    message: "res.render with user data — verify auto-escape"
+    metadata: {cwe: "CWE-79"}
+  - id: ex-res-send-html-user
+    pattern: "res\\.send\\s*\\(\\s*['\\\"<][^<]*<[^>]*>.*(?:req|request|input|user|params)"
+    severity: high
+    message: "res.send with HTML + user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: ex-res-json-secret
+    pattern: "res\\.json\\s*\\(\\s*\\{[^}]*(?:password|secret|token|api_key)"
+    severity: high
+    message: "res.json with secret — info leak"
+    metadata: {cwe: "CWE-532"}
+  - id: ex-csrf-missing
+    pattern: "app\\.use\\s*\\(\\s*express\\.session(?!.*csrf|.*csurf)"
+    severity: medium
+    message: "Express session without CSRF protection"
+    metadata: {cwe: "CWE-352"}
+  - id: ex-session-secret-hardcoded
+    pattern: "secret\\s*:\\s*['\\\"][^'\\\"]{8,}['\\\"]\\s*,?\\s*resave|session\\s*\\(\\s*\\{[^}]*secret\\s*:\\s*['\\\"][^'\\\"]{8,}['\\\"]"
+    severity: high
+    message: "Express session hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: ex-session-cookie-secure-false
+    pattern: "cookie\\s*:\\s*\\{[^}]*secure\\s*:\\s*false"
+    severity: high
+    message: "Express session cookie secure=false"
+    metadata: {cwe: "CWE-614"}
+  - id: ex-session-cookie-httponly-false
+    pattern: "cookie\\s*:\\s*\\{[^}]*httpOnly\\s*:\\s*false"
+    severity: medium
+    message: "Express session cookie httpOnly=false"
+    metadata: {cwe: "CWE-1004"}
+  - id: ex-session-cookie-samesite-none
+    pattern: "cookie\\s*:\\s*\\{[^}]*sameSite\\s*:\\s*['\\\"]none['\\\"]"
+    severity: medium
+    message: "Express session cookie SameSite=None — CSRF risk"
+    metadata: {cwe: "CWE-352"}
+  - id: ex-no-trust-proxy
+    pattern: "app\\.set\\s*\\(\\s*['\\\"]trust proxy['\\\"]"
+    severity: low
+    message: "Express trust proxy — verify reverse proxy present"
+    metadata: {cwe: "CWE-441"}
+  - id: ex-req-params-exec
+    pattern: "req\\.(?:query|body|params)\\.\\w+\\s*\\)\\s*\\)\\s*;"
+    severity: critical
+    message: "req.params executed — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: ex-ejs-include-user
+    pattern: "res\\.render\\s*\\(\\s*[^,]+,\\s*\\{[^}]*include\\s*:\\s*(?:req|request|input|user|params)"
+    severity: high
+    message: "EJS include with user input — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: ex-pug-include-user
+    pattern: "res\\.render\\s*\\(\\s*[^,]+,\\s*\\{[^}]*include\\s*:\\s*(?:req|request|input|user|params)"
+    severity: high
+    message: "Pug include with user input — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: ex-multer-no-limit
+    pattern: "multer\\s*\\(\\s*\\{[^}]*dest\\s*:(?!.*limit|.*fileSize)"
+    severity: medium
+    message: "Multer without file size limit — DoS risk"
+    metadata: {cwe: "CWE-400"}
+  - id: ex-multer-file-filter-missing
+    pattern: "multer\\s*\\(\\s*\\{[^}]*(?!.*fileFilter)"
+    severity: medium
+    message: "Multer without file filter — arbitrary file upload"
+    metadata: {cwe: "CWE-434"}
+  - id: ex-bcrypt-rounds-low
+    pattern: "bcrypt\\.(?:hash|genSalt)\\s*\\(\\s*[^,]+,\\s*[1-9]\\s*\\)"
+    severity: medium
+    message: "Bcrypt with low rounds (<10) — weak hash"
+    metadata: {cwe: "CWE-916"}
+  - id: ex-jwt-hardcoded-secret
+    pattern: "jwt\\.sign\\s*\\([^)]*['\\\"](secret|password|key|changeme)['\\\"]"
+    severity: critical
+    message: "JWT with hardcoded weak secret"
+    metadata: {cwe: "CWE-798"}
+  - id: ex-jwt-verify-false
+    pattern: "jwt\\.verify\\s*\\([^)]*verify\\s*:\\s*false|jwt\\.decode\\s*\\(\\s*(?:req|request|user)"
+    severity: critical
+    message: "JWT verify disabled — auth bypass"
+    metadata: {cwe: "CWE-345"}
+  - id: ex-jwt-none-alg
+    pattern: "jwt\\.sign\\s*\\([^)]*algorithm\\s*:\\s*['\\\"]none['\\\"]"
+    severity: critical
+    message: "JWT with alg=none — auth bypass"
+    metadata: {cwe: "CWE-345"}
+  - id: node-require-user
+    pattern: "\\brequire\\s*\\(\\s*(?:req|request|input|user|args|process\\.argv)"
+    severity: critical
+    message: "require with user input — LFI/RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: node-dynamic-import-user
+    pattern: "\\bimport\\s*\\(\\s*(?:req|request|input|user|args|process\\.argv)"
+    severity: critical
+    message: "dynamic import with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: node-child-process-exec-user
+    pattern: "child_process\\.exec\\s*\\(\\s*(?:req|request|input|user|args|process\\.argv)"
+    severity: critical
+    message: "child_process.exec with user input — RCE"
+    metadata: {cwe: "CWE-78"}
+  - id: node-child-process-exec-concat
+    pattern: "child_process\\.exec\\s*\\(\\s*['\\\"`][^'\\\"`]*['\\\"`]\\s*\\+"
+    severity: critical
+    message: "child_process.exec with concat — injection"
+    metadata: {cwe: "CWE-78"}
+  - id: node-child-process-exec-template
+    pattern: "child_process\\.exec\\s*\\(\\s*`[^`]*\\$\\{"
+    severity: critical
+    message: "child_process.exec with template literal — injection"
+    metadata: {cwe: "CWE-78"}
+  - id: node-child-process-execSync-user
+    pattern: "child_process\\.execSync\\s*\\(\\s*(?:req|request|input|user|args|process\\.argv)"
+    severity: critical
+    message: "child_process.execSync with user input — RCE"
+    metadata: {cwe: "CWE-78"}
+  - id: node-child-process-spawn-user
+    pattern: "child_process\\.spawn\\s*\\(\\s*(?:req|request|input|user|args|process\\.argv)"
+    severity: high
+    message: "child_process.spawn with user input"
+    metadata: {cwe: "CWE-78"}
+  - id: node-child-process-fork-user
+    pattern: "child_process\\.fork\\s*\\(\\s*(?:req|request|input|user|args|process\\.argv)"
+    severity: critical
+    message: "child_process.fork with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: node-eval-user
+    pattern: "\\beval\\s*\\(\\s*(?:req|request|input|user|args|process\\.argv)"
+    severity: critical
+    message: "eval with user input — RCE"
+    metadata: {cwe: "CWE-95"}
+  - id: node-eval-concat
+    pattern: "\\beval\\s*\\(\\s*['\\\"`][^'\\\"`]*['\\\"`]\\s*\\+"
+    severity: critical
+    message: "eval with concat — code injection"
+    metadata: {cwe: "CWE-95"}
+  - id: node-eval-template
+    pattern: "\\beval\\s*\\(\\s*`[^`]*\\$\\{"
+    severity: critical
+    message: "eval with template literal — code injection"
+    metadata: {cwe: "CWE-95"}
+  - id: node-function-constructor
+    pattern: "new\\s+Function\\s*\\("
+    severity: high
+    message: "Function constructor — RCE risk"
+    metadata: {cwe: "CWE-94"}
+  - id: node-function-constructor-user
+    pattern: "new\\s+Function\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: critical
+    message: "Function constructor with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: node-settimeout-string
+    pattern: "setTimeout\\s*\\(\\s*['\\\"`]"
+    severity: high
+    message: "setTimeout with string — eval injection"
+    metadata: {cwe: "CWE-95"}
+  - id: node-setinterval-string
+    pattern: "setInterval\\s*\\(\\s*['\\\"`]"
+    severity: high
+    message: "setInterval with string — eval injection"
+    metadata: {cwe: "CWE-95"}
+  - id: node-vm-run-user
+    pattern: "vm\\.(?:runInNewContext|runInThisContext|runInContext)\\s*\\([^)]*(?:req|request|input|user|args)"
+    severity: critical
+    message: "vm.run with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: node-vm-compile-function-user
+    pattern: "vm\\.compileFunction\\s*\\([^)]*(?:req|request|input|user|args)"
+    severity: critical
+    message: "vm.compileFunction with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: node-vm-script-user
+    pattern: "new\\s+vm\\.Script\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: critical
+    message: "new vm.Script with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: node-prototype-pollution-assign
+    pattern: "Object\\.assign\\s*\\(\\s*Object\\.prototype"
+    severity: critical
+    message: "Object.prototype pollution via assign"
+    metadata: {cwe: "CWE-1321"}
+  - id: node-prototype-pollution-define
+    pattern: "Object\\.defineProperty\\s*\\(\\s*Object\\.prototype"
+    severity: critical
+    message: "Object.prototype pollution via defineProperty"
+    metadata: {cwe: "CWE-1321"}
+  - id: node-prototype-pollution-merge
+    pattern: "(?:deepMerge|deepmerge|merge|extend|defaultsDeep)\\s*\\(\\s*\\w+\\s*,\\s*\\w+\\s*,\\s*true\\s*\\)"
+    severity: high
+    message: "deep merge — prototype pollution risk"
+    metadata: {cwe: "CWE-1321"}
+  - id: node-prototype-pollution-recursive
+    pattern: "function\\s+\\w*[Mm]erge\\s*\\([^)]*\\)\\s*\\{[\\s\\S]*?(?:__proto__|prototype)"
+    severity: high
+    message: "recursive merge — prototype pollution risk"
+    metadata: {cwe: "CWE-1321"}
+  - id: node-fs-read-user
+    pattern: "fs\\.(?:readFile|readFileSync|createReadStream)\\s*\\(\\s*(?:req|request|input|user|args|process\\.argv)"
+    severity: high
+    message: "fs.readFile with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: node-fs-write-user
+    pattern: "fs\\.(?:writeFile|writeFileSync|createWriteStream|appendFile|appendFileSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: high
+    message: "fs.writeFile with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: node-fs-unlink-user
+    pattern: "fs\\.(?:unlink|unlinkSync|rmdir|rmdirSync|rm|rmSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: high
+    message: "fs.unlink with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: node-fs-copy-user
+    pattern: "fs\\.(?:copyFile|copyFileSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: high
+    message: "fs.copyFile with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: node-fs-rename-user
+    pattern: "fs\\.(?:rename|renameSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: high
+    message: "fs.rename with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: node-fs-symlink-user
+    pattern: "fs\\.(?:symlink|symlinkSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: high
+    message: "fs.symlink with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: node-fs-chmod-user
+    pattern: "fs\\.(?:chmod|chmodSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: high
+    message: "fs.chmod with user input — privilege escalation"
+    metadata: {cwe: "CWE-269"}
+  - id: node-fs-chown-user
+    pattern: "fs\\.(?:chown|chownSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: high
+    message: "fs.chown with user input — privilege escalation"
+    metadata: {cwe: "CWE-269"}
+  - id: node-fs-mkdir-user
+    pattern: "fs\\.(?:mkdir|mkdirSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: medium
+    message: "fs.mkdir with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: node-fs-open-user
+    pattern: "fs\\.(?:open|openSync)\\s*\\(\\s*(?:req|request|input|user|args)"
+    severity: high
+    message: "fs.open with user input — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: node-crypto-md5
+    pattern: "crypto\\.createHash\\s*\\(\\s*['\\\"]md5['\\\"]"
+    severity: high
+    message: "MD5 broken — use sha256"
+    metadata: {cwe: "CWE-327"}
+  - id: node-crypto-sha1
+    pattern: "crypto\\.createHash\\s*\\(\\s*['\\\"]sha1['\\\"]"
+    severity: high
+    message: "SHA1 broken — use sha256"
+    metadata: {cwe: "CWE-327"}
+  - id: node-crypto-ecb
+    pattern: "crypto\\.createCipheriv\\s*\\(\\s*['\\\"]aes-\\d+-ecb['\\\"]"
+    severity: critical
+    message: "AES-ECB — deterministic"
+    metadata: {cwe: "CWE-327"}
+  - id: node-crypto-des
+    pattern: "crypto\\.createCipher(?:iv)?\\s*\\(\\s*['\\\"]des['\\\"]"
+    severity: critical
+    message: "DES broken"
+    metadata: {cwe: "CWE-327"}
+  - id: node-crypto-rc4
+    pattern: "crypto\\.createCipher(?:iv)?\\s*\\(\\s*['\\\"]rc4['\\\"]"
+    severity: critical
+    message: "RC4 broken"
+    metadata: {cwe: "CWE-327"}
+  - id: node-crypto-blowfish
+    pattern: "crypto\\.createCipher(?:iv)?\\s*\\(\\s*['\\\"]bf['\\\"]"
+    severity: medium
+    message: "Blowfish — verify use case"
+    metadata: {cwe: "CWE-327"}
+  - id: node-crypto-pbkdf2-low-iter
+    pattern: "crypto\\.pbkdf2\\s*\\(\\s*[^,]+,\\s*[^,]+,\\s*[1-9]\\d{0,3}\\s*,"
+    severity: high
+    message: "PBKDF2 with low iterations (<10000) — weak"
+    metadata: {cwe: "CWE-916"}
+  - id: node-crypto-scrypt-low
+    pattern: "crypto\\.scrypt\\s*\\(\\s*[^,]+,\\s*[^,]+,\\s*[1-9]\\d{0,4}\\s*,"
+    severity: medium
+    message: "scrypt with low keylen — verify"
+    metadata: {cwe: "CWE-916"}
+  - id: node-process-env-secret
+    pattern: "process\\.env\\.(?:PASSWORD|SECRET|API_KEY|TOKEN|PRIVATE_KEY)"
+    severity: low
+    message: "process.env secret — verify not logged"
+    metadata: {cwe: "CWE-798"}
+  - id: node-hardcoded-secret
+    pattern: "(?:password|secret|api[_-]?key|token)\\s*[:=]\\s*['\\\"][^'\\\"]{8,}['\\\"]"
+    severity: high
+    message: "hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: node-process-exit
+    pattern: "process\\.exit\\s*\\(\\s*\\d*\\s*\\)"
+    severity: low
+    message: "process.exit — verify cleanup"
+    metadata: {cwe: "CWE-754"}
+  - id: node-console-log-prod
+    pattern: "\\bconsole\\.log\\s*\\("
+    severity: low
+    message: "console.log in production"
+    metadata: {cwe: "CWE-532"}
+  - id: node-console-error-prod
+    pattern: "\\bconsole\\.error\\s*\\("
+    severity: low
+    message: "console.error in production"
+    metadata: {cwe: "CWE-532"}
+  - id: node-debugger
+    pattern: "\\bdebugger\\b\\s*;?"
+    severity: medium
+    message: "debugger statement in production"
+    metadata: {cwe: "CWE-532"}
+  - id: node-aws-sdk-hardcoded
+    pattern: "accessKeyId\\s*:\\s*['\\\"]AKIA|secretAccessKey\\s*:\\s*['\\\"][A-Za-z0-9/+=]{40}['\\\"]"
+    severity: critical
+    message: "AWS SDK hardcoded credentials"
+    metadata: {cwe: "CWE-798"}
+  - id: react-dangerouslysetinnerhtml
+    pattern: "dangerouslySetInnerHTML\\s*="
+    severity: high
+    message: "dangerouslySetInnerHTML — XSS risk"
+    metadata: {cwe: "CWE-79"}
+  - id: react-dangerouslysetinnerhtml-user
+    pattern: "dangerouslySetInnerHTML\\s*:\\s*\\{[^}]*__html\\s*:\\s*(?:props|params|data|response|req)"
+    severity: critical
+    message: "dangerouslySetInnerHTML with user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: react-innerhtml
+    pattern: "\\.innerHTML\\s*="
+    severity: high
+    message: "innerHTML assignment — XSS risk"
+    metadata: {cwe: "CWE-79"}
+  - id: react-innerhtml-user
+    pattern: "\\.innerHTML\\s*=\\s*(?:props|params|data|response|req)"
+    severity: critical
+    message: "innerHTML with user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: react-eval
+    pattern: "\\beval\\s*\\("
+    severity: high
+    message: "eval — code injection"
+    metadata: {cwe: "CWE-95"}
+  - id: react-eval-user
+    pattern: "\\beval\\s*\\(\\s*(?:props|params|data|response|req)"
+    severity: critical
+    message: "eval with user input — RCE"
+    metadata: {cwe: "CWE-95"}
+  - id: react-document-write
+    pattern: "document\\.write\\s*\\("
+    severity: high
+    message: "document.write — XSS risk"
+    metadata: {cwe: "CWE-79"}
+  - id: react-document-write-user
+    pattern: "document\\.write\\s*\\(\\s*(?:props|params|data|response|req)"
+    severity: critical
+    message: "document.write with user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: react-localstorage-jwt
+    pattern: "localStorage\\.setItem\\s*\\(\\s*['\\\"]\\w*token['\\\"]"
+    severity: high
+    message: "JWT in localStorage — XSS session theft"
+    metadata: {cwe: "CWE-922"}
+  - id: react-localstorage-secret
+    pattern: "localStorage\\.setItem\\s*\\(\\s*['\\\"]\\w*(?:password|secret|api[_-]?key|auth)['\\\"]"
+    severity: high
+    message: "Secret in localStorage — XSS leak"
+    metadata: {cwe: "CWE-922"}
+  - id: react-sessionstorage-jwt
+    pattern: "sessionStorage\\.setItem\\s*\\(\\s*['\\\"]\\w*token['\\\"]"
+    severity: medium
+    message: "JWT in sessionStorage — XSS session theft"
+    metadata: {cwe: "CWE-922"}
+  - id: react-window-location-user
+    pattern: "window\\.location\\s*=\\s*(?:props|params|data|response|req)"
+    severity: high
+    message: "window.location with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: react-window-open-user
+    pattern: "window\\.open\\s*\\(\\s*(?:props|params|data|response|req)"
+    severity: medium
+    message: "window.open with user input — open redirect/tabnabbing"
+    metadata: {cwe: "CWE-601"}
+  - id: react-window-open-no-noopener
+    pattern: "window\\.open\\s*\\([^)]*['\\\"]_blank['\\\"](?!.*noopener)"
+    severity: medium
+    message: "window.open(_blank) without noopener — tabnabbing"
+    metadata: {cwe: "CWE-1022"}
+  - id: react-href-user
+    pattern: "href\\s*=\\s*\\{(?:props|params|data|response|req)"
+    severity: medium
+    message: "href with user input — open redirect/XSS"
+    metadata: {cwe: "CWE-601"}
+  - id: react-src-user
+    pattern: "src\\s*=\\s*\\{(?:props|params|data|response|req)"
+    severity: medium
+    message: "src with user input — verify URL safety"
+    metadata: {cwe: "CWE-601"}
+  - id: react-action-user
+    pattern: "action\\s*=\\s*\\{(?:props|params|data|response|req)"
+    severity: high
+    message: "form action with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: react-cryptojs
+    pattern: "CryptoJS\\.(?:AES|DES|RC4|MD5|SHA1)\\."
+    severity: high
+    message: "CryptoJS — client-side crypto is insecure"
+    metadata: {cwe: "CWE-327"}
+  - id: react-cryptojs-ecb
+    pattern: "CryptoJS\\.AES\\.encrypt\\s*\\([^)]*mode\\s*:\\s*CryptoJS\\.mode\\.ECB"
+    severity: critical
+    message: "CryptoJS AES-ECB — deterministic"
+    metadata: {cwe: "CWE-327"}
+  - id: react-cryptojs-md5
+    pattern: "CryptoJS\\.MD5\\s*\\("
+    severity: high
+    message: "CryptoJS MD5 — broken"
+    metadata: {cwe: "CWE-327"}
+  - id: react-cryptojs-sha1
+    pattern: "CryptoJS\\.SHA1\\s*\\("
+    severity: high
+    message: "CryptoJS SHA1 — broken"
+    metadata: {cwe: "CWE-327"}
+  - id: react-fetch-http
+    pattern: "fetch\\s*\\(\\s*['\\\"]http://"
+    severity: medium
+    message: "fetch HTTP (not HTTPS) — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: react-axios-http
+    pattern: "axios\\.(?:get|post|put|delete|patch)\\s*\\(\\s*['\\\"]http://"
+    severity: medium
+    message: "Axios HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: react-next-redirect-user
+    pattern: "redirect\\s*\\(\\s*(?:props|params|data|response|req|searchParams)"
+    severity: high
+    message: "Next.js redirect with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: react-next-image-remote
+    pattern: "next/image.*src\\s*=\\s*\\{(?:props|params|data|response|req)"
+    severity: medium
+    message: "next/image with remote user URL — SSRF"
+    metadata: {cwe: "CWE-918"}
+  - id: react-next-getstaticpaths-fallback
+    pattern: "fallback\\s*:\\s*false"
+    severity: low
+    message: "Next.js getStaticPaths fallback false — 404 on new pages"
+    metadata: {cwe: "CWE-754"}
+  - id: react-next-rewrites-destination-user
+    pattern: "destination\\s*:\\s*['\\\"]/(?:api|admin)[^\\\"]*\\$\\{"
+    severity: medium
+    message: "Next.js rewrites with interpolation — verify"
+    metadata: {cwe: "CWE-601"}
+  - id: react-next-middleware-header
+    pattern: "NextResponse\\.next\\s*\\(\\s*\\{\\s*headers\\s*:\\s*\\{[^}]*(?:req|request|cookies)"
+    severity: medium
+    message: "Next.js middleware setting headers from request"
+    metadata: {cwe: "CWE-79"}
+  - id: react-zod-infer-missing
+    pattern: "z\\.object\\s*\\(\\s*\\{"
+    severity: low
+    message: "Zod schema — good practice, verify usage"
+    metadata: {cwe: "CWE-20"}
+  - id: react-formik-no-csrf
+    pattern: "<Formik[^>]*onSubmit\\s*=\\s*\\{(?:async\\s*)?\\([^)]*\\)\\s*=>"
+    severity: low
+    message: "Formik onSubmit — verify CSRF token included"
+    metadata: {cwe: "CWE-352"}
+  - id: js-eval
+    pattern: "\\beval\\s*\\("
+    severity: high
+    message: "eval — code injection risk"
+    metadata: {cwe: "CWE-95"}
+  - id: js-eval-concat
+    pattern: "\\beval\\s*\\(\\s*['\\\"`][^'\\\"`]*['\\\"`]\\s*\\+"
+    severity: critical
+    message: "eval with concat — code injection"
+    metadata: {cwe: "CWE-95"}
+  - id: js-eval-template
+    pattern: "\\beval\\s*\\(\\s*`[^`]*\\$\\{"
+    severity: critical
+    message: "eval with template literal — injection"
+    metadata: {cwe: "CWE-95"}
+  - id: js-function-constructor
+    pattern: "new\\s+Function\\s*\\("
+    severity: high
+    message: "Function constructor — RCE risk"
+    metadata: {cwe: "CWE-94"}
+  - id: js-settimeout-string
+    pattern: "setTimeout\\s*\\(\\s*['\\\"`]"
+    severity: high
+    message: "setTimeout with string — eval injection"
+    metadata: {cwe: "CWE-95"}
+  - id: js-setinterval-string
+    pattern: "setInterval\\s*\\(\\s*['\\\"`]"
+    severity: high
+    message: "setInterval with string — eval injection"
+    metadata: {cwe: "CWE-95"}
+  - id: js-innerhtml
+    pattern: "\\.innerHTML\\s*="
+    severity: high
+    message: "innerHTML assignment — XSS risk"
+    metadata: {cwe: "CWE-79"}
+  - id: js-innerhtml-user
+    pattern: "\\.innerHTML\\s*=\\s*(?:req|request|input|user|args|params|data)"
+    severity: critical
+    message: "innerHTML with user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: js-outerhtml-user
+    pattern: "\\.outerHTML\\s*=\\s*(?:req|request|input|user|args|params|data)"
+    severity: critical
+    message: "outerHTML with user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: js-insertadjacenthtml-user
+    pattern: "\\.insertAdjacentHTML\\s*\\(\\s*[^,]+,\\s*(?:req|request|input|user|args|params|data)"
+    severity: critical
+    message: "insertAdjacentHTML with user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: js-document-write
+    pattern: "document\\.write\\s*\\("
+    severity: high
+    message: "document.write — XSS risk"
+    metadata: {cwe: "CWE-79"}
+  - id: js-document-write-user
+    pattern: "document\\.write\\s*\\(\\s*(?:req|request|input|user|args|params|data)"
+    severity: critical
+    message: "document.write with user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: js-document-writeln
+    pattern: "document\\.writeln\\s*\\("
+    severity: high
+    message: "document.writeln — XSS risk"
+    metadata: {cwe: "CWE-79"}
+  - id: js-document-writeln-user
+    pattern: "document\\.writeln\\s*\\(\\s*(?:req|request|input|user|args|params|data)"
+    severity: critical
+    message: "document.writeln with user input — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: js-localstorage-jwt
+    pattern: "localStorage\\.setItem\\s*\\(\\s*['\\\"]\\w*token['\\\"]"
+    severity: high
+    message: "JWT in localStorage — XSS session theft"
+    metadata: {cwe: "CWE-922"}
+  - id: js-localstorage-secret
+    pattern: "localStorage\\.setItem\\s*\\(\\s*['\\\"]\\w*(?:password|secret|api[_-]?key|auth)['\\\"]"
+    severity: high
+    message: "Secret in localStorage — XSS leak"
+    metadata: {cwe: "CWE-922"}
+  - id: js-window-location-user
+    pattern: "window\\.location\\s*=\\s*(?:req|request|input|user|args|params|data)"
+    severity: high
+    message: "window.location with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: js-window-open-user
+    pattern: "window\\.open\\s*\\(\\s*(?:req|request|input|user|args|params|data)"
+    severity: medium
+    message: "window.open with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: js-window-open-no-noopener
+    pattern: "window\\.open\\s*\\([^)]*['\\\"]_blank['\\\"](?!.*noopener)"
+    severity: medium
+    message: "window.open(_blank) without noopener — tabnabbing"
+    metadata: {cwe: "CWE-1022"}
+  - id: js-location-href-user
+    pattern: "location\\.href\\s*=\\s*(?:req|request|input|user|args|params|data)"
+    severity: high
+    message: "location.href with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: js-location-replace-user
+    pattern: "location\\.replace\\s*\\(\\s*(?:req|request|input|user|args|params|data)"
+    severity: high
+    message: "location.replace with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: js-location-assign-user
+    pattern: "location\\.assign\\s*\\(\\s*(?:req|request|input|user|args|params|data)"
+    severity: high
+    message: "location.assign with user input — open redirect"
+    metadata: {cwe: "CWE-601"}
+  - id: js-href-javascript
+    pattern: "href\\s*=\\s*['\\\"]javascript:"
+    severity: high
+    message: "href javascript: — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: js-src-javascript
+    pattern: "src\\s*=\\s*['\\\"]javascript:"
+    severity: high
+    message: "src javascript: — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: js-action-javascript
+    pattern: "action\\s*=\\s*['\\\"]javascript:"
+    severity: high
+    message: "action javascript: — XSS"
+    metadata: {cwe: "CWE-79"}
+  - id: js-prototype-pollution
+    pattern: "(?:__proto__|prototype)\\s*\\["
+    severity: high
+    message: "prototype access — prototype pollution risk"
+    metadata: {cwe: "CWE-1321"}
+  - id: js-constructor-pollution
+    pattern: "\\.constructor\\s*\\["
+    severity: high
+    message: "constructor access — prototype pollution risk"
+    metadata: {cwe: "CWE-1321"}
+  - id: js-require-resolve-user
+    pattern: "require\\.resolve\\s*\\(\\s*(?:req|request|input|user|args|params|data)"
+    severity: high
+    message: "require.resolve with user input — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: js-crypto-md5
+    pattern: "crypto\\.createHash\\s*\\(\\s*['\\\"]md5['\\\"]"
+    severity: high
+    message: "MD5 broken — use sha256"
+    metadata: {cwe: "CWE-327"}
+  - id: js-crypto-sha1
+    pattern: "crypto\\.createHash\\s*\\(\\s*['\\\"]sha1['\\\"]"
+    severity: high
+    message: "SHA1 broken — use sha256"
+    metadata: {cwe: "CWE-327"}
+  - id: js-crypto-ecb
+    pattern: "crypto\\.createCipheriv\\s*\\(\\s*['\\\"]aes-\\d+-ecb['\\\"]"
+    severity: critical
+    message: "AES-ECB — deterministic"
+    metadata: {cwe: "CWE-327"}
+  - id: js-crypto-des
+    pattern: "crypto\\.createCipher(?:iv)?\\s*\\(\\s*['\\\"]des['\\\"]"
+    severity: critical
+    message: "DES broken"
+    metadata: {cwe: "CWE-327"}
+  - id: js-fetch-http
+    pattern: "fetch\\s*\\(\\s*['\\\"]http://"
+    severity: medium
+    message: "fetch HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: js-axios-http
+    pattern: "axios\\.(?:get|post|put|delete|patch)\\s*\\(\\s*['\\\"]http://"
+    severity: medium
+    message: "Axios HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: js-xmlhttprequest-http
+    pattern: "\\.open\\s*\\(\\s*['\\\"](?:GET|POST|PUT|DELETE)['\\\"]\\s*,\\s*['\\\"]http://"
+    severity: medium
+    message: "XMLHttpRequest HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: js-jquery-ajax-http
+    pattern: "\\$\\.ajax\\s*\\(\\s*\\{[^}]*url\\s*:\\s*['\\\"]http://"
+    severity: medium
+    message: "jQuery ajax HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: js-postgres-query-concat
+    pattern: "\\.query\\s*\\(\\s*['\\\"`][^'\\\"`]*['\\\"`]\\s*\\+"
+    severity: high
+    message: "pg.query with concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: js-postgres-query-template
+    pattern: "\\.query\\s*\\(\\s*`[^`]*\\$\\{"
+    severity: high
+    message: "pg.query with template literal — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: js-mysql-query-concat
+    pattern: "\\.query\\s*\\(\\s*['\\\"][^'\\\"]*['\\\"]\\s*\\+"
+    severity: high
+    message: "mysql.query with concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: js-mongodb-where
+    pattern: "\\$where\\s*:\\s*(?:req|request|input|user|args|params|data)"
+    severity: critical
+    message: "MongoDB $where with user input — NoSQL injection"
+    metadata: {cwe: "CWE-943"}
+  - id: js-mongodb-eval
+    pattern: "db\\.(?:eval|command)\\s*\\(\\s*(?:req|request|input|user|args|params|data)"
+    severity: critical
+    message: "MongoDB eval with user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: js-cors-wildcard
+    pattern: "Access-Control-Allow-Origin['\\\"]?\\s*[:=]\\s*['\\\"]\\*['\\\"]"
+    severity: high
+    message: "CORS Allow-Origin wildcard"
+    metadata: {cwe: "CWE-942"}
+  - id: js-cors-credentials-wildcard
+    pattern: "Access-Control-Allow-Credentials['\\\"]?\\s*[:=]\\s*true[^;]*Access-Control-Allow-Origin['\\\"]?\\s*[:=]\\s*['\\\"]\\*"
+    severity: critical
+    message: "CORS credentials + wildcard origin"
+    metadata: {cwe: "CWE-942"}
+  - id: js-debugger
+    pattern: "\\bdebugger\\b\\s*;?"
+    severity: medium
+    message: "debugger statement in production"
+    metadata: {cwe: "CWE-532"}
+  - id: js-console-log
+    pattern: "\\bconsole\\.log\\s*\\("
+    severity: low
+    message: "console.log in production"
+    metadata: {cwe: "CWE-532"}
+  - id: js-console-error
+    pattern: "\\bconsole\\.error\\s*\\("
+    severity: low
+    message: "console.error in production"
+    metadata: {cwe: "CWE-532"}
+  - id: js-console-debug
+    pattern: "\\bconsole\\.debug\\s*\\("
+    severity: low
+    message: "console.debug in production"
+    metadata: {cwe: "CWE-532"}
+  - id: js-hardcoded-secret
+    pattern: "(?:password|secret|api[_-]?key|token)\\s*[:=]\\s*['\\\"][^'\\\"]{8,}['\\\"]"
+    severity: high
+    message: "hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: js-aws-hardcoded
+    pattern: "accessKeyId\\s*:\\s*['\\\"]AKIA|secretAccessKey\\s*:\\s*['\\\"][A-Za-z0-9/+=]{40}['\\\"]"
+    severity: critical
+    message: "AWS hardcoded credentials"
+    metadata: {cwe: "CWE-798"}
+  - id: js-postmessage-wildcard
+    pattern: "postMessage\\s*\\(\\s*[^,]+,\\s*['\\\"]\\*['\\\"]"
+    severity: high
+    message: "postMessage with wildcard origin — XSS risk"
+    metadata: {cwe: "CWE-79"}
+  - id: js-eventsource-http
+    pattern: "new\\s+EventSource\\s*\\(\\s*['\\\"]http://"
+    severity: medium
+    message: "EventSource HTTP — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: js-websocket-ws
+    pattern: "new\\s+WebSocket\\s*\\(\\s*['\\\"]ws://"
+    severity: medium
+    message: "WebSocket ws:// (not wss://) — MITM risk"
+    metadata: {cwe: "CWE-319"}

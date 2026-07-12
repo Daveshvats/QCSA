@@ -1,0 +1,2 @@
+[console_scripts]
+stca = stca.cli:main

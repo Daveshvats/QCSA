@@ -12,10 +12,6 @@ internet connection to render charts. Falls back to text tables offline.
 """
 from __future__ import annotations
 
-import logging
-
-logger = logging.getLogger("stca.report.dashboard")
-
 import html
 import json
 from collections import Counter
@@ -102,8 +98,8 @@ def generate_dashboard(repo_root: Path, out_path: Path,
                     "severity": mf.severity, "category": mf.category,
                     "confidence": mf.confidence, "message": mf.description,
                     "cwe": mf.cwe, "layer": "L0"})
-        except Exception as e:
-            logger.warning("modern attack scan failed for dashboard: %s", e)
+        except Exception:
+            pass
 
     by_sev = Counter(f["severity"] for f in findings)
     by_cat = Counter(f["category"] for f in findings)
