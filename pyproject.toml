@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loomscan"
-version = "5.9.5"
+version = "5.9.6"
 description = "Static + Test + Constraint Analysis — an offline, deterministic-first bug detection pipeline with a type-2 fuzzy aggregation brain"
 readme = "README.md"
 requires-python = ">=3.9"

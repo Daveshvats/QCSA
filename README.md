@@ -7,13 +7,12 @@
 </p>
 
 <h1 align="center">LoomScan</h1>
-
 <p align="center">
-  <a href="https://github.com/Daveshvats/loomscan/actions"><img src="https://github.com/Daveshvats/loomscan/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/Daveshvats/Loomscan/actions/workflows/build-rust-wheels.yml"><img src="https://github.com/Daveshvats/Loomscan/actions/workflows/build-rust-wheels.yml/badge.svg" alt="Build"></a>
   <a href="https://pypi.org/project/loomscan/"><img src="https://img.shields.io/pypi/v/loomscan.svg" alt="PyPI"></a>
   <a href="https://pypi.org/project/loomscan/"><img src="https://img.shields.io/pypi/dm/loomscan.svg" alt="Downloads"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/Daveshvats/loomscan.svg" alt="License"></a>
-  <a href="https://github.com/Daveshvats/loomscan"><img src="https://img.shields.io/github/stars/Daveshvats/loomscan.svg?style=social" alt="Stars"></a>
+  <a href="https://github.com/Daveshvats/Loomscan/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Daveshvats/Loomscan.svg" alt="License"></a>
+  <a href="https://github.com/Daveshvats/Loomscan"><img src="https://img.shields.io/github/stars/Daveshvats/Loomscan.svg?style=social" alt="Stars"></a>
 </p>
 
 <p align="center">

@@ -5,4 +5,4 @@ aggregates findings through an interval type-2 fuzzy inference system, and
 optionally invokes an LLM tie-breaker (gated by a process reward model).
 """
 
-__version__ = "5.9.5"
+__version__ = "5.9.6"

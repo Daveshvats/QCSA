@@ -26,34 +26,29 @@ The progress bar is disabled when:
   - stdout is not a TTY (piped to file / CI log)
   - --quiet or --json is set on the CLI
   - $LOOMSCAN_NO_TUI=1 is set in the environment
+  - --no-tui flag is passed
 """
 from __future__ import annotations
 
 import os
 import sys
-import threading
 import time
+import threading
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import List, Optional, Dict, Any
 
 try:
     from rich.console import Console
-    from rich.progress import (Progress, SpinnerColumn, BarColumn,
-                                TextColumn, TimeElapsedColumn, MofNCompleteColumn)
-    from rich.live import Live
-    from rich.panel import Panel
-    from rich.text import Text
-    from rich.table import Table
+    from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn
+    from rich.progress import MofNCompleteColumn, TimeElapsedColumn
     _HAS_RICH = True
 except ImportError:
     _HAS_RICH = False
 
-from .mascot import Mascot, get_global_mascot
-
 
 def _tui_disabled() -> bool:
-    """Return True if TUI animations should be suppressed."""
-    if os.environ.get("LOOMSCAN_NO_TUI") == "1":
+    """Check if TUI is explicitly disabled."""
+    if os.environ.get("LOOMSCAN_NO_TUI", "").lower() in ("1", "true", "yes"):
         return True
     if not sys.stdout.isatty():
         return True
@@ -80,15 +75,7 @@ class Stage:
 
 
 class ScanProgress:
-    """Wraps Rich Progress + Loomy mascot for the pipeline.
-
-    Designed to be a context manager:
-
-        with ScanProgress(total_stages=12) as sp:
-            ...
-
-    Falls back to no-op when Rich is unavailable or stdout is not a TTY.
-    """
+    """Wraps Rich Progress + Loomy mascot for the pipeline."""
 
     def __init__(self, total_stages: int = 12, show_mascot: bool = True,
                  console: Optional["Console"] = None,
@@ -104,9 +91,15 @@ class ScanProgress:
             enabled = _HAS_RICH and not _tui_disabled()
         self.enabled = enabled
 
-        self.console = console or (Console() if _HAS_RICH else None)
+        # v5.10: Force legacy_windows=False and force_terminal=True
+        # This fixes progress bar freezing on Windows Terminal
+        self.console = console or (Console(legacy_windows=False, force_terminal=True) if _HAS_RICH else None)
         self.show_mascot = show_mascot and self.enabled
+        
+        # Try to use image mascot first, fall back to ASCII
+        from .mascot import get_global_mascot
         self.mascot = get_global_mascot(enabled=self.show_mascot)
+        
         self._progress: Optional[Progress] = None
         self._task_id = None
         self._findings_count = 0
@@ -116,7 +109,7 @@ class ScanProgress:
     def __enter__(self) -> "ScanProgress":
         if not self.enabled:
             return self
-        # Initialize Rich progress
+        # Initialize Rich progress with v5.10 refresh rate fix
         self._progress = Progress(
             SpinnerColumn(),
             TextColumn("[bold cyan]{task.description}"),
@@ -128,6 +121,7 @@ class ScanProgress:
             TextColumn("[yellow]{task.fields[findings]} findings"),
             console=self.console,
             transient=False,
+            refresh_per_second=10,  # v5.10: Force 10fps refresh to prevent freezing
         )
         self._progress.__enter__()
         self._task_id = self._progress.add_task(
@@ -217,67 +211,32 @@ class ScanProgress:
         self.completed_stages += 1
         self._findings_count += findings_count
 
-        if self.enabled and self._progress is not None and self._task_id is not None:
+        if not self.enabled:
+            return
+
+        if self._progress is not None and self._task_id is not None:
             self._progress.update(
                 self._task_id,
                 completed=self.completed_stages,
                 findings=self._findings_count,
+                description=self._current_stage.name,
             )
-
-    def fail_stage(self, error: str = "") -> None:
-        """Mark the current stage as failed but keep going."""
-        with self._lock:
-            if self._current_stage:
-                self._current_stage.status = "error"
-                self._current_stage.finished_at = time.perf_counter()
-                self.completed_stages += 1
-                if self._progress is not None and self._task_id is not None:
-                    self._progress.update(
-                        self._task_id,
-                        completed=self.completed_stages,
-                        description=f"{self._current_stage.name} [FAILED: {error[:40]}]",
-                    )
-
-    def update_description(self, description: str) -> None:
-        """Update the current stage's description without changing stage."""
-        if not self.enabled:
-            return
-        if self._progress is not None and self._task_id is not None and self._current_stage:
-            self._current_stage.description = description
-            self._progress.update(
-                self._task_id,
-                description=f"{self._current_stage.name} — {description}",
-            )
-            if self.show_mascot:
-                self.mascot.update_phase("layers", description)
 
     # ---------- introspection ----------
 
-    def summary_table(self):
-        """Return a Rich Table of stage timings (for inclusion in TUI report)."""
-        if not _HAS_RICH:
-            return None
-        t = Table(title="Pipeline Stages", show_lines=False)
-        t.add_column("#", style="dim", width=3)
-        t.add_column("Stage", style="cyan")
-        t.add_column("Findings", justify="right", style="yellow")
-        t.add_column("Time (s)", justify="right", style="green")
-        t.add_column("Status")
-        for i, s in enumerate(self.stages, 1):
-            status_style = {"done": "green", "running": "yellow", "error": "red"}.get(s.status, "dim")
-            t.add_row(
-                str(i),
-                s.name,
-                str(s.findings_count),
-                f"{s.elapsed:.2f}",
-                Text(s.status.upper(), style=status_style),
-            )
-        return t
-
-    @property
     def total_elapsed(self) -> float:
-        if not self.stages:
-            return 0.0
-        first = self.stages[0].started_at
-        last = max(s.finished_at or time.perf_counter() for s in self.stages)
-        return last - first
+        """Total elapsed time across all completed stages."""
+        return sum(s.elapsed for s in self.stages if s.status == "done")
+
+    def stage_summary(self) -> List[Dict[str, Any]]:
+        """Return a summary of all stages."""
+        return [
+            {
+                "name": s.name,
+                "description": s.description,
+                "elapsed": s.elapsed,
+                "findings": s.findings_count,
+                "status": s.status,
+            }
+            for s in self.stages
+        ]
