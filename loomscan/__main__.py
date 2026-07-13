@@ -1,0 +1,1 @@
+from loomscan.cli import main; main()

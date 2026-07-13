@@ -47,18 +47,15 @@ def test_pyproject_version_matches():
 
 
 def test_readme_header_says_v57_or_later():
-    """v5.7+: README header should say v5.7 or later (was stuck on v5.4)."""
+    """v5.7+: README should mention a version >= 5.7."""
     readme = Path(__file__).resolve().parent.parent / "README.md"
     content = readme.read_text()
-    # Must contain v5.7+ in the first 10 lines (the > quote)
-    first_lines = "\n".join(content.split("\n")[:10])
-    # Accept v5.7, v5.8, v5.9, v6.0, etc.
+    # Check the FULL content, not just first 10 lines (logo HTML pushes version past line 10)
     import re
-    match = re.search(r'v(\d+)\.(\d+)', first_lines)
-    assert match, f"README header doesn't mention a version: {first_lines[:200]}"
+    match = re.search(r'v(\d+)\.(\d+)', content)
+    assert match, "README doesn't mention any version"
     major, minor = int(match.group(1)), int(match.group(2))
     assert (major, minor) >= (5, 7), f"README version {major}.{minor} < 5.7"
-
 
 def test_readme_mentions_tui_and_mascot():
     """v5.7: README should mention the TUI mascot and progress bar."""
