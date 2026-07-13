@@ -6,9 +6,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stca.profiles import ProfileManager, Profile, BUILTIN_PROFILES
-from stca.rule_config import RuleConfigManager, RuleConfig
-from stca.models import Finding, Severity, BlastRadius, LayerID, Category
+from loomscan.profiles import ProfileManager, Profile, BUILTIN_PROFILES
+from loomscan.rule_config import RuleConfigManager, RuleConfig
+from loomscan.models import Finding, Severity, BlastRadius, LayerID, Category
 
 
 # === Profile system (luacheck/detekt-inspired) ===
@@ -27,8 +27,8 @@ def test_profile_manager_loads_builtins(tmp_path):
 
 
 def test_profile_manager_loads_custom_profiles(tmp_path):
-    """Custom profiles from .stca.yaml should be loaded."""
-    cfg = tmp_path / ".stca.yaml"
+    """Custom profiles from .loomscan.yaml should be loaded."""
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "profiles": {
             "custom-strict": {
@@ -47,7 +47,7 @@ def test_profile_manager_loads_custom_profiles(tmp_path):
 
 def test_profile_inheritance(tmp_path):
     """Profiles with 'extends' should inherit from parent."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "profiles": {
             "child": {
@@ -127,7 +127,7 @@ def test_rule_config_manager_starts_empty(tmp_path):
 
 def test_rule_config_disable_rule(tmp_path):
     """Disabled rules should be filtered out."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "rules": {
             "test:noisy-rule": {
@@ -143,7 +143,7 @@ def test_rule_config_disable_rule(tmp_path):
 
 def test_rule_config_severity_override(tmp_path):
     """Severity override should change the finding's severity."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "rules": {
             "test:rule": {
@@ -165,7 +165,7 @@ def test_rule_config_severity_override(tmp_path):
 
 def test_rule_config_path_filtering(tmp_path):
     """Rules with paths_include should only apply to matching files."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "rules": {
             "test:auth-rule": {
@@ -182,7 +182,7 @@ def test_rule_config_path_filtering(tmp_path):
 
 def test_rule_config_path_exclude(tmp_path):
     """Rules with paths_exclude should skip matching files."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "rules": {
             "test:rule": {
@@ -199,7 +199,7 @@ def test_rule_config_path_exclude(tmp_path):
 
 def test_rule_config_params(tmp_path):
     """Rule-specific parameters should be loadable."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "rules": {
             "lintr-line-length": {
@@ -215,7 +215,7 @@ def test_rule_config_params(tmp_path):
 
 def test_rule_config_filter_findings_removes_disabled(tmp_path):
     """filter_findings should remove findings from disabled rules."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "rules": {
             "test:disabled": {"active": False},
@@ -236,7 +236,7 @@ def test_rule_config_filter_findings_removes_disabled(tmp_path):
 
 def test_rule_config_set_and_save(tmp_path):
     """set_rule_config should persist to the config file."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({"rules": {}}))
     rcm = RuleConfigManager(config_path=cfg)
     rcm.set_rule_config("test:new-rule", RuleConfig(active=False, note="test"))
@@ -247,7 +247,7 @@ def test_rule_config_set_and_save(tmp_path):
 
 def test_rule_config_stats(tmp_path):
     """stats should report config counts."""
-    cfg = tmp_path / ".stca.yaml"
+    cfg = tmp_path / ".loomscan.yaml"
     cfg.write_text(yaml.dump({
         "rules": {
             "test:disabled": {"active": False},

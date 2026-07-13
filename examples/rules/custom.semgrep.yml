@@ -1,6 +1,6 @@
 # Sample custom Semgrep rules — extend the built-in ruleset
-# Place in .stca-rules/ or anywhere Semgrep can find them
-# Run with: semgrep --config .stca-rules/custom.semgrep.yml
+# Place in .loomscan-rules/ or anywhere Semgrep can find them
+# Run with: semgrep --config .loomscan-rules/custom.semgrep.yml
 
 rules:
   - id: sample-python-print-with-secret

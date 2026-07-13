@@ -1,0 +1,152 @@
+# LoomScan Dart Security Rules — 30 rules
+rules:
+  - id: dart-eval-like
+    pattern: "\\bEval\\s*\\(|JsEval\\s*\\("
+    severity: critical
+    message: "eval — RCE if user input"
+    metadata: {cwe: "CWE-94"}
+  - id: dart-process-run
+    pattern: "\\bProcess\\.run\\s*\\(|Process\\.start\\s*\\("
+    severity: high
+    message: "Process.run — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: dart-process-run-string
+    pattern: "\\bProcess\\.run\\s*\\(\\s*[\\\"'].*\\$\\{"
+    severity: critical
+    message: "Process.run with interpolation — injection"
+    metadata: {cwe: "CWE-78"}
+  - id: dart-md5
+    pattern: "\\bmd5\\.convert\\b|MD5\\b\\.digest"
+    severity: high
+    message: "MD5 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: dart-sha1
+    pattern: "\\bsha1\\.convert\\b|SHA1\\b\\.digest"
+    severity: high
+    message: "SHA1 broken — use SHA-256"
+    metadata: {cwe: "CWE-327"}
+  - id: dart-ecb-mode
+    pattern: "\\bAESMode\\.ecb\\b|CipherMode\\.ECB"
+    severity: critical
+    message: "AES-ECB — deterministic, leaks patterns"
+    metadata: {cwe: "CWE-327"}
+  - id: dart-cbc-no-mac
+    pattern: "\\bAESMode\\.cbc\\b"
+    severity: medium
+    message: "AES-CBC without MAC — malleable ciphertext"
+    metadata: {cwe: "CWE-327"}
+  - id: dart-random-not-secure
+    pattern: "\\bRandom\\s*\\(\\s*\\)|math\\.Random\\b"
+    severity: high
+    message: "Random not CSPRNG — use Random.secure()"
+    metadata: {cwe: "CWE-338"}
+  - id: dart-hardcoded-secret
+    pattern: "\\b(?:const|var|final)\\s+(?:password|secret|api[_-]?key|auth[_-]?token)\\s*[:=]\\s*[\\\"'][^\\\"']{8,}[\\\"']"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: dart-sharedprefs-secret
+    pattern: "\\bSharedPreferences\\b.*setString\\s*\\(\\s*[\\\"']\\w*(?:password|secret|token)\\w*[\\\"']"
+    severity: high
+    message: "SharedPreferences for secret — use flutter_secure_storage"
+    metadata: {cwe: "CWE-312"}
+  - id: dart-http-http
+    pattern: "\\bhttp\\.(?:get|post|put|delete)\\s*\\(\\s*[\\\"']http://"
+    severity: medium
+    message: "HTTP (not HTTPS) request"
+    metadata: {cwe: "CWE-319"}
+  - id: dart-dio-http
+    pattern: "\\bdio\\.(?:get|post)\\s*\\(\\s*[\\\"']http://"
+    severity: medium
+    message: "Dio HTTP request — use HTTPS"
+    metadata: {cwe: "CWE-319"}
+  - id: dart-http-no-cert-verify
+    pattern: "\\b badCertificateCallback\\b|onBadCertificate\\s*:\\s*\\([^)]*\\)\\s*=>\\s*true"
+    severity: critical
+    message: "SSL verification disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: dart-sqflite-string
+    pattern: "\\brawQuery\\s*\\(\\s*[\\\"'].*\\$\\{"
+    severity: high
+    message: "rawQuery with interpolation — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: dart-sqflite-concat
+    pattern: "\\brawQuery\\s*\\(\\s*[\\\"'][^\\\"']*\\s*\\+\\s*\\w"
+    severity: high
+    message: "rawQuery with concat — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: dart-sqflite-insert-string
+    pattern: "\\brawInsert\\s*\\(\\s*[\\\"'].*\\$\\{"
+    severity: high
+    message: "rawInsert with interpolation — SQL injection"
+    metadata: {cwe: "CWE-89"}
+  - id: dart-print-prod
+    pattern: "\\bprint\\s*\\("
+    severity: low
+    message: "print in production — use logger package"
+    metadata: {cwe: "CWE-532"}
+  - id: dart-debug-print
+    pattern: "\\bdebugPrint\\s*\\("
+    severity: low
+    message: "debugPrint in production — use logger"
+    metadata: {cwe: "CWE-532"}
+  - id: dart-assert-prod
+    pattern: "\\bassert\\s*\\("
+    severity: low
+    message: "assert — disabled in release mode"
+    metadata: {cwe: "CWE-749"}
+  - id: dart-throw-exception
+    pattern: "\\bthrow\\s+\\w*Exception\\s*\\("
+    severity: low
+    message: "throw Exception — verify catch hierarchy"
+    metadata: {cwe: "CWE-754"}
+  - id: dart-catch-exception
+    pattern: "\\bcatch\\s*\\(\\s*\\w+,\\s*\\w+\\)"
+    severity: medium
+    message: "catch all — too broad, masks bugs"
+    metadata: {cwe: "CWE-396"}
+  - id: dart-future-wait
+    pattern: "\\bFuture\\.wait\\s*\\(\\s*\\[\\s*\\w+\\.(?:then|whenComplete)"
+    severity: medium
+    message: "Future.wait with side-effects — verify ordering"
+    metadata: {cwe: "CWE-754"}
+  - id: dart-async-await-mixed
+    pattern: "\\bawait\\s+\\w+\\.then\\s*\\("
+    severity: medium
+    message: "await + .then — confusing, pick one"
+    metadata: {cwe: "CWE-754"}
+  - id: dart-completer-misuse
+    pattern: "\\bCompleter\\s*<\\w+>\\s*\\(\\s*\\)"
+    severity: medium
+    message: "Completer — verify it's needed"
+    metadata: {cwe: "CWE-754"}
+  - id: dart-zone-run-unsafe
+    pattern: "\\brunZoned\\s*\\("
+    severity: medium
+    message: "runZoned — verify error handling"
+    metadata: {cwe: "CWE-754"}
+  - id: dart-stream-listen-no-err
+    pattern: "\\.listen\\s*\\([^,)]+\\)\\s*(?!.*onError)"
+    severity: medium
+    message: "stream.listen without onError — silent failures"
+    metadata: {cwe: "CWE-754"}
+  - id: dart-iso-zone
+    pattern: "\\bIsolate\\.spawn\\s*\\("
+    severity: medium
+    message: "Isolate.spawn — verify message passing"
+    metadata: {cwe: "CWE-662"}
+  - id: dart-ffi-lookup
+    pattern: "\\bDynamicLibrary\\.open\\s*\\(\\s*[\\\"']\\$\\{"
+    severity: high
+    message: "DynamicLibrary.open with variable — path injection"
+    metadata: {cwe: "CWE-78"}
+  - id: dart-ffi-cast
+    pattern: "\\blookupFunction\\s*<\\s*\\w+\\s*,\\s*\\w+\\s*>"
+    severity: medium
+    message: "FFI lookupFunction — verify ABI safety"
+    metadata: {cwe: "CWE-733"}
+  - id: dart-json-parse-user
+    pattern: "\\bjsonDecode\\s*\\(\\s*(?:request|response|input|body)"
+    severity: medium
+    message: "jsonDecode on user input — DoS via huge payload"
+    metadata: {cwe: "CWE-400"}

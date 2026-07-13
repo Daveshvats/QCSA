@@ -1,0 +1,31 @@
+# rust-core/pyproject.toml — maturin build config for loomscan-regex
+#
+# Build the Rust core as a Python native extension:
+#   cd rust-core
+#   maturin build --release         # produces wheel in target/wheels/
+#   pip install target/wheels/loomscan_regex-*.whl
+#
+# Or develop mode:
+#   maturin develop --release       # installs into current venv
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "loomscan-regex"
+version = "0.1.0"
+description = "High-performance Rust regex engine for LoomScan YAML rule packs"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Security",
+    "License :: OSI Approved :: MIT License",
+]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "loomscan_regex"

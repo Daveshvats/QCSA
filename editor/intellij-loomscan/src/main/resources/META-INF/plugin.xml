@@ -1,0 +1,112 @@
+<idea-plugin>
+    <id>com.loomscan.pipeline.intellij</id>
+    <name>LoomScan</name>
+    <vendor email="support@loomscan.dev" url="https://github.com/local/loomscan">LoomScan</vendor>
+
+    <description><![CDATA[
+        <h3>LoomScan — Static + Test + Constraint Analysis</h3>
+        <p>Real-time squiggles, quality gates, auto-fix, and rule mining for 20+ languages.</p>
+        <p>Connects to the LoomScan LSP server for sub-second feedback.</p>
+        <ul>
+          <li><b>Languages:</b> Python, JavaScript, TypeScript, Go, Java, Rust, C/C++, PHP, Ruby, C#, Swift, Scala, Kotlin, SQL, Bash, Dart, Lua, R, Haskell, Elixir</li>
+          <li><b>Quality gates:</b> SonarQube-style thresholds (strict/balanced/permissive presets)</li>
+          <li><b>Auto-fix:</b> 107 patterns across 10+ languages</li>
+          <li><b>Secret detection:</b> 275+ patterns (AWS, Stripe, GitHub, OpenAI, etc.)</li>
+          <li><b>Rule mining:</b> Auto-derive rules from your bug-fix commits</li>
+          <li><b>Unique:</b> Fuzzy brain, LLM verify, counterfactual, metamorphic, knowledge graph</li>
+        </ul>
+        <p>Install: <code>pip install loomscan</code>, then restart IDE.</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <b>0.1.0</b> — Initial release.<br>
+        LSP client, 7 commands, quality gates, auto-fix, rule mining.
+    ]]></change-notes>
+
+    <!-- Minimum IDE build -->
+    <idea-version since-build="231" until-build="241.*"/>
+
+    <!-- Dependencies (IntelliJ platform modules) -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+
+    <!-- Extension points -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Application-level settings -->
+        <applicationService
+            serviceImplementation="com.loomscan.pipeline.settings.LoomScanSettingsService"/>
+
+        <!-- Configurable for Settings > Tools > LoomScan -->
+        <applicationConfigurable
+            parentId="tools"
+            instance="com.loomscan.pipeline.settings.LoomScanSettingsConfigurable"
+            id="com.loomscan.pipeline.settings.LoomScanSettingsConfigurable"
+            displayName="LoomScan"
+            nonDefaultProject="true"/>
+
+        <!-- LSP server support (IntelliJ 2023.1+) -->
+        <platform.lsp.serverSupport
+            implementation="com.loomscan.pipeline.lsp.LoomScanLspServerSupport"/>
+
+        <!-- Annotator (fallback when LSP not available) -->
+        <annotator
+            language="LoomScan"
+            implementationClass="com.loomscan.pipeline.annotator.LoomScanAnnotator"/>
+
+        <!-- Tool window for LoomScan output -->
+        <toolWindow
+            id="LoomScan"
+            anchor="bottom"
+            factoryClass="com.loomscan.pipeline.ui.LoomScanToolWindowFactory"
+            icon="com.loomscan.pipeline.icons.LoomScanIcons.LoomScan"/>
+
+        <!-- Status bar widget -->
+        <statusBarWidgetFactory
+            id="LoomScanStatusBar"
+            implementation="com.loomscan.pipeline.ui.LoomScanStatusBarWidgetFactory"/>
+
+        <!-- Inspection (for batch mode) -->
+        <localInspection
+            language="LoomScan"
+            bundle="com.loomscan.pipeline.messages.LoomScanBundle"
+            key="inspection.display.name"
+            groupKey="inspection.group.name"
+            enabledByDefault="true"
+            level="WARNING"
+            implementationClass="com.loomscan.pipeline.inspection.LoomScanInspection"/>
+    </extensions>
+
+    <!-- Actions -->
+    <actions>
+        <group id="LoomScan.Actions" text="LoomScan" description="LoomScan actions">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="LoomScan.CheckRepo"
+                    class="com.loomscan.pipeline.action.CheckRepoAction"
+                    text="Run Full Check on Repo"
+                    description="Run loomscan check --full"/>
+            <action id="LoomScan.CheckFile"
+                    class="com.loomscan.pipeline.action.CheckFileAction"
+                    text="Check Current File"
+                    description="Re-analyze the current file"/>
+            <action id="LoomScan.ApplyFix"
+                    class="com.loomscan.pipeline.action.ApplyFixAction"
+                    text="Apply Auto-fix"
+                    description="Apply loomscan fix --apply"/>
+            <action id="LoomScan.ShowUncertain"
+                    class="com.loomscan.pipeline.action.ShowUncertainAction"
+                    text="Toggle Uncertain Findings (30-70%)"
+                    description="Show only findings worth human review"/>
+            <action id="LoomScan.Gate"
+                    class="com.loomscan.pipeline.action.GateAction"
+                    text="Run Quality Gate"
+                    description="SonarQube-style thresholds"/>
+            <action id="LoomScan.Mine"
+                    class="com.loomscan.pipeline.action.MineAction"
+                    text="Mine Rules from Git History"
+                    description="Auto-derive rules from bug-fix commits"/>
+            <action id="LoomScan.Restart"
+                    class="com.loomscan.pipeline.action.RestartAction"
+                    text="Restart LSP Server"/>
+        </group>
+    </actions>
+</idea-plugin>

@@ -6,11 +6,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stca.version_vuln_checks import scan_version_vuln_checks, version_vuln_check_stats, VERSION_VULN_DATABASE
-from stca.contracts import extract_contracts, check_preconditions_at_call_sites, contract_stats
-from stca.deadcode import DeadCodeAnalyzer
-from stca.flawfinder_db import scan_dangerous_functions, scan_repo_dangerous_functions, database_stats, DANGEROUS_FUNCTIONS
-from stca.malicious_patterns import scan_malicious_patterns, scan_repo_malicious_patterns, malicious_stats
+from loomscan.version_vuln_checks import scan_version_vuln_checks, version_vuln_check_stats, VERSION_VULN_DATABASE
+from loomscan.contracts import extract_contracts, check_preconditions_at_call_sites, contract_stats
+from loomscan.deadcode import DeadCodeAnalyzer
+from loomscan.flawfinder_db import scan_dangerous_functions, scan_repo_dangerous_functions, database_stats, DANGEROUS_FUNCTIONS
+from loomscan.malicious_patterns import scan_malicious_patterns, scan_repo_malicious_patterns, malicious_stats
 
 
 # === Missing patches (Vanir-inspired) ===
@@ -66,7 +66,7 @@ def compute(x):
     assert any(c.contract_type == "post" for c in contracts)
 
 def test_contract_stats():
-    from stca.contracts import Contract
+    from loomscan.contracts import Contract
     contracts = [
         Contract(function="f", file="a.py", line=1, contract_type="pre", condition="x > 0"),
         Contract(function="f", file="a.py", line=2, contract_type="post", condition="r >= 0"),
@@ -182,7 +182,7 @@ def test_malicious_no_false_positive_on_normal_code(tmp_path):
     assert len(hits) == 0
 
 def test_malicious_stats():
-    from stca.malicious_patterns import MaliciousPattern
+    from loomscan.malicious_patterns import MaliciousPattern
     hits = [
         MaliciousPattern(pattern_type="base64_exec", file="a.py", line=1,
                          description="test", severity="critical", indicator="test"),

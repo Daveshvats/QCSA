@@ -25,8 +25,8 @@ class TestBayesianWiringRegression:
 
     def test_bayesian_enabled_when_config_set(self, tmp_path):
         """When config.brain.enable_bayesian=True, self.bayesian must be non-None."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / ".git").mkdir()
@@ -42,7 +42,7 @@ class TestBayesianWiringRegression:
 
     def test_bayesian_evaluate_works(self):
         """BayesianSecondOpinion.evaluate() must produce a valid BBNResult."""
-        from stca.brain.bayesian import BayesianSecondOpinion, BBNEvidence
+        from loomscan.brain.bayesian import BayesianSecondOpinion, BBNEvidence
         bbn = BayesianSecondOpinion()
         evidence = BBNEvidence(
             fis_score=0.8, confidence=0.9, exploitability=0.8,
@@ -56,8 +56,8 @@ class TestBayesianWiringRegression:
 
     def test_bayesian_not_enabled_by_default(self, tmp_path):
         """By default, Bayesian should be off (opt-in)."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / ".git").mkdir()
@@ -78,8 +78,8 @@ class TestProjectTunerWiringRegression:
 
     def test_project_tuner_enabled_when_config_set(self, tmp_path):
         """When config.brain.enable_project_tuner=True, self.project_tuner must be non-None."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / ".git").mkdir()
@@ -105,14 +105,14 @@ class TestCounterfactualSharedRegression:
 
     def test_counterfactual_method_exists(self):
         """_apply_counterfactual must exist as a shared method."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         assert hasattr(Orchestrator, '_apply_counterfactual'), (
             "_apply_counterfactual must exist — v4.9 had counterfactual only in run_full()"
         )
 
     def test_counterfactual_called_from_run(self):
         """run() must call _apply_counterfactual."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run)
         assert "_apply_counterfactual" in source, (
@@ -121,7 +121,7 @@ class TestCounterfactualSharedRegression:
 
     def test_counterfactual_called_from_run_full(self):
         """run_full() must call _apply_counterfactual."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run_full)
         assert "_apply_counterfactual" in source, (
@@ -140,7 +140,7 @@ class TestToolMissingScannerHealthRegression:
 
     def test_tool_missing_in_scanner_health_code(self):
         """The orchestrator must have code that moves tool_missing to scanner_health."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run_full)
         assert "tool_missing" in source, (
@@ -159,7 +159,7 @@ class TestBayesianMultPassRegression:
 
     def test_fp_history_affects_pass_probability(self):
         """High fp_history should increase P(pass) compared to low fp_history."""
-        from stca.brain.bayesian import BayesianSecondOpinion, BBNEvidence
+        from loomscan.brain.bayesian import BayesianSecondOpinion, BBNEvidence
         bbn = BayesianSecondOpinion()
         # Low FP history
         evidence_low_fp = BBNEvidence(
@@ -192,7 +192,7 @@ class TestCounterfactualLanguageGuardRegression:
 
     def test_line_removal_uses_comment_for_js(self):
         """For JS files, line_removal should use /* */ not pass."""
-        from stca.counterfactual import CounterfactualMutator
+        from loomscan.counterfactual import CounterfactualMutator
         # The _mutate method should produce JS-appropriate no-ops
         # We test by checking the source code has language-aware logic
         import inspect

@@ -1,0 +1,241 @@
+rules:
+- id: sqlsp-exec-dynamic-sql
+  pattern: \bEXEC(?:UTE)?\s+(?:@?\w+\s*=\s*)?'?@?\w+'?\s*\+@?\w+
+  severity: critical
+  message: "Dynamic SQL with concat \u2014 SQL injection"
+  metadata:
+    cwe: CWE-89
+- id: sqlsp-sp-executesql-no-params
+  pattern: \bsp_executesql\s*\(\s*N'[^']*'\s*\)(?!\s*,)
+  severity: high
+  message: sp_executesql without parameterization
+  metadata:
+    cwe: CWE-89
+- id: sqlsp-sp-executesql-string-concat
+  pattern: \bsp_executesql\s*\(\s*N'[^']*'\s*\+\s*@
+  severity: critical
+  message: "sp_executesql with string concat \u2014 injection"
+  metadata:
+    cwe: CWE-89
+- id: sqlsp-create-proc-dynamic
+  pattern: CREATE\s+(?:OR\s+ALTER\s+)?PROC(?:EDURE)?\s+\w+[\s\S]*?EXEC(?:UTE)?\s+'@?\w+'?\s*\+@?\w+
+  severity: critical
+  message: Procedure with dynamic SQL concat
+  metadata:
+    cwe: CWE-89
+- id: sqlsp-grant-exec-public
+  pattern: GRANT\s+EXEC(?:UTE)?\s+ON\s+\w+\s+TO\s+public\b
+  severity: high
+  message: "GRANT EXEC to public \u2014 privilege escalation"
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-grant-exec-guest
+  pattern: GRANT\s+EXEC(?:UTE)?\s+ON\s+\w+\s+TO\s+guest\b
+  severity: high
+  message: "GRANT EXEC to guest \u2014 privilege escalation"
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-ownership-chaining
+  pattern: \bSET\s+DB_CHAINING\s+ON\b
+  severity: high
+  message: "Cross-DB ownership chaining \u2014 verify trust boundary"
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-trustworthy-on
+  pattern: \bALTER\s+DATABASE\s+\w+\s+SET\s+TRUSTWORTHY\s+ON\b
+  severity: critical
+  message: "TRUSTWORTHY ON \u2014 privilege escalation risk"
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-execute-as-owner
+  pattern: \bEXECUTE\s+AS\s+OWNER\b
+  severity: high
+  message: "EXECUTE AS OWNER \u2014 verify least privilege"
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-execute-as-caller
+  pattern: \bEXECUTE\s+AS\s+CALLER\b
+  severity: medium
+  message: "EXECUTE AS CALLER \u2014 verify caller has minimal rights"
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-execute-as-self
+  pattern: \bEXECUTE\s+AS\s+SELF\b
+  severity: medium
+  message: "EXECUTE AS SELF \u2014 proc runs as creator"
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-with-execute-as-dbo
+  pattern: \bWITH\s+EXECUTE\s+AS\s+OWNER\s+AS\s+CALLER\b
+  severity: high
+  message: "EXECUTE AS OWNER/CALLER \u2014 verify"
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-no-set-nocount
+  pattern: CREATE\s+(?:OR\s+ALTER\s+)?PROC(?:EDURE)?\s+\w+[\s\S]*?AS\b(?!.*SET\s+NOCOUNT)
+  severity: low
+  message: "Procedure without SET NOCOUNT ON \u2014 performance/info leak"
+  metadata:
+    cwe: CWE-209
+- id: sqlsp-no-error-handling
+  pattern: CREATE\s+(?:OR\s+ALTER\s+)?PROC(?:EDURE)?\s+\w+[\s\S]*?AS\b(?!.*TRY.*CATCH)
+  severity: medium
+  message: "Procedure without TRY/CATCH \u2014 silent failures"
+  metadata:
+    cwe: CWE-755
+- id: sqlsp-transaction-no-rollback
+  pattern: BEGIN\s+TRAN(?:SACTION)?\b(?!.*ROLLBACK)
+  severity: high
+  message: "BEGIN TRAN without ROLLBACK \u2014 data corruption risk"
+  metadata:
+    cwe: CWE-754
+- id: sqlsp-commit-in-trigger
+  pattern: CREATE\s+TRIGGER\s+\w+[\s\S]*?COMMIT\s+TRAN
+  severity: critical
+  message: "COMMIT in trigger \u2014 breaks outer transaction"
+  metadata:
+    cwe: CWE-754
+- id: sqlsp-rollback-in-trigger
+  pattern: CREATE\s+TRIGGER\s+\w+[\s\S]*?ROLLBACK\s+TRAN
+  severity: high
+  message: "ROLLBACK in trigger \u2014 affects outer transaction"
+  metadata:
+    cwe: CWE-754
+- id: sqlsp-cursor-no-deallocate
+  pattern: DECLARE\s+\w+\s+CURSOR\b(?!.*DEALLOCATE\s+\w+)
+  severity: medium
+  message: "Cursor without DEALLOCATE \u2014 resource leak"
+  metadata:
+    cwe: CWE-775
+- id: sqlsp-cursor-no-close
+  pattern: DECLARE\s+\w+\s+CURSOR\b(?!.*CLOSE\s+\w+)
+  severity: medium
+  message: "Cursor without CLOSE \u2014 resource leak"
+  metadata:
+    cwe: CWE-775
+- id: sqlsp-sp-configure-recovery
+  pattern: \bsp_configure\s+'recovery interval'[^,]*,\s*\d{3,}
+  severity: high
+  message: "recovery interval > 100s \u2014 data loss risk"
+  metadata:
+    cwe: CWE-754
+- id: sqlsp-sp-configure-fill-factor
+  pattern: \bsp_configure\s+'fill factor'[^,]*,\s*0\b
+  severity: low
+  message: "fill factor 0 \u2014 page split risk"
+  metadata:
+    cwe: CWE-400
+- id: sqlsp-sp-configure-affinity
+  pattern: \bsp_configure\s+'affinity
+  severity: medium
+  message: "sp_configure affinity \u2014 verify with DBA"
+  metadata:
+    cwe: CWE-400
+- id: sqlsp-sp-configure-allow-updates
+  pattern: \bsp_configure\s+'allow updates'[^,]*,\s*1\b
+  severity: critical
+  message: "allow updates = 1 \u2014 system table modification"
+  metadata:
+    cwe: CWE-732
+- id: sqlsp-sp-configure-cross-db
+  pattern: \bsp_configure\s+'cross db ownership chaining'[^,]*,\s*1\b
+  severity: critical
+  message: Cross-DB ownership chaining enabled
+  metadata:
+    cwe: CWE-269
+- id: sqlsp-sp-allow-remote
+  pattern: \bsp_configure\s+'remote admin connections'[^,]*,\s*1\b
+  severity: high
+  message: Remote admin connections enabled
+  metadata:
+    cwe: CWE-732
+- id: sqlsp-sp-allow-xp-cmdshell
+  pattern: \bsp_configure\s+'xp_cmdshell'[^,]*,\s*1\b
+  severity: critical
+  message: "xp_cmdshell enabled \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sqlsp-sp-allow-ole-automation
+  pattern: \bsp_configure\s+'Ole Automation Procedures'[^,]*,\s*1\b
+  severity: critical
+  message: "OLE Automation enabled \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sqlsp-sp-allow-clr
+  pattern: \bsp_configure\s+'clr enabled'[^,]*,\s*1\b
+  severity: high
+  message: "CLR enabled \u2014 verify assemblies are safe"
+  metadata:
+    cwe: CWE-78
+- id: sqlsp-sp-allow-external-scripts
+  pattern: \bsp_configure\s+'external scripts enabled'[^,]*,\s*1\b
+  severity: critical
+  message: "External scripts enabled \u2014 RCE via R/Python"
+  metadata:
+    cwe: CWE-78
+- id: sqlsp-sp-allow-ad-hoc
+  pattern: \bsp_configure\s+'Ad Hoc Distributed Queries'[^,]*,\s*1\b
+  severity: critical
+  message: "Ad hoc distributed queries \u2014 SSRF/LFI"
+  metadata:
+    cwe: CWE-918
+- id: sqlsp-sp-oacreate
+  pattern: \bsp_OACreate\s*\(
+  severity: critical
+  message: "sp_OACreate \u2014 OLE Automation, RCE risk"
+  metadata:
+    cwe: CWE-78
+- id: sqlsp-sp-oadestroy
+  pattern: \bsp_OADestroy\s*\(
+  severity: medium
+  message: "sp_OADestroy \u2014 verify lifecycle"
+  metadata:
+    cwe: CWE-404
+- id: sqlsp-sp-oamethod
+  pattern: \bsp_OAMethod\s*\(
+  severity: critical
+  message: "sp_OAMethod \u2014 OLE method invocation, RCE"
+  metadata:
+    cwe: CWE-78
+- id: sqlsp-sp-oagetproperty
+  pattern: \bsp_OAGetProperty\s*\(
+  severity: medium
+  message: "sp_OAGetProperty \u2014 info leak risk"
+  metadata:
+    cwe: CWE-200
+- id: sqlsp-sp-oasetproperty
+  pattern: \bsp_OASetProperty\s*\(
+  severity: medium
+  message: "sp_OASetProperty \u2014 verify intent"
+  metadata:
+    cwe: CWE-78
+- id: sqlsp-sp-send-dbmail
+  pattern: \bsp_send_dbmail\s*\(\s*@recipients\s*=\s*'[^']*'\s*\+
+  severity: high
+  message: "sp_send_dbmail with concat \u2014 email injection"
+  metadata:
+    cwe: CWE-88
+- id: sqlsp-sp-send-dbmail-user-attachment
+  pattern: \bsp_send_dbmail\s*\([^)]*@file_attachments\s*=\s*'[^']*'\s*\+
+  severity: high
+  message: "sp_send_dbmail with concat attachment \u2014 LFI"
+  metadata:
+    cwe: CWE-22
+- id: sqlsp-sp-addmessage-user
+  pattern: \bsp_addmessage\s*\([^)]*@msgtext\s*=\s*'[^']*'\s*\+
+  severity: medium
+  message: "sp_addmessage with concat \u2014 verify"
+  metadata:
+    cwe: CWE-78
+- id: sqlsp-sp-updatestats
+  pattern: \bsp_updatestats\s*\(
+  severity: low
+  message: "sp_updatestats \u2014 verify maintenance window"
+  metadata:
+    cwe: CWE-400
+- id: sqlsp-sp-who2
+  pattern: \bsp_who2\b
+  severity: low
+  message: "sp_who2 \u2014 use sp_who for performance"
+  metadata:
+    cwe: CWE-400

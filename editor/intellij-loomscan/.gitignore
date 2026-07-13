@@ -1,0 +1,7 @@
+# IntelliJ build ignores
+.gradle/
+build/
+out/
+*.iml
+.idea/
+*.zip

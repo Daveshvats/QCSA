@@ -1,6 +1,6 @@
-"""Sample app with intentional bugs for STCA pipeline testing.
+"""Sample app with intentional bugs for LoomScan pipeline testing.
 
-Each function has a documented bug that one of the STCA layers should catch.
+Each function has a documented bug that one of the LoomScan layers should catch.
 """
 
 
@@ -85,7 +85,7 @@ def new_buggy_auth(username, password):
 
 
 def suppressed_eval(user_input):
-    result = eval(user_input)  # stca: ignore
+    result = eval(user_input)  # loomscan: ignore
     return result
 
 

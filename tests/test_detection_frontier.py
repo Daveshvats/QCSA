@@ -6,12 +6,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stca.cpg import build_cpg_for_file, build_cpg_for_repo, CPG, CPGNode
-from stca.taint_cross_file import track_taint_cross_file, SOURCE_PARAM_PATTERNS, SINK_PATTERNS
-from stca.typestate import analyze_typestate, PROTOCOLS
-from stca.metamorphic import discover_testable_functions, _classify_function
-from stca.differential import find_function_pairs
-from stca.cpg_queries import (query_unsanitized_taint_flows, query_unused_variables,
+from loomscan.cpg import build_cpg_for_file, build_cpg_for_repo, CPG, CPGNode
+from loomscan.taint_cross_file import track_taint_cross_file, SOURCE_PARAM_PATTERNS, SINK_PATTERNS
+from loomscan.typestate import analyze_typestate, PROTOCOLS
+from loomscan.metamorphic import discover_testable_functions, _classify_function
+from loomscan.differential import find_function_pairs
+from loomscan.cpg_queries import (query_unsanitized_taint_flows, query_unused_variables,
                                query_dangerous_patterns_in_auth, query_function_complexity)
 
 
@@ -299,7 +299,7 @@ def authenticate(user_input):
 
 def test_llm_verify_module_imports():
     """The LLM-verify module should import cleanly."""
-    from stca import llm_verify
+    from loomscan import llm_verify
     assert hasattr(llm_verify, "llm_verify_function")
     assert hasattr(llm_verify, "LLMHypothesis")
     assert hasattr(llm_verify, "VerifiedBug")
@@ -307,7 +307,7 @@ def test_llm_verify_module_imports():
 
 def test_llm_verify_returns_empty_without_llm(tmp_path):
     """Without an LLM client, generate_hypotheses should return []."""
-    from stca.llm_verify import generate_hypotheses
+    from loomscan.llm_verify import generate_hypotheses
     src = tmp_path / "app.py"
     src.write_text("def foo(x): return x + 1")
     hyps = generate_hypotheses("foo", "def foo(x): return x + 1", llm_client=None)

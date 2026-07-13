@@ -1,6 +1,6 @@
 """Tests for the installer module."""
 import pytest
-from stca.installer import (
+from loomscan.installer import (
     TOOLS, ToolSpec, get_platform_id, is_tool_installed,
 )
 

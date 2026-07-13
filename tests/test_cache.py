@@ -1,7 +1,7 @@
 """Tests for the function-level result cache."""
 import pytest
 from pathlib import Path
-from stca.cache import ResultCache
+from loomscan.cache import ResultCache
 
 
 @pytest.fixture

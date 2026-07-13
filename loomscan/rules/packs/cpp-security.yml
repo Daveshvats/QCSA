@@ -1,0 +1,90 @@
+# Bundled Semgrep rule pack — C/C++ security
+rules:
+  - id: cpp-gets
+    pattern: gets(...)
+    message: gets() — buffer overflow, removed from C11
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { cwe: "CWE-242", owasp: "A03" }
+
+  - id: cpp-scanf-no-limit
+    pattern: scanf("%s", ...)
+    message: scanf %s — unbounded read, buffer overflow risk
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { cwe: "CWE-120", owasp: "A03" }
+
+  - id: cpp-sprintf
+    pattern: sprintf(...)
+    message: sprintf — buffer overflow risk, use snprintf
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { cwe: "CWE-120" }
+
+  - id: cpp-strcpy
+    pattern: strcpy(...)
+    message: strcpy — buffer overflow risk, use strncpy or strlcpy
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { cwe: "CWE-120", owasp: "A03" }
+
+  - id: cpp-strcat
+    pattern: strcat(...)
+    message: strcat — buffer overflow risk, use strncat
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { cwe: "CWE-120" }
+
+  - id: cpp-system
+    pattern: system(...)
+    message: system() — command injection risk
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { cwe: "CWE-78", owasp: "A03" }
+
+  - id: cpp-malloc-no-check
+    pattern: |
+      $PTR = malloc(...);
+      $PTR[...]
+    message: malloc result not checked — NULL deref on OOM
+    languages: [c, cpp]
+    severity: WARNING
+    metadata: { cwe: "CWE-690" }
+
+  - id: cpp-free-after-use
+    pattern: |
+      free($PTR);
+      ...
+      $PTR
+    message: Use after free — undefined behavior
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { cwe: "CWE-416", owasp: "A03" }
+
+  - id: cpp-printf-user-input
+    pattern: printf($INPUT)
+    message: printf with user input as format string — format string attack
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { cwe: "CWE-134", owasp: "A03" }
+
+  - id: cpp-atoi
+    pattern: atoi(...)
+    message: atoi — no error handling, use strtol
+    languages: [c, cpp]
+    severity: INFO
+    metadata: { cwe: "CWE-20" }
+
+  - id: cpp-raw-pointer-array
+    pattern: $TYPE * $NAME = new $TYPE[...]
+    message: Raw pointer with new[] — use std::vector or unique_ptr
+    languages: [cpp]
+    severity: WARNING
+    metadata: { cwe: "CWE-401" }
+
+  - id: cpp-delete-array
+    pattern: delete $PTR
+    message: Use delete[] for arrays, delete for single objects
+    languages: [cpp]
+    severity: WARNING
+    metadata: { cwe: "CWE-401" }

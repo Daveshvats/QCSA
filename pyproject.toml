@@ -3,13 +3,13 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "stca-pipeline"
-version = "4.44.0"
+name = "loomscan"
+version = "5.7.0"
 description = "Static + Test + Constraint Analysis — an offline, deterministic-first bug detection pipeline with a type-2 fuzzy aggregation brain"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "STCA Project" }]
+authors = [{ name = "LoomScan Project" }]
 keywords = ["static-analysis", "security", "sast", "fuzzing", "mutation-testing", "fuzzy-logic", "developer-tools", "code-quality"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -50,6 +50,7 @@ property = ["hypothesis>=6.100"]   # Property-based testing (L1)
 mutation = ["mutmut>=3.0"]         # L2 mutation testing
 supply-chain = ["pip-audit>=2.7"]  # L0b Python CVEs
 re2 = ["google-re2>=0.3"]          # ReDoS protection (linear-time regex)
+semgrep = ["semgrep>=1.50"]        # Full YAML rule support (pattern-inside, metavariables)
 all-tools = [
     "hypothesis>=6.100",
     "mutmut>=3.0",
@@ -59,18 +60,18 @@ all-tools = [
 dev = ["pytest>=7.0", "pytest-cov>=4.0", "hypothesis>=6.100", "mypy>=1.8", "build>=1.0", "twine>=4.0"]
 
 [project.scripts]
-stca = "stca.cli:main"
+loomscan = "loomscan.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/local/stca-pipeline"
-Documentation = "https://github.com/local/stca-pipeline/blob/main/GUIDE.md"
-Issues = "https://github.com/local/stca-pipeline/issues"
+Homepage = "https://github.com/Daveshvats/loomscan"
+Documentation = "https://github.com/Daveshvats/loomscan/blob/main/GUIDE.md"
+Issues = "https://github.com/Daveshvats/loomscan/issues"
 
 [tool.setuptools.packages.find]
-include = ["stca*"]
+include = ["loomscan*"]
 
 [tool.setuptools.package-data]
-"stca.rules" = ["packs/*.yml", "policies/*.rego"]
+"loomscan.rules" = ["packs/*.yml", "policies/*.rego"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -86,9 +87,9 @@ disallow_untyped_defs = false
 warn_redundant_casts = true
 warn_unused_ignores = true
 no_implicit_optional = true
-files = ["stca/"]
+files = ["loomscan/"]
 exclude = [
-    "stca/cli.py",
-    "stca/orchestrator.py",
-    "stca/v4_restored.py",
+    "loomscan/cli.py",
+    "loomscan/orchestrator.py",
+    "loomscan/v4_restored.py",
 ]

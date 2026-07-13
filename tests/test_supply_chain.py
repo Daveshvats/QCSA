@@ -1,8 +1,8 @@
 """Tests for the L0b supply chain layer."""
 import pytest
 from pathlib import Path
-from stca.layers.l0b_supply_chain import L0bSupplyChain, TYPOSQUATS, EOL_PYTHON
-from stca.models import Severity
+from loomscan.layers.l0b_supply_chain import L0bSupplyChain, TYPOSQUATS, EOL_PYTHON
+from loomscan.models import Severity
 
 
 @pytest.fixture

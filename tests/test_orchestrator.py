@@ -1,8 +1,8 @@
 """Tests for the aggregator."""
 import pytest
 from pathlib import Path
-from stca.brain.aggregator import Aggregator
-from stca.models import Finding, Severity, BlastRadius, LayerID, Decision
+from loomscan.brain.aggregator import Aggregator
+from loomscan.models import Finding, Severity, BlastRadius, LayerID, Decision
 
 
 @pytest.fixture

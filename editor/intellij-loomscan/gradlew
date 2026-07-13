@@ -1,0 +1,16 @@
+#!/bin/sh
+# Gradle wrapper script — downloads Gradle on first run.
+DIR="$(cd "$(dirname "$0")" && pwd)"
+PROPS="$DIR/gradle/wrapper/gradle-wrapper.properties"
+DIST_DIR="${GRADLE_USER_HOME:-$HOME/.gradle}/wrapper/dists"
+DISTRIBUTION_URL=$(grep distributionUrl "$PROPS" | cut -d= -f2- | sed 's/\\//g')
+DIST_NAME=$(basename "$DISTRIBUTION_URL" .zip)
+DIST_PATH="$DIST_DIR/$DIST_NAME"
+if [ ! -d "$DIST_PATH" ]; then
+    echo "Downloading Gradle..."
+    mkdir -p "$DIST_PATH"
+    curl -fsSL "$DISTRIBUTION_URL" -o /tmp/gradle.zip
+    unzip -q -o /tmp/gradle.zip -d "$DIST_PATH"
+fi
+GRADLE_BIN=$(find "$DIST_PATH" -name gradle -type f -path "*/bin/*" | head -1)
+exec "$GRADLE_BIN" "$@"

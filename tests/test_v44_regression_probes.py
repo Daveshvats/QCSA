@@ -29,8 +29,8 @@ class TestEngineFieldWiredRegression:
 
     def test_engine_set_on_orchestrator_findings(self, tmp_path):
         """Orchestrator-produced findings must have engine= set."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / ".git").mkdir()
@@ -72,8 +72,8 @@ class TestJavaTypestateRegression:
 
     def test_java_real_violation_caught(self, tmp_path):
         """Java session.get() without login() MUST be caught (was 0 before fix)."""
-        from stca.v4_restored import detect_typestate_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_typestate_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "App.java"
         src.write_text("""public class App {
     void handleSession(Session session) {
@@ -92,8 +92,8 @@ class TestJavaTypestateRegression:
 
     def test_java_cache_get_no_fp(self, tmp_path):
         """Java cache.get() must NOT be flagged (type-evidence gating works)."""
-        from stca.v4_restored import detect_typestate_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_typestate_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "App.java"
         src.write_text("""public class App {
     void syncData(ApiClient apiClient, Cache cache) {
@@ -112,8 +112,8 @@ class TestJavaTypestateRegression:
 
     def test_java_use_after_close_caught(self, tmp_path):
         """Java conn.execute() after conn.close() MUST be caught."""
-        from stca.v4_restored import detect_typestate_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_typestate_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "App.java"
         src.write_text("""public class App {
     void handleConn(Connection conn) {
@@ -141,8 +141,8 @@ class TestStateMachineCamelCaseRegression:
 
     def test_camel_case_java_detected(self, tmp_path):
         """Java processOrder with double-pay MUST be caught."""
-        from stca.v4_restored import detect_state_machine_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_state_machine_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "App.java"
         src.write_text("""public class App {
     void processOrder(Order order) {
@@ -160,8 +160,8 @@ class TestStateMachineCamelCaseRegression:
 
     def test_camel_case_js_detected(self, tmp_path):
         """JS processOrder with double-pay MUST be caught."""
-        from stca.v4_restored import detect_state_machine_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_state_machine_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "app.js"
         src.write_text("""function processOrder(order) {
     order.pay();
@@ -174,8 +174,8 @@ class TestStateMachineCamelCaseRegression:
 
     def test_snake_case_still_works(self, tmp_path):
         """snake_case process_order must still be detected (no regression)."""
-        from stca.v4_restored import detect_state_machine_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_state_machine_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "app.js"
         src.write_text("""function process_order(order) {
     order.create();
@@ -201,8 +201,8 @@ class TestCrossFileTaintFStringRegression:
 
     def test_f_string_cross_file_taint(self, tmp_path):
         """Taint must flow: request → user_id → f-string sql → execute_query → execute."""
-        from stca.cpg import build_cpg_for_repo
-        from stca.taint_cross_file import track_taint_cross_file
+        from loomscan.cpg import build_cpg_for_repo
+        from loomscan.taint_cross_file import track_taint_cross_file
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / "app.py").write_text("""
@@ -230,8 +230,8 @@ def execute_query(query):
 
     def test_bare_copy_cross_file_still_works(self, tmp_path):
         """Bare-copy cross-file taint (sql = user_id) must still work."""
-        from stca.cpg import build_cpg_for_repo
-        from stca.taint_cross_file import track_taint_cross_file
+        from loomscan.cpg import build_cpg_for_repo
+        from loomscan.taint_cross_file import track_taint_cross_file
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / "app.py").write_text("""
@@ -254,8 +254,8 @@ def execute_query(query):
 
     def test_string_concat_cross_file_taint(self, tmp_path):
         """Taint must flow through string concatenation: sql = "..." + user_id."""
-        from stca.cpg import build_cpg_for_repo
-        from stca.taint_cross_file import track_taint_cross_file
+        from loomscan.cpg import build_cpg_for_repo
+        from loomscan.taint_cross_file import track_taint_cross_file
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / "app.py").write_text("""

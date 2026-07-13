@@ -1,4 +1,4 @@
-# STCA Pipeline — Complete User Guide
+# LoomScan — Complete User Guide
 
 > **v4.43** — Static + Test + Constraint Analysis. A deterministic-first, type-2 fuzzy aggregated bug detection pipeline that runs on any laptop, offline, across **24 programming languages** with **1,995 rules**, **107 auto-fix patterns**, **275 secret detection patterns**, and **9 unique differentiators**.
 
@@ -8,7 +8,7 @@ This guide covers everything: installation, configuration, daily usage, CI/CD in
 
 ## Table of Contents
 
-1. [What STCA Does](#1-what-stca-does)
+1. [What LoomScan Does](#1-what-loomscan-does)
 2. [Installation](#2-installation)
 3. [Quick Start (5 Minutes)](#3-quick-start-5-minutes)
 4. [Core Concepts](#4-core-concepts)
@@ -16,7 +16,7 @@ This guide covers everything: installation, configuration, daily usage, CI/CD in
 6. [Quality Gates (SonarQube-style)](#6-quality-gates)
 7. [Strictness Levels (1-9)](#7-strictness-levels)
 8. [Reports and Dashboards](#8-reports-and-dashboards)
-9. [Configuration (.stca.yaml)](#9-configuration)
+9. [Configuration (.loomscan.yaml)](#9-configuration)
 10. [Auto-Fix (107 patterns)](#10-auto-fix)
 11. [IDE Integration (VS Code + JetBrains)](#11-ide-integration)
 12. [CI/CD Integration (GitHub Actions + PR Bot)](#12-cicd-integration)
@@ -31,9 +31,9 @@ This guide covers everything: installation, configuration, daily usage, CI/CD in
 
 ---
 
-## 1. What STCA Does
+## 1. What LoomScan Does
 
-STCA is a **multi-layer static analysis pipeline** for finding bugs, security vulnerabilities, and code quality issues. It runs on a git diff (for pre-commit/PR review) or the full repo (for periodic audits), aggregates findings from 8+ analysis layers, and uses a type-2 fuzzy inference system to decide whether each finding should block, warn, or pass.
+LoomScan is a **multi-layer static analysis pipeline** for finding bugs, security vulnerabilities, and code quality issues. It runs on a git diff (for pre-commit/PR review) or the full repo (for periodic audits), aggregates findings from 8+ analysis layers, and uses a type-2 fuzzy inference system to decide whether each finding should block, warn, or pass.
 
 ### Key characteristics
 
@@ -64,15 +64,15 @@ STCA is a **multi-layer static analysis pipeline** for finding bugs, security vu
 ### Prerequisites
 
 - **Python 3.9+** (3.12+ recommended for faster fuzzing via `sys.monitoring`)
-- **Git** (STCA analyzes git diffs)
+- **Git** (LoomScan analyzes git diffs)
 - **pip** and **venv**
 
 ### Step 1: Extract and install
 
 ```bash
 # Extract the tarball
-tar -xzf stca-pipeline-v3.2.tar.gz
-cd stca-pipeline
+tar -xzf loomscan-v3.2.tar.gz
+cd loomscan
 
 # Create a virtual environment
 python -m venv .venv
@@ -81,7 +81,7 @@ python -m venv .venv
 source .venv/bin/activate        # Linux/macOS
 # .venv\Scripts\activate         # Windows PowerShell
 
-# Install STCA in editable mode
+# Install LoomScan in editable mode
 pip install -e .
 ```
 
@@ -97,29 +97,29 @@ pip install -e ".[all-tools]"      # everything except atheris
 pip install -e ".[dev]"            # pytest + pytest-cov (for running tests)
 ```
 
-**Note on atheris (L4 fuzzing)**: atheris only works on Linux (requires libFuzzer C++ library). On Windows/macOS, STCA automatically uses its built-in pure-Python coverage-guided fuzzer instead — same algorithm, slightly slower. See [§15. Fuzzing](#15-fuzzing-l4-layer).
+**Note on atheris (L4 fuzzing)**: atheris only works on Linux (requires libFuzzer C++ library). On Windows/macOS, LoomScan automatically uses its built-in pure-Python coverage-guided fuzzer instead — same algorithm, slightly slower. See [§15. Fuzzing](#15-fuzzing-l4-layer).
 
 ### Step 3: Verify the install
 
 ```bash
-stca --version                     # should print: stca, version 0.1.0
-stca --help                        # list all commands
-stca doctor                        # check what tools are available
+loomscan --version                     # should print: loomscan, version 0.1.0
+loomscan --help                        # list all commands
+loomscan doctor                        # check what tools are available
 python -m pytest tests/            # run the test suite (should all pass)
 ```
 
 ### Step 4: Install external tools (optional, recommended)
 
-STCA can auto-install external analysis tools (gitleaks, semgrep, osv-scanner, etc.):
+LoomScan can auto-install external analysis tools (gitleaks, semgrep, osv-scanner, etc.):
 
 ```bash
-stca install-tools                 # install all tools
-stca install-tools --layer L0      # only L0 tools (semgrep, gitleaks, ruff)
-stca install-tools --layer L0b     # only supply chain tools
-stca doctor                        # verify what's installed
+loomscan install-tools                 # install all tools
+loomscan install-tools --layer L0      # only L0 tools (semgrep, gitleaks, ruff)
+loomscan install-tools --layer L0b     # only supply chain tools
+loomscan doctor                        # verify what's installed
 ```
 
-Tools are installed to `~/.stca/bin/` (added to PATH automatically). Binary downloads are SHA256-verified.
+Tools are installed to `~/.loomscan/bin/` (added to PATH automatically). Binary downloads are SHA256-verified.
 
 ---
 
@@ -129,51 +129,51 @@ Tools are installed to `~/.stca/bin/` (added to PATH automatically). Binary down
 
 ```bash
 cd /path/to/your/repo
-stca init                          # creates .stca.yaml config
+loomscan init                          # creates .loomscan.yaml config
 ```
 
 ### B. Run your first scan
 
 ```bash
 # Full-repo scan (scans ALL source files)
-stca check --repo . --full
+loomscan check --repo . --full
 
 # Or scan just the git diff (faster, for pre-commit)
-stca check --repo . --base main
+loomscan check --repo . --base main
 ```
 
 You'll see output like:
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                    ✗  STCA — Final Decision: BLOCK                       ║
+║                    ✗  LoomScan — Final Decision: BLOCK                       ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 
 Findings:                          47  Duration:    12.3s
 By severity:  critical=8  high=12  medium=15  low=10  info=2  LLM invoked:  no
 
-Full report:  stca report  (opens HTML dashboard in browser)
-Reports dir:  .stca-reports/  (report.html, result.json, result.sarif)
+Full report:  loomscan report  (opens HTML dashboard in browser)
+Reports dir:  .loomscan-reports/  (report.html, result.json, result.sarif)
 ```
 
 ### C. View the dashboard
 
 ```bash
-stca dashboard --repo .            # generates .stca-reports/dashboard.html
+loomscan dashboard --repo .            # generates loomscan-dashboard.html in repo dir
 # Open it in your browser:
-# Linux:   xdg-open .stca-reports/dashboard.html
-# macOS:   open .stca-reports/dashboard.html
-# Windows: start .stca-reports\dashboard.html
+# Linux:   xdg-open .loomscan-reports/dashboard.html
+# macOS:   open .loomscan-reports/dashboard.html
+# Windows: start .loomscan-reports\dashboard.html
 ```
 
 ### D. Get details on a specific finding
 
 ```bash
 # JSON output with full finding details
-stca check --repo . --full --json | python -m json.tool | head -50
+loomscan check --repo . --full --json | python -m json.tool | head -50
 
 # Or look at the SARIF report (VS Code SARIF Viewer compatible)
-cat .stca-reports/result.sarif | python -m json.tool | head -30
+cat .loomscan-reports/result.sarif | python -m json.tool | head -30
 ```
 
 ---
@@ -182,7 +182,7 @@ cat .stca-reports/result.sarif | python -m json.tool | head -30
 
 ### Layers
 
-STCA runs findings through 8 analysis layers, each inspired by a different OSS tool:
+LoomScan runs findings through 8 analysis layers, each inspired by a different OSS tool:
 
 | Layer | Name | Inspired by | What it does |
 |-------|------|-------------|--------------|
@@ -237,19 +237,19 @@ PHPStan-inspired 9-level system. Higher levels = more layers + more severities:
 
 ## 5. The `check` Command — Your Daily Driver
 
-`stca check` is the main command. Here's every flag explained:
+`loomscan check` is the main command. Here's every flag explained:
 
 ### Basic usage
 
 ```bash
 # Full-repo scan (scans ALL source files, not just diff)
-stca check --repo /path/to/repo --full
+loomscan check --repo /path/to/repo --full
 
 # Diff scan (compare against a base branch — for PR review)
-stca check --repo /path/to/repo --base main
+loomscan check --repo /path/to/repo --base main
 
 # Staged changes only (for pre-commit hook)
-stca check --repo /path/to/repo --staged
+loomscan check --repo /path/to/repo --staged
 ```
 
 ### Output format flags
@@ -305,16 +305,16 @@ stca check --repo /path/to/repo --staged
 
 ```bash
 # Quick pre-commit check (staged files, level 5, minimal output)
-stca check --repo . --staged --strictness 5 --quiet
+loomscan check --repo . --staged --strictness 5 --quiet
 
 # Full audit for a release (everything, strict, JSON for CI)
-stca check --repo . --full --strictness 9 --json > release-audit.json
+loomscan check --repo . --full --strictness 9 --json > release-audit.json
 
 # PR review (diff against main, show all findings)
-stca check --repo . --base main --detailed
+loomscan check --repo . --base main --detailed
 
 # CI gate (block on scanner failures too)
-stca check --repo . --base origin/main --strict-scanners
+loomscan check --repo . --base origin/main --strict-scanners
 ```
 
 ---
@@ -324,17 +324,17 @@ stca check --repo . --base origin/main --strict-scanners
 ### Show current level
 
 ```bash
-stca strictness --repo .
+loomscan strictness --repo .
 ```
 
 ### Set the level
 
 ```bash
-# Sets it in .stca.yaml (persists across runs)
-stca strictness --repo . --level 7
+# Sets it in .loomscan.yaml (persists across runs)
+loomscan strictness --repo . --level 7
 
 # Or override per-run
-stca check --repo . --full --strictness 7
+loomscan check --repo . --full --strictness 7
 ```
 
 ### All 9 levels
@@ -367,7 +367,7 @@ Level  Name                         Layers   Description
 
 ## 7. Reports and Dashboards
 
-Every `stca check` run generates 3 reports in `<repo>/.stca-reports/`:
+Every `loomscan check` run generates 3 reports in `<repo>/.loomscan-reports/`:
 
 ### A. HTML Dashboard (`report.html`)
 
@@ -380,17 +380,18 @@ Self-contained HTML page with:
 
 ```bash
 # Generate after a check
-stca check --repo . --full
-# The HTML report is at .stca-reports/report.html
+loomscan check --repo . --full
+# The HTML report is at .loomscan-reports/report.html
 
 # Or generate a richer dashboard with charts and filterable table
-stca dashboard --repo .
-# Generates .stca-reports/dashboard.html
+# Generates loomscan-dashboard.html in repo dir
+loomscan dashboard --repo . --open    # Generate and open in browser
+# Generates loomscan-dashboard.html in repo dir (use --open to open in browser)
 
 # Open in browser:
-# Linux:   xdg-open .stca-reports/dashboard.html
-# macOS:   open .stca-reports/dashboard.html
-# Windows: start .stca-reports\dashboard.html
+# Linux:   xdg-open .loomscan-reports/dashboard.html
+# macOS:   open .loomscan-reports/dashboard.html
+# Windows: start .loomscan-reports\dashboard.html
 ```
 
 ### B. JSON Report (`result.json`)
@@ -398,7 +399,7 @@ stca dashboard --repo .
 Structured JSON for CI integration and custom tooling:
 
 ```bash
-stca check --repo . --full --json > report.json
+loomscan check --repo . --full --json > report.json
 
 # Key fields:
 # - findings[]           : every issue found
@@ -417,13 +418,13 @@ SARIF 2.1.0 — the industry standard for static analysis. Compatible with:
 - **Azure DevOps**
 
 ```bash
-stca check --repo . --full
-# SARIF is at .stca-reports/result.sarif
+loomscan check --repo . --full
+# SARIF is at .loomscan-reports/result.sarif
 
 # Upload to GitHub:
 # - uses: github/codeql-action/upload-sarif@v3
 #   with:
-#     sarif_file: .stca-reports/result.sarif
+#     sarif_file: .loomscan-reports/result.sarif
 ```
 
 When scanners fail, SARIF includes:
@@ -442,19 +443,19 @@ When scanners fail, SARIF includes:
 
 ---
 
-## 8. Configuration (.stca.yaml)
+## 8. Configuration (.loomscan.yaml)
 
 ### Initialize
 
 ```bash
-stca init --repo .                  # creates .stca.yaml with defaults
-stca init --repo . --force          # overwrite existing config
+loomscan init --repo .                  # creates .loomscan.yaml with defaults
+loomscan init --repo . --force          # overwrite existing config
 ```
 
 ### Full config reference
 
 ```yaml
-# .stca.yaml — STCA Pipeline configuration
+# .loomscan.yaml — LoomScan configuration
 
 layers:
   L0_fast:       { enabled: true,  timeout_seconds: 10 }
@@ -498,15 +499,15 @@ llm:
 tools: {}
 
 # Stats file (tracks layer precision/recall over time)
-stats_file: ".stca-stats.json"
+stats_file: ".loomscan-stats.json"
 
 # Report output directory
-report_dir: ".stca-reports"
+report_dir: ".loomscan-reports"
 ```
 
 ### Enabling/disabling layers
 
-Edit `.stca.yaml` or use the strictness level system. For example, to enable L4 fuzzing:
+Edit `.loomscan.yaml` or use the strictness level system. For example, to enable L4 fuzzing:
 
 ```yaml
 layers:
@@ -516,7 +517,7 @@ layers:
 Or use strictness level 8+ (which enables L4 automatically):
 
 ```bash
-stca strictness --repo . --level 8
+loomscan strictness --repo . --level 8
 ```
 
 ### Custom critical paths
@@ -540,15 +541,15 @@ For legacy codebases with many existing issues, baseline mode lets you only flag
 ### First run (establishes baseline)
 
 ```bash
-stca check --repo . --full
-# This run establishes the baseline in .stca-baseline.json
+loomscan check --repo . --full
+# This run establishes the baseline in .loomscan-baseline.json
 # All current findings are recorded as "known"
 ```
 
 ### Subsequent runs (only new issues)
 
 ```bash
-stca check --repo . --full --baseline
+loomscan check --repo . --full --baseline
 # Only findings NOT in the baseline are reported
 # Known issues are suppressed
 ```
@@ -556,10 +557,10 @@ stca check --repo . --full --baseline
 ### Managing the baseline
 
 ```bash
-stca baseline --repo . show           # show current baseline
-stca baseline --repo . add <fingerprint>   # add a finding to baseline
-stca baseline --repo . remove <fingerprint>  # remove a finding from baseline
-stca baseline --repo . clear          # clear the baseline
+loomscan baseline --repo . show           # show current baseline
+loomscan baseline --repo . add <fingerprint>   # add a finding to baseline
+loomscan baseline --repo . remove <fingerprint>  # remove a finding from baseline
+loomscan baseline --repo . clear          # clear the baseline
 ```
 
 ### Use cases
@@ -572,24 +573,24 @@ stca baseline --repo . clear          # clear the baseline
 
 ## 10. Auto-Fix
 
-STCA can auto-fix some findings (bare except, mutable defaults, etc.):
+LoomScan can auto-fix some findings (bare except, mutable defaults, etc.):
 
 ### Stage fixes for review (default)
 
 ```bash
-stca check --repo . --full           # generate findings
-stca fix --repo .                    # stage fixes in .stca-fixes/
+loomscan check --repo . --full           # generate findings
+loomscan fix --repo .                    # stage fixes in .loomscan-fixes/
 # Review the patches:
-ls .stca-fixes/
+ls .loomscan-fixes/
 # Apply the ones you want:
-git apply .stca-fixes/001_*.patch
+git apply .loomscan-fixes/001_*.patch
 ```
 
 ### Apply directly to source files
 
 ```bash
-stca fix --repo . --apply            # apply all fixes directly
-stca fix --repo . --finding-id <fingerprint>  # fix one specific finding
+loomscan fix --repo . --apply            # apply all fixes directly
+loomscan fix --repo . --finding-id <fingerprint>  # fix one specific finding
 ```
 
 ### What gets auto-fixed
@@ -601,7 +602,7 @@ stca fix --repo . --finding-id <fingerprint>  # fix one specific finding
 | `eval()`/`exec()` | `ast.literal_eval()` (where safe) |
 | Some formatting issues | ruff auto-fixes |
 
-**Always review auto-fixes before committing.** STCA stages them in `.stca-fixes/` by default for this reason.
+**Always review auto-fixes before committing.** LoomScan stages them in `.loomscan-fixes/` by default for this reason.
 
 ---
 
@@ -615,9 +616,9 @@ Create `.pre-commit-config.yaml` in your repo:
 repos:
   - repo: local
     hooks:
-      - id: stca
-        name: STCA Pipeline
-        entry: stca pre-commit
+      - id: loomscan
+        name: LoomScan
+        entry: loomscan pre-commit
         language: system
         pass_filenames: false
         stages: [commit]
@@ -629,7 +630,7 @@ pip install pre-commit
 pre-commit install
 ```
 
-Now every `git commit` runs STCA on staged files. If STCA returns exit code 1 (BLOCK), the commit is blocked.
+Now every `git commit` runs LoomScan on staged files. If LoomScan returns exit code 1 (BLOCK), the commit is blocked.
 
 ### Option B: plain git hook
 
@@ -637,7 +638,7 @@ Create `.git/hooks/pre-commit`:
 
 ```bash
 #!/bin/sh
-stca check --repo . --staged --strictness 5 --quiet
+loomscan check --repo . --staged --strictness 5 --quiet
 exit $?
 ```
 
@@ -646,10 +647,10 @@ Make it executable:
 chmod +x .git/hooks/pre-commit
 ```
 
-### Option C: STCA's built-in pre-commit command
+### Option C: LoomScan's built-in pre-commit command
 
 ```bash
-stca pre-commit --repo . --files "file1.py,file2.py"
+loomscan pre-commit --repo . --files "file1.py,file2.py"
 ```
 
 This is what the pre-commit framework calls internally.
@@ -661,12 +662,12 @@ This is what the pre-commit framework calls internally.
 ### Basic workflow
 
 ```yaml
-# .github/workflows/stca.yml
-name: STCA Scan
+# .github/workflows/loomscan.yml
+name: LoomScan Scan
 on: [pull_request]
 
 jobs:
-  stca:
+  loomscan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -678,14 +679,14 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install STCA
+      - name: Install LoomScan
         run: |
           pip install -e .
           pip install -e ".[supply-chain]"
 
-      - name: Run STCA
+      - name: Run LoomScan
         run: |
-          stca check --repo . --base origin/main --json > stca-report.json
+          loomscan check --repo . --base origin/main --json > loomscan-report.json
           # Exit code: 0=pass, 1=block, 3=scanner errors
           exit $?
 
@@ -693,31 +694,31 @@ jobs:
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: .stca-reports/result.sarif
+          sarif_file: .loomscan-reports/result.sarif
 
       - name: Upload JSON report artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stca-report
-          path: stca-report.json
+          name: loomscan-report
+          path: loomscan-report.json
 ```
 
 ### Strict CI gate (block on scanner errors too)
 
 ```yaml
-- name: Run STCA (strict)
+- name: Run LoomScan (strict)
   run: |
-    stca check --repo . --base origin/main --strict-scanners --strictness 6
+    loomscan check --repo . --base origin/main --strict-scanners --strictness 6
     # Exit 1 = findings block, Exit 3 = scanner errors block
 ```
 
-### Using the STCA GitHub Action
+### Using the LoomScan GitHub Action
 
-STCA includes a ready-made action at `.github/actions/stca-action/`:
+LoomScan includes a ready-made action at `.github/actions/loomscan-action/`:
 
 ```yaml
-- uses: ./.github/actions/stca-action
+- uses: ./.github/actions/loomscan-action
   with:
     args: 'check --base origin/main --strict-scanners'
 ```
@@ -726,7 +727,7 @@ STCA includes a ready-made action at `.github/actions/stca-action/`:
 
 ## 13. LLM Tie-Breaker (Optional)
 
-For UNCERTAIN findings (where the FIS can't decide), STCA can call a local LLM via Ollama to make the final call.
+For UNCERTAIN findings (where the FIS can't decide), LoomScan can call a local LLM via Ollama to make the final call.
 
 ### Setup
 
@@ -735,8 +736,8 @@ For UNCERTAIN findings (where the FIS can't decide), STCA can call a local LLM v
 # 2. Pull a model
 ollama pull qwen3-coder-1.5b
 
-# 3. Enable in .stca.yaml:
-cat >> .stca.yaml << 'EOF'
+# 3. Enable in .loomscan.yaml:
+cat >> .loomscan.yaml << 'EOF'
 llm:
   enabled: true
   provider: ollama
@@ -747,21 +748,21 @@ llm:
 EOF
 
 # 4. Run with LLM tie-breaking
-stca check --repo . --full
+loomscan check --repo . --full
 # The TUI will show "LLM invoked: yes" if any finding needed tie-breaking
 ```
 
 ### How it works
 
 1. FIS produces an UNCERTAIN decision for a finding
-2. STCA sends the finding + surrounding code context to the LLM
+2. LoomScan sends the finding + surrounding code context to the LLM
 3. LLM proposes a hypothesis ("this function crashes on None input")
-4. STCA **verifies** the hypothesis by executing it (LLM-as-oracle with verified reasoning)
+4. LoomScan **verifies** the hypothesis by executing it (LLM-as-oracle with verified reasoning)
 5. Only confirmed bugs are reported
 
 ### Process Reward Model (PRM)
 
-STCA uses a Process Reward Model to score the LLM's reasoning quality. Only reasoning with PRM score > `prm_threshold` (default 0.6) is trusted.
+LoomScan uses a Process Reward Model to score the LLM's reasoning quality. Only reasoning with PRM score > `prm_threshold` (default 0.6) is trusted.
 
 ### Privacy
 
@@ -771,7 +772,7 @@ All LLM calls go to your local Ollama instance — no data leaves your machine.
 
 ## 14. Language Coverage
 
-STCA analyzes 7+ programming languages. Different layers cover different languages:
+LoomScan analyzes 7+ programming languages. Different layers cover different languages:
 
 | Language | L0 Patterns | Taint Tracking | CPG Queries | Fuzzing (L4) | Symbolic (L6) | IaC (L0e) |
 |----------|:-----------:|:--------------:|:-----------:|:------------:|:-------------:|:---------:|
@@ -795,9 +796,9 @@ STCA analyzes 7+ programming languages. Different layers cover different languag
 
 ### Why fuzzing is Python-only
 
-Fuzzing requires runtime execution. Python is interpreted, so STCA can `import` the target module and call its functions directly. Compiled languages (Go, Java, C/C++) would require their toolchains + build systems + language-specific harness generation, which would break STCA's "works on any laptop, offline" design.
+Fuzzing requires runtime execution. Python is interpreted, so LoomScan can `import` the target module and call its functions directly. Compiled languages (Go, Java, C/C++) would require their toolchains + build systems + language-specific harness generation, which would break LoomScan's "works on any laptop, offline" design.
 
-For Rust, STCA uses **Kani** (L6) instead of fuzzing — Kani mathematically *proves* absence of certain bugs (overflow, panic, contract violations), which is more powerful than fuzzing.
+For Rust, LoomScan uses **Kani** (L6) instead of fuzzing — Kani mathematically *proves* absence of certain bugs (overflow, panic, contract violations), which is more powerful than fuzzing.
 
 ---
 
@@ -819,17 +820,17 @@ The L4 fuzz layer:
 | **coverage-python** | All platforms | `sys.monitoring` BRANCH events + corpus mutation | ~50-100K iter/sec |
 | **random-python** | All platforms | Random mutation (legacy fallback) | ~50K iter/sec |
 
-STCA auto-detects the best available backend. On Windows/macOS, it uses `coverage-python` (the built-in pure-Python fuzzer).
+LoomScan auto-detects the best available backend. On Windows/macOS, it uses `coverage-python` (the built-in pure-Python fuzzer).
 
 ### Enabling fuzzing
 
 ```bash
 # Option 1: Use strictness level 8+ (enables L4 automatically)
-stca check --repo . --full --strictness 8
+loomscan check --repo . --full --strictness 8
 
-# Option 2: Enable L4 in .stca.yaml
-stca strictness --repo . --level 8
-# Or manually edit .stca.yaml:
+# Option 2: Enable L4 in .loomscan.yaml
+loomscan strictness --repo . --level 8
+# Or manually edit .loomscan.yaml:
 # L4_fuzz: { enabled: true, timeout_seconds: 60 }
 ```
 
@@ -851,12 +852,12 @@ The fuzzer finds:
 
 ### Custom fuzz harnesses
 
-STCA auto-generates a naive harness, but you can provide a custom one:
+LoomScan auto-generates a naive harness, but you can provide a custom one:
 
 ```python
 # tests/fuzz/process_fuzz.py
 import sys
-from stca.fuzz_coverage import fuzz_coverage, FuzzedDataProvider
+from loomscan.fuzz_coverage import fuzz_coverage, FuzzedDataProvider
 from app import process
 
 def test_one_input(data):
@@ -879,7 +880,7 @@ if __name__ == '__main__':
     sys.exit(0)
 ```
 
-Place it at `tests/fuzz/<function_name>_fuzz.py` and STCA will use it instead of auto-generating.
+Place it at `tests/fuzz/<function_name>_fuzz.py` and LoomScan will use it instead of auto-generating.
 
 ### Fuzzer stats
 
@@ -925,14 +926,14 @@ Every scanner failure is now:
 ### CI gate
 
 ```bash
-stca check --repo . --full --strict-scanners
+loomscan check --repo . --full --strict-scanners
 # Exit 3 if any scanner failed — surfaces previously-silent failures as a build breaker
 ```
 
 ### Debug logging
 
 ```bash
-stca check --repo . --full -v
+loomscan check --repo . --full -v
 # Shows DEBUG-level diagnostics: optional-parser failures, per-file scan errors
 ```
 
@@ -940,89 +941,89 @@ stca check --repo . --full -v
 
 ## 17. Advanced Commands Reference
 
-STCA has 73+ commands. Here are the most useful ones beyond `check`:
+LoomScan has 73+ commands. Here are the most useful ones beyond `check`:
 
 ### Analysis commands
 
 ```bash
-stca taint --repo .                # Interprocedural taint tracking (Python)
-stca cpg --repo .                  # Code Property Graph queries (Joern-style)
-stca nullness --repo .             # Sound nullness analysis (NilAway-inspired)
-stca typestate --repo .            # State machine violation detection
-stca symbolic --repo .             # Z3 symbolic execution + abstract interpretation
-stca metamorphic --repo .          # Oracle-free bug detection
-stca differential --repo .         # Refactor verification (old vs new)
-stca concurrency --repo .          # Async/concurrency bug detection
-stca crypto --repo .               # Cryptographic correctness audit
-stca code-quality --repo .         # 111+ multi-language quality rules
-stca duplicates --repo .           # Find duplicated code blocks
-stca deadcode --repo .             # Runtime dead code analysis
-stca toxicity --repo .             # Code toxicity (nocuous/codehawk-inspired)
-stca consistency --repo .          # Codebase consistency (credo-inspired)
-stca architecture --repo .         # Architecture enforcement (rev-dep-inspired)
-stca contracts --repo .            # Design-by-contract analysis (deal-inspired)
-stca doc-audit --repo .            # Documentation audit (Valknut-inspired)
-stca ffi-check --repo .            # Cross-language FFI boundary analysis
+loomscan taint --repo .                # Interprocedural taint tracking (Python)
+loomscan cpg --repo .                  # Code Property Graph queries (Joern-style)
+loomscan nullness --repo .             # Sound nullness analysis (NilAway-inspired)
+loomscan typestate --repo .            # State machine violation detection
+loomscan symbolic --repo .             # Z3 symbolic execution + abstract interpretation
+loomscan metamorphic --repo .          # Oracle-free bug detection
+loomscan differential --repo .         # Refactor verification (old vs new)
+loomscan concurrency --repo .          # Async/concurrency bug detection
+loomscan crypto --repo .               # Cryptographic correctness audit
+loomscan code-quality --repo .         # 111+ multi-language quality rules
+loomscan duplicates --repo .           # Find duplicated code blocks
+loomscan deadcode --repo .             # Runtime dead code analysis
+loomscan toxicity --repo .             # Code toxicity (nocuous/codehawk-inspired)
+loomscan consistency --repo .          # Codebase consistency (credo-inspired)
+loomscan architecture --repo .         # Architecture enforcement (rev-dep-inspired)
+loomscan contracts --repo .            # Design-by-contract analysis (deal-inspired)
+loomscan doc-audit --repo .            # Documentation audit (Valknut-inspired)
+loomscan ffi-check --repo .            # Cross-language FFI boundary analysis
 ```
 
 ### Security commands
 
 ```bash
-stca iac --repo .                  # Terraform/Dockerfile/K8s scanner (71 rules)
-stca pii --repo .                  # PII detection (pii-shield-inspired)
-stca malicious --repo .            # Malicious package patterns (aura-inspired)
-stca missing-patches --repo .      # Missing security patches (Vanir-inspired)
-stca modern --repo .               # Modern attack surfaces (LLM, GraphQL, etc.)
-stca history-scan --repo .         # Scan git history for leaked secrets
-stca pysa --repo .                 # Pysa (Meta OSS) taint analysis
-stca maven-cve --repo .            # Scan pom.xml for Maven CVEs
-stca supply-chain --repo .         # Dependency CVEs, typosquats, EOL, licenses
+loomscan iac --repo .                  # Terraform/Dockerfile/K8s scanner (71 rules)
+loomscan pii --repo .                  # PII detection (pii-shield-inspired)
+loomscan malicious --repo .            # Malicious package patterns (aura-inspired)
+loomscan missing-patches --repo .      # Missing security patches (Vanir-inspired)
+loomscan modern --repo .               # Modern attack surfaces (LLM, GraphQL, etc.)
+loomscan history-scan --repo .         # Scan git history for leaked secrets
+loomscan pysa --repo .                 # Pysa (Meta OSS) taint analysis
+loomscan maven-cve --repo .            # Scan pom.xml for Maven CVEs
+loomscan supply-chain --repo .         # Dependency CVEs, typosquats, EOL, licenses
 ```
 
 ### Management commands
 
 ```bash
-stca init --repo .                 # Create .stca.yaml config
-stca install-tools                 # Auto-install gitleaks, semgrep, etc.
-stca doctor                        # Check what tools are available
-stca baseline --repo . show        # Manage the issue baseline
-stca audit --repo . show           # Tamper-evident audit log
-stca issue --repo . list           # Issue store (CodeChecker-inspired)
-stca hotspot --repo . list         # Security hotspots (SonarQube-style)
-stca cache --repo . clear          # Function-level result cache
-stca strictness --repo .           # Show/set strictness level
-stca profile --repo .              # Configuration profiles
-stca rules --repo .                # Manage rule packs (Semgrep + Rego)
-stca suppressions --repo .         # Inline suppressions
-stca feedback --repo .             # Track precision/recall
-stca tuning                        # FIS auto-tuning
+loomscan init --repo .                 # Create .loomscan.yaml config
+loomscan install-tools                 # Auto-install gitleaks, semgrep, etc.
+loomscan doctor                        # Check what tools are available
+loomscan baseline --repo . show        # Manage the issue baseline
+loomscan audit --repo . show           # Tamper-evident audit log
+loomscan issue --repo . list           # Issue store (CodeChecker-inspired)
+loomscan hotspot --repo . list         # Security hotspots (SonarQube-style)
+loomscan cache --repo . clear          # Function-level result cache
+loomscan strictness --repo .           # Show/set strictness level
+loomscan profile --repo .              # Configuration profiles
+loomscan rules --repo .                # Manage rule packs (Semgrep + Rego)
+loomscan suppressions --repo .         # Inline suppressions
+loomscan feedback --repo .             # Track precision/recall
+loomscan tuning                        # FIS auto-tuning
 ```
 
 ### Utility commands
 
 ```bash
-stca sbom --repo .                 # Generate SBOM (CycloneDX/SPDX)
-stca dashboard --repo .            # Generate HTML dashboard
-stca fix --repo .                  # Apply auto-fixes
-stca pre-commit --repo .           # Run as pre-commit hook
-stca watch --repo .                # Watch and re-scan on save
-stca lsp                           # Language server (VS Code/Neovim integration)
-stca bootstrap                     # One-time setup (invariant inference, etc.)
-stca optimize --repo .             # Parallel scan with file-level cache
-stca trace --repo .                # Trace a finding's lifecycle
-stca rca --repo .                  # Root cause analysis (Vitrage-inspired)
-stca impact --repo .               # Impact analysis (gossiphs-inspired)
-stca similar --repo .              # Find similar code snippets
-stca source-discovery --repo .     # Discover taint sources
-stca llm-verify --repo .           # LLM-as-oracle with verified reasoning
-stca gnn --repo .                  # GNN-on-CPG scoring
+loomscan sbom --repo .                 # Generate SBOM (CycloneDX/SPDX)
+loomscan dashboard --repo .            # Generate HTML dashboard
+loomscan fix --repo .                  # Apply auto-fixes
+loomscan pre-commit --repo .           # Run as pre-commit hook
+loomscan watch --repo .                # Watch and re-scan on save
+loomscan lsp                           # Language server (VS Code/Neovim integration)
+loomscan bootstrap                     # One-time setup (invariant inference, etc.)
+loomscan optimize --repo .             # Parallel scan with file-level cache
+loomscan trace --repo .                # Trace a finding's lifecycle
+loomscan rca --repo .                  # Root cause analysis (Vitrage-inspired)
+loomscan impact --repo .               # Impact analysis (gossiphs-inspired)
+loomscan similar --repo .              # Find similar code snippets
+loomscan source-discovery --repo .     # Discover taint sources
+loomscan llm-verify --repo .           # LLM-as-oracle with verified reasoning
+loomscan gnn --repo .                  # GNN-on-CPG scoring
 ```
 
 ### Update commands
 
 ```bash
-stca update-cves                   # Update CVE database from OSV.dev
-stca rule-lint                     # Lint custom rule files
+loomscan update-cves                   # Update CVE database from OSV.dev
+loomscan rule-lint                     # Lint custom rule files
 ```
 
 ---
@@ -1035,29 +1036,29 @@ stca rule-lint                     # Lint custom rule files
 Error: Not a git repo: /path/to/repo
 ```
 
-**Cause**: STCA needs a git repo (it analyzes diffs by default).
+**Cause**: LoomScan needs a git repo (it analyzes diffs by default).
 **Fix**: Either `git init` the directory, or use `--full` for a full-repo scan.
 
 ### "atheris not installed" (L4 fuzzing)
 
-**Cause**: atheris only works on Linux. On Windows/macOS, STCA automatically uses its built-in pure-Python fuzzer.
-**Fix**: No action needed — STCA handles this automatically. The `L4.fuzz.backend` INFO finding tells you which backend is active.
+**Cause**: atheris only works on Linux. On Windows/macOS, LoomScan automatically uses its built-in pure-Python fuzzer.
+**Fix**: No action needed — LoomScan handles this automatically. The `L4.fuzz.backend` INFO finding tells you which backend is active.
 
 ### Too many findings (overwhelming)
 
 **Fix 1**: Use a lower strictness level:
 ```bash
-stca check --repo . --full --strictness 1   # critical only
+loomscan check --repo . --full --strictness 1   # critical only
 ```
 
 **Fix 2**: Use baseline mode (only new issues):
 ```bash
-stca check --repo . --full --baseline
+loomscan check --repo . --full --baseline
 ```
 
 **Fix 3**: Filter by severity in the JSON output:
 ```bash
-stca check --repo . --full --json | python -c "
+loomscan check --repo . --full --json | python -c "
 import json, sys
 data = json.load(sys.stdin)
 critical = [f for f in data['findings'] if f['severity'] == 'critical']
@@ -1073,7 +1074,7 @@ for f in critical:
 **Cause**: A scanner encountered an error (missing import, parse error, network issue).
 **Diagnosis**:
 ```bash
-stca check --repo . --full --detailed -v
+loomscan check --repo . --full --detailed -v
 # The -v flag shows DEBUG-level diagnostics
 # The --detailed flag shows the full Scanner Health table
 ```
@@ -1086,20 +1087,20 @@ stca check --repo . --full --detailed -v
 
 **Fix 1**: Use diff mode instead of full-repo:
 ```bash
-stca check --repo . --base main    # only scan the diff
+loomscan check --repo . --base main    # only scan the diff
 ```
 
 **Fix 2**: Use a lower strictness level:
 ```bash
-stca check --repo . --full --strictness 3   # skips L4-L7
+loomscan check --repo . --full --strictness 3   # skips L4-L7
 ```
 
 **Fix 3**: Use the file-level cache:
 ```bash
-stca optimize --repo .             # parallel scan with caching
+loomscan optimize --repo .             # parallel scan with caching
 ```
 
-**Fix 4**: Disable slow layers in `.stca.yaml`:
+**Fix 4**: Disable slow layers in `.loomscan.yaml`:
 ```yaml
 layers:
   L6_symbolic: { enabled: false, timeout_seconds: 120 }
@@ -1110,43 +1111,43 @@ layers:
 
 **Fix 1**: Use baseline mode to suppress known issues:
 ```bash
-stca check --repo . --full --baseline
+loomscan check --repo . --full --baseline
 ```
 
 **Fix 2**: Use the feedback loop to train the FP learner:
 ```bash
-stca feedback --repo . mark-fp <fingerprint>   # mark as false positive
-stca feedback --repo . stats                   # see precision/recall
+loomscan feedback --repo . mark-fp <fingerprint>   # mark as false positive
+loomscan feedback --repo . stats                   # see precision/recall
 ```
 
 **Fix 3**: Suppress inline:
 ```python
-# stca-ignore-next-line
-eval(user_input)  # STCA won't flag this
+# loomscan-ignore-next-line
+eval(user_input)  # LoomScan won't flag this
 ```
 
 **Fix 4**: Use the precision engine:
 ```bash
-stca precision --repo .           # rule mining, FP learning, calibration
+loomscan precision --repo .           # rule mining, FP learning, calibration
 ```
 
 ### Config not being picked up
 
-**Cause**: STCA looks for `.stca.yaml` in the repo root.
+**Cause**: LoomScan looks for `.loomscan.yaml` in the repo root.
 **Fix**:
 ```bash
-stca init --repo . --force        # recreate with defaults
-# Edit .stca.yaml, then verify:
-stca strictness --repo .          # should show your level
+loomscan init --repo . --force        # recreate with defaults
+# Edit .loomscan.yaml, then verify:
+loomscan strictness --repo .          # should show your level
 ```
 
 ### Reports not being generated
 
-**Cause**: Reports go to `<repo>/.stca-reports/`.
+**Cause**: Reports go to `<repo>/.loomscan-reports/`.
 **Fix**:
 ```bash
-ls .stca-reports/                 # should have report.html, result.json, result.sarif
-stca dashboard --repo .           # generate dashboard.html
+ls .loomscan-reports/                 # should have report.html, result.json, result.sarif
+loomscan dashboard --repo .           # generate dashboard.html
 ```
 
 ### LLM tie-breaker not working
@@ -1216,7 +1217,7 @@ git diff (or full repo)
    │  output: BLOCK / WARN / PASS / UNCERTAIN
    ▼
 [Optional LLM tie-breaker] — for UNCERTAIN findings only
-   │  LLM proposes hypothesis → STCA verifies by execution
+   │  LLM proposes hypothesis → LoomScan verifies by execution
    ▼
 [Issue store] — tamper-evident, tracks new vs recurring issues
    │
@@ -1284,46 +1285,46 @@ This ensures previously-silent failures are visible.
 
 ```bash
 # === Daily workflow ===
-stca check --repo . --full                          # full scan (default minimal output)
-stca check --repo . --base main                     # diff scan (PR review)
-stca check --repo . --staged                        # staged changes (pre-commit)
-stca check --repo . --full --detailed               # full findings in terminal
-stca check --repo . --full --json > report.json     # JSON for CI
-stca check --repo . --full --quiet                  # just the decision
+loomscan check --repo . --full                          # full scan (default minimal output)
+loomscan check --repo . --base main                     # diff scan (PR review)
+loomscan check --repo . --staged                        # staged changes (pre-commit)
+loomscan check --repo . --full --detailed               # full findings in terminal
+loomscan check --repo . --full --json > report.json     # JSON for CI
+loomscan check --repo . --full --quiet                  # just the decision
 
 # === Strictness ===
-stca strictness --repo .                            # show current level
-stca strictness --repo . --level 7                  # set level
-stca check --repo . --full --strictness 9           # override per-run
+loomscan strictness --repo .                            # show current level
+loomscan strictness --repo . --level 7                  # set level
+loomscan check --repo . --full --strictness 9           # override per-run
 
 # === Baseline ===
-stca check --repo . --full                          # establish baseline
-stca check --repo . --full --baseline               # only new issues
+loomscan check --repo . --full                          # establish baseline
+loomscan check --repo . --full --baseline               # only new issues
 
 # === Reports ===
-stca dashboard --repo .                             # HTML dashboard
-cat .stca-reports/result.json | python -m json.tool # view JSON
-# .stca-reports/result.sarif                        # for VS Code / GitHub
+loomscan dashboard --repo .                             # HTML dashboard
+cat .loomscan-reports/result.json | python -m json.tool # view JSON
+# .loomscan-reports/result.sarif                        # for VS Code / GitHub
 
 # === Scanner health ===
-stca check --repo . --full --strict-scanners        # exit 3 on scanner errors
-stca check --repo . --full -v                       # DEBUG logging
+loomscan check --repo . --full --strict-scanners        # exit 3 on scanner errors
+loomscan check --repo . --full -v                       # DEBUG logging
 
 # === Auto-fix ===
-stca fix --repo .                                   # stage fixes for review
-stca fix --repo . --apply                           # apply directly
+loomscan fix --repo .                                   # stage fixes for review
+loomscan fix --repo . --apply                           # apply directly
 
 # === Setup ===
-stca init --repo .                                  # create .stca.yaml
-stca install-tools                                  # install gitleaks, semgrep, etc.
-stca doctor                                         # check what's installed
+loomscan init --repo .                                  # create .loomscan.yaml
+loomscan install-tools                                  # install gitleaks, semgrep, etc.
+loomscan doctor                                         # check what's installed
 
 # === LLM tie-breaker ===
 ollama pull qwen3-coder-1.5b                        # pull model
-# Set llm.enabled: true in .stca.yaml
-stca check --repo . --full                          # LLM invoked for UNCERTAIN findings
+# Set llm.enabled: true in .loomscan.yaml
+loomscan check --repo . --full                          # LLM invoked for UNCERTAIN findings
 ```
 
 ---
 
-**STCA Pipeline v3.2** — 235 tests passing, 73+ commands, 8 analysis layers, cross-platform. For questions, run `stca <command> --help` on any command.
+**LoomScan v3.2** — 235 tests passing, 73+ commands, 8 analysis layers, cross-platform. For questions, run `loomscan <command> --help` on any command.

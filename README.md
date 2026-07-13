@@ -1,46 +1,59 @@
-# STCA Pipeline — Static + Test + Constraint Analysis
+# LoomScan — Static + Test + Constraint Analysis
 
-> **v4.43** — A deterministic-first, type-2 fuzzy aggregated bug detection pipeline with **1,995 rules across 39 packs covering 24 languages**, **107 auto-fix patterns**, **275 secret detection patterns**, **9 unique differentiators**, and **77 CLI commands**. Free, offline, and production-ready.
+> **v5.7** — A deterministic-first, type-2 fuzzy aggregated bug detection pipeline with **2,095 rules across 40 packs covering 24 languages**, **107 auto-fix patterns**, **275 secret detection patterns**, **10 unique differentiators**, and **78+ CLI commands**. Free, offline, and production-ready. Native YAML rule engine (no semgrep dependency), multi-language CPG def-use chains, incremental CPG caching, SARIF Pro tier with threadFlow, **animated TUI mascot + progress bar (Loomy the spider)**, and an **optional Rust regex core** for 10-50× faster pattern matching.
 
 ## Quick Start
 
 ```bash
-# Install
+# Install (from PyPI when published, or from source):
+pip install loomscan
+# Or from source:
 pip install -e .
 
-# Verify installation
-stca doctor
+# One-command quickstart (creates config, runs scan, shows summary):
+loomscan quickstart /path/to/your/code
 
-# Scan a git diff
-stca check
-
-# Scan the full repo
-stca check --full
-
-# Get JSON output
-stca check --full --json
-
-# Run quality gate (SonarQube-style)
-stca gate --full --preset strict
-
-# Apply auto-fixes
-stca fix --apply
+# Or step by step:
+loomscan init                    # Create .loomscan.yaml config
+loomscan check --full            # Scan the full repo
+loomscan check --full --summary  # Compact grouped output
+loomscan gate --full --preset strict  # Quality gate (SonarQube-style)
+loomscan fix --apply             # Apply auto-fixes
+loomscan dashboard --repo . --open   # Generate HTML dashboard + open in browser
 ```
 
-## What Makes STCA Unique
+## What's New in v5.7
 
-STCA has **9 capabilities no competitor offers**:
+Two big UX wins + the Rust core comes online:
+
+| Change | What it does |
+|--------|--------------|
+| **Animated TUI mascot (Loomy)** | While the pipeline runs, an ASCII spider "Loomy" weaves a web in your terminal — 6-frame walk cycle, phase-aware speech bubbles. Like the mascots in claude-code / opencode. Auto-disabled in CI / pipes / `--no-tui`. |
+| **Progress bar** | Rich-powered 7-stage tracker: `Layers → Taint & CPG → Research Engines → Multi-lang → Precision → FIS Brain → AutoFix`. Shows `[████░░░] N/7` + live findings counter + elapsed seconds. No more "is it stuck?" |
+| **`--no-tui` flag** | Disables mascot + progress bar for CI logs / piping to file. |
+| **Rust regex core (compiled)** | `rust-core/` now compiles to a real native extension via `maturin`. `yaml_engine.py` auto-detects the Rust engine and uses it for 10-50× faster regex matching, with seamless fallback to Python `re`. |
+| **README honest version** | README header finally matches `pyproject.toml` (was stuck on v5.4 since v5.4). |
+
+```bash
+loomscan check --full                    # with mascot + progress bar
+loomscan check --full --no-tui           # CI mode (plain output)
+loomscan check --full --json             # JSON output (auto-disables TUI)
+```
+
+## What Makes LoomScan Unique
+
+LoomScan has **9 capabilities no competitor offers**:
 
 | # | Feature | What It Does |
 |---|---------|-------------|
 | 1 | **IT2-FIS Brain** | Type-2 fuzzy inference system with 50 rules. Produces confidence *intervals* (not point estimates). Aggregates severity, confidence, blast radius, exploitability, and source-layer reliability into BLOCK/WARN/PASS/UNCERTAIN decisions. |
-| 2 | **LLM-Verify** | LLM proposes hypotheses ("function crashes on None input"); STCA verifies by *execution*. Only confirmed bugs are reported. PRM-gated (process reward model scores the LLM's reasoning). |
+| 2 | **LLM-Verify** | LLM proposes hypotheses ("function crashes on None input"); LoomScan verifies by *execution*. Only confirmed bugs are reported. PRM-gated (process reward model scores the LLM's reasoning). |
 | 3 | **Counterfactual Mutation** | Mutates the code (removes lines, injects guards) and re-runs detectors. If the finding disappears → true positive (boost confidence). If it persists → false positive (demote). |
 | 4 | **Metamorphic Testing** | Oracle-free bug detection: `sort(sort(x)) == sort(x)`, `hash(x) == hash(x)`. Catches semantic bugs no test oracle can. |
-| 5 | **Knowledge Graph** | Builds a codebase structure graph (1,400+ nodes for a typical project). `stca impact --changed file.py` shows blast radius (which functions are affected by your change). |
-| 6 | **Rule Auto-Mining** | `stca mine` scans git history for bug-fix commits and auto-generates Semgrep rules from the diff. Every bug you've ever fixed becomes a permanent rule. |
-| 7 | **Spec Mining** | `stca spec` mines API usage patterns from your codebase (e.g., "open() is always followed by close()") and flags deviations. Adaptive — learns from your code, not from generic rules. |
-| 8 | **--uncertain Flag** | `stca check --uncertain` shows only 30-70% confidence findings — the ones worth human review. No competitor has this. |
+| 5 | **Knowledge Graph** | Builds a codebase structure graph (1,400+ nodes for a typical project). `loomscan impact --changed file.py` shows blast radius (which functions are affected by your change). |
+| 6 | **Rule Auto-Mining** | `loomscan mine` scans git history for bug-fix commits and auto-generates Semgrep rules from the diff. Every bug you've ever fixed becomes a permanent rule. |
+| 7 | **Spec Mining** | `loomscan spec` mines API usage patterns from your codebase (e.g., "open() is always followed by close()") and flags deviations. Adaptive — learns from your code, not from generic rules. |
+| 8 | **--uncertain Flag** | `loomscan check --uncertain` shows only 30-70% confidence findings — the ones worth human review. No competitor has this. |
 | 9 | **9-Level Strictness** | PHPStan-inspired strictness levels (1-9). Level 1 = only critical findings; Level 9 = everything including style issues. |
 
 ## Rule Coverage
@@ -62,71 +75,71 @@ Python, JavaScript, TypeScript, Go, Java, Rust, C, C++, PHP, Ruby, C#, Swift, Sc
 
 ### Core
 ```bash
-stca check [--full] [--json] [--sarif --output file] [--strictness N] [--uncertain]
-stca gate [--full] [--preset strict|balanced|permissive|custom] [--max-critical N] [--max-high N]
-stca fix [--apply] [--finding-id ID]
-stca init / install-tools / doctor
+loomscan check [--full] [--json] [--sarif --output file] [--strictness N] [--uncertain]
+loomscan gate [--full] [--preset strict|balanced|permissive|custom] [--max-critical N] [--max-high N]
+loomscan fix [--apply] [--finding-id ID]
+loomscan init / install-tools / doctor
 ```
 
 ### IDE Integration
 ```bash
-stca lsp                    # Start LSP server (VS Code / JetBrains / Neovim)
-stca watch                  # Incremental scanning with sub-second feedback
-stca playground             # Web UI for testing regex rules (localhost:8765)
+loomscan lsp                    # Start LSP server (VS Code / JetBrains / Neovim)
+loomscan watch                  # Incremental scanning with sub-second feedback
+loomscan playground             # Web UI for testing regex rules (localhost:8765)
 ```
 
 ### Analysis
 ```bash
-stca cpg --query taint|unused|auth|complexity|def_use|cross_func
-stca typestate             # State machine violations
-stca metamorphic           # Oracle-free bug detection
-stca differential          # Refactor verification
-stca llm-verify            # LLM proposes, STCA verifies by execution
-stca impact --changed file.py  # Blast radius analysis
-stca spec                  # Spec mining (adaptive API pattern learning)
-stca mine                  # Rule auto-mining from git history
+loomscan cpg --query taint|unused|auth|complexity|def_use|cross_func
+loomscan typestate             # State machine violations
+loomscan metamorphic           # Oracle-free bug detection
+loomscan differential          # Refactor verification
+loomscan llm-verify            # LLM proposes, LoomScan verifies by execution
+loomscan impact --changed file.py  # Blast radius analysis
+loomscan spec                  # Spec mining (adaptive API pattern learning)
+loomscan mine                  # Rule auto-mining from git history
 ```
 
 ### Rules
 ```bash
-stca rules list             # List all 39 built-in packs
-stca rules show <pack>      # Show rules in a pack
-stca rules pull <pack>      # Pull external pack
-stca rules submit --pack my-rules.yml --name my-pack --language python  # Submit community rules
+loomscan rules list             # List all 39 built-in packs
+loomscan rules show <pack>      # Show rules in a pack
+loomscan rules pull <pack>      # Pull external pack
+loomscan rules submit --pack my-rules.yml --name my-pack --language python  # Submit community rules
 ```
 
 ### CI/CD
 ```bash
-stca bot --pr 42 --token $GITHUB_TOKEN  # PR comment bot (inline review comments)
-stca check --sarif --output stca.sarif   # SARIF for GitHub Code Scanning
-stca gate --preset strict                 # Quality gate (exit 0=pass, 1=fail)
+loomscan bot --pr 42 --token $GITHUB_TOKEN  # PR comment bot (inline review comments)
+loomscan check --sarif --output loomscan.sarif   # SARIF for GitHub Code Scanning
+loomscan gate --preset strict                 # Quality gate (exit 0=pass, 1=fail)
 ```
 
 ### Quality
 ```bash
-stca strictness --level N   # Set strictness (1-9)
-stca code-quality           # Multi-language code quality
-stca config-scan            # Scan config files for secrets
-stca duplicates             # Code duplication detection
-stca deadcode               # Dead code analysis
-stca hotspot                # Security hotspot detection
+loomscan strictness --level N   # Set strictness (1-9)
+loomscan code-quality           # Multi-language code quality
+loomscan config-scan            # Scan config files for secrets
+loomscan duplicates             # Code duplication detection
+loomscan deadcode               # Dead code analysis
+loomscan hotspot                # Security hotspot detection
 ```
 
 ## IDE Extensions
 
 ### VS Code
 ```bash
-code --install-extension editor/vscode-stca/stca-0.2.0.vsix
+code --install-extension editor/vscode-loomscan/loomscan-0.2.0.vsix
 ```
 - Real-time diagnostics via LSP
 - Hover shows rule details + fix suggestions
-- Code actions: "Apply STCA fix" (quickfix)
+- Code actions: "Apply LoomScan fix" (quickfix)
 - 6 commands: CheckRepo, CheckFile, ApplyFix, ShowUncertain, Gate, Restart
 - 17 language activations
 
 ### JetBrains (IntelliJ, PyCharm, WebStorm, etc.)
 ```bash
-cd editor/intellij-stca && ./gradlew buildPlugin
+cd editor/intellij-loomscan && ./gradlew buildPlugin
 # Install: Settings > Plugins > Install from Disk > build/distributions/*.zip
 ```
 - LSP support via IntelliJ 2023.1+ platform
@@ -172,10 +185,10 @@ SARIF 2.1.0 + Rich TUI + HTML + JSON + CycloneDX SBOM + SPDX SBOM
 
 ```bash
 # Presets
-stca gate --full --preset strict       # 0 critical, 0 high, 5/1k LOC
-stca gate --full --preset balanced     # 0 critical, 5 high, 10/1k LOC (DEFAULT)
-stca gate --full --preset permissive   # 5 critical, 20 high, 20/1k LOC
-stca gate --full --preset custom --max-critical 0 --max-high 10
+loomscan gate --full --preset strict       # 0 critical, 0 high, 5/1k LOC
+loomscan gate --full --preset balanced     # 0 critical, 5 high, 10/1k LOC (DEFAULT)
+loomscan gate --full --preset permissive   # 5 critical, 20 high, 20/1k LOC
+loomscan gate --full --preset custom --max-critical 0 --max-high 10
 
 # Exit codes: 0=pass, 1=fail, 2=error, 3=scanner failure
 ```
@@ -183,7 +196,7 @@ stca gate --full --preset custom --max-critical 0 --max-high 10
 ## Monorepo Support
 
 ```yaml
-# .stca.yaml
+# .loomscan.yaml
 workspaces:
   - "apps/*"
   - "packages/*"
@@ -192,34 +205,34 @@ workspace_exclude:
 ```
 
 ```bash
-stca monorepo --list     # List resolved workspaces
-stca monorepo --scan     # Scan each workspace, report findings
-stca monorepo --add 'services/*'
+loomscan monorepo --list     # List resolved workspaces
+loomscan monorepo --scan     # Scan each workspace, report findings
+loomscan monorepo --add 'services/*'
 ```
 
 ## GitHub Actions Integration
 
 ```yaml
-# .github/workflows/stca.yml
-- name: Install STCA
+# .github/workflows/loomscan.yml
+- name: Install LoomScan
   run: pip install --user .
-- name: Run STCA
-  run: stca check --sarif --output stca.sarif --strictness 5
+- name: Run LoomScan
+  run: loomscan check --sarif --output loomscan.sarif --strictness 5
 - name: Upload SARIF
   uses: github/codeql-action/upload-sarif@v3
   with:
-    sarif_file: stca.sarif
+    sarif_file: loomscan.sarif
 ```
 
 ```yaml
-# .github/workflows/stca-bot.yml — PR comment bot
-- name: Run STCA PR Bot
-  run: stca bot --token ${{ secrets.GITHUB_TOKEN }}
+# .github/workflows/loomscan-bot.yml — PR comment bot
+- name: Run LoomScan PR Bot
+  run: loomscan bot --token ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Competitive Position
 
-| Axis | STCA v4.43 | Semgrep | SonarQube | CodeQL |
+| Axis | LoomScan v4.43 | Semgrep | SonarQube | CodeQL |
 |------|-----------|---------|-----------|--------|
 | Total rules | ~2,700 | 3,000+ | 5,000+ | 1,500+ |
 | Languages | 24 | 30+ | 30+ | 6 (deep) |

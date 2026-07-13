@@ -54,7 +54,7 @@ def pytest_sessionstart(session):
     """Validate YAML packs at session start."""
     import yaml
     import os
-    packs_dir = os.path.join(os.path.dirname(__file__), '..', 'stca', 'rules', 'packs')
+    packs_dir = os.path.join(os.path.dirname(__file__), '..', 'loomscan', 'rules', 'packs')
     if not os.path.isdir(packs_dir):
         return
     for f in sorted(os.listdir(packs_dir)):

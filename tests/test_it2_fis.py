@@ -1,7 +1,7 @@
 """Tests for the IT2-FIS brain."""
 import pytest
-from stca.brain.it2_fis import IT2FIS, decision_from_score
-from stca.brain.membership import IT2Membership
+from loomscan.brain.it2_fis import IT2FIS, decision_from_score
+from loomscan.brain.membership import IT2Membership
 
 
 @pytest.fixture

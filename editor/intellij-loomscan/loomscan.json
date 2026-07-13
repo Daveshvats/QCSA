@@ -1,0 +1,98 @@
+{
+  "id": "com.loomscan.pipeline.intellij",
+  "name": "LoomScan",
+  "version": "0.1.0",
+  "description": "LoomScan (Static + Test + Constraint Analysis) — real-time squiggles, quality gates, auto-fix, and rule mining. Connects to the LoomScan LSP server.",
+  "changeNotes": "Initial release. LSP client + commands + quality gates.",
+  "vendor": {
+    "name": "LoomScan",
+    "url": "https://github.com/local/loomscan"
+  },
+  "category": "Tools.Build",
+  "tags": ["security", "static-analysis", "linter", "sast", "taint"],
+
+  "dependencies": {
+    "com.intellij.modules.platform": "231.8109.91"
+  },
+
+  "extensions": {
+    "com.loomscan.pipeline.intellij.StcaLspServerSupport": {
+      "language": "LoomScan",
+      "displayName": "LoomScan",
+      "fileNamePattern": "*",
+      "supportsValidation": true
+    }
+  },
+
+  "actions": [
+    {
+      "id": "Stca.CheckRepo",
+      "class": "com.loomscan.pipeline.action.CheckRepoAction",
+      "text": "LoomScan: Run Full Check on Repo",
+      "description": "Run loomscan check --full and stream output"
+    },
+    {
+      "id": "Stca.CheckFile",
+      "class": "com.loomscan.pipeline.action.CheckFileAction",
+      "text": "LoomScan: Check Current File",
+      "description": "Re-analyze the current file"
+    },
+    {
+      "id": "Stca.ApplyFix",
+      "class": "com.loomscan.pipeline.action.ApplyFixAction",
+      "text": "LoomScan: Apply Auto-fix",
+      "description": "Apply loomscan fix --apply for the current finding"
+    },
+    {
+      "id": "Stca.ShowUncertain",
+      "class": "com.loomscan.pipeline.action.ShowUncertainAction",
+      "text": "LoomScan: Toggle Uncertain Findings (30-70%)",
+      "description": "Show only findings in the 30-70% confidence band"
+    },
+    {
+      "id": "Stca.Gate",
+      "class": "com.loomscan.pipeline.action.GateAction",
+      "text": "LoomScan: Run Quality Gate",
+      "description": "Run loomscan gate (SonarQube-style thresholds)"
+    },
+    {
+      "id": "Stca.Mine",
+      "class": "com.loomscan.pipeline.action.MineAction",
+      "text": "LoomScan: Mine Rules from Git History",
+      "description": "Auto-derive rules from bug-fix commits"
+    },
+    {
+      "id": "Stca.Restart",
+      "class": "com.loomscan.pipeline.action.RestartAction",
+      "text": "LoomScan: Restart LSP Server",
+      "description": "Restart the LoomScan LSP server"
+    }
+  ],
+
+  "applicationServices": [],
+  "projectServices": [
+    {
+      "service": {
+        "serviceInterface": "com.loomscan.pipeline.service.StcaService",
+        "serviceImplementation": "com.loomscan.pipeline.service.StcaServiceImpl"
+      }
+    }
+  ],
+
+  "com.intellij.configurationSchema": {
+    "StcaSettings": {
+      "type": "object",
+      "properties": {
+        "stcaEnabled": { "type": "boolean", "default": true },
+        "pythonPath": { "type": "string", "default": "python" },
+        "strictness": { "type": "integer", "default": 5, "minimum": 1, "maximum": 9 },
+        "debounceMs": { "type": "integer", "default": 500 },
+        "showUncertainOnly": { "type": "boolean", "default": false },
+        "useLsp": { "type": "boolean", "default": true },
+        "gatePreset": { "type": "string", "enum": ["strict", "balanced", "permissive", "custom"], "default": "balanced" },
+        "gateMaxCritical": { "type": "integer", "default": 0 },
+        "gateMaxHigh": { "type": "integer", "default": 0 }
+      }
+    }
+  }
+}

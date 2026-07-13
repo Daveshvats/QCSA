@@ -32,7 +32,7 @@ class TestNullnessInterproceduralRegression:
 
     def test_non_none_returning_function_not_flagged(self, tmp_path):
         """get_default_config() returns a dict, never None — must NOT be flagged."""
-        from stca.nullness import NullnessAnalyzer
+        from loomscan.nullness import NullnessAnalyzer
         src = tmp_path / "app.py"
         src.write_text("""def get_default_config():
     \"\"\"Always returns a dict, never None - by design.\"\"\"
@@ -51,7 +51,7 @@ def process():
 
     def test_none_returning_function_still_caught(self, tmp_path):
         """maybe_get() can return None — MUST still be flagged."""
-        from stca.nullness import NullnessAnalyzer
+        from loomscan.nullness import NullnessAnalyzer
         src = tmp_path / "app.py"
         src.write_text("""def maybe_get():
     if condition:
@@ -67,7 +67,7 @@ def process():
 
     def test_function_with_bare_return_flagged(self, tmp_path):
         """A function with bare `return` returns None — must be flagged."""
-        from stca.nullness import NullnessAnalyzer
+        from loomscan.nullness import NullnessAnalyzer
         src = tmp_path / "app.py"
         src.write_text("""def maybe_get(x):
     if x > 0:
@@ -83,7 +83,7 @@ def process():
 
     def test_builtin_not_flagged(self, tmp_path):
         """Builtin calls like len() must NOT be flagged (was already fixed)."""
-        from stca.nullness import NullnessAnalyzer
+        from loomscan.nullness import NullnessAnalyzer
         src = tmp_path / "app.py"
         src.write_text("""def process(items):
     count = len(items)
@@ -105,7 +105,7 @@ class TestContractsValidationRelevanceRegression:
 
     def test_unrelated_check_does_not_suppress(self, tmp_path):
         """FeatureFlags.check() must NOT suppress missing-precondition finding."""
-        from stca.v4_restored import detect_contracts_multi
+        from loomscan.v4_restored import detect_contracts_multi
         src = tmp_path / "app.py"
         src.write_text("""def process_payment(amount, currency):
     guard = FeatureFlags.check("new_payment_flow")
@@ -122,7 +122,7 @@ class TestContractsValidationRelevanceRegression:
 
     def test_real_param_validation_suppresses(self, tmp_path):
         """if amount <= 0: raise ValueError — real validation should suppress."""
-        from stca.v4_restored import detect_contracts_multi
+        from loomscan.v4_restored import detect_contracts_multi
         src = tmp_path / "app.py"
         src.write_text("""def process_payment(amount, currency):
     if amount <= 0:
@@ -144,7 +144,7 @@ class TestContractsValidationRelevanceRegression:
         line, not in the body — the detector currently only checks body lines.
         This test uses Python's inline validation with type hints instead.
         """
-        from stca.v4_restored import detect_contracts_multi
+        from loomscan.v4_restored import detect_contracts_multi
         src = tmp_path / "app.py"
         src.write_text("""from typing import Optional
 
@@ -175,7 +175,7 @@ class TestConcurrencyReceiverCheckRegression:
 
     def test_custom_gather_not_flagged(self, tmp_path):
         """collector.gather() must NOT be flagged as asyncio.gather()."""
-        from stca.concurrency import PythonAsyncAnalyzer
+        from loomscan.concurrency import PythonAsyncAnalyzer
         src = tmp_path / "app.py"
         src.write_text("""class MetricsCollector:
     async def gather(self, *sources):
@@ -194,7 +194,7 @@ async def collect_metrics(collector, sources):
 
     def test_real_asyncio_gather_still_caught(self, tmp_path):
         """asyncio.gather() without try/except MUST still be caught."""
-        from stca.concurrency import PythonAsyncAnalyzer
+        from loomscan.concurrency import PythonAsyncAnalyzer
         src = tmp_path / "app.py"
         src.write_text("""import asyncio
 
@@ -207,7 +207,7 @@ async def handler():
 
     def test_custom_create_task_not_flagged(self, tmp_path):
         """obj.create_task() must NOT be flagged as asyncio.create_task()."""
-        from stca.concurrency import PythonAsyncAnalyzer
+        from loomscan.concurrency import PythonAsyncAnalyzer
         src = tmp_path / "app.py"
         src.write_text("""class TaskManager:
     def create_task(self, name):

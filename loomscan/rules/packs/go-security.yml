@@ -1,0 +1,98 @@
+# Bundled Semgrep rule pack — Go security
+rules:
+  - id: go-cmd-exec
+    pattern: "exec.Command(\"sh\", \"-c\", $INPUT)"
+    message: "Shell exec with input — shell injection risk"
+    languages: [go]
+    severity: ERROR
+    metadata: { cwe: "CWE-78", owasp: "A03" }
+
+  - id: go-sql-string-format
+    pattern: "fmt.Sprintf(\"...%s...\", $INPUT)"
+    message: "SQL query via fmt.Sprintf — SQL injection risk"
+    languages: [go]
+    severity: ERROR
+    metadata: { cwe: "CWE-89", owasp: "A03" }
+
+  - id: go-http-tls-skip-verify
+    pattern: "tls.Config{ InsecureSkipVerify: true }"
+    message: "InsecureSkipVerify:true — MITM risk"
+    languages: [go]
+    severity: ERROR
+    metadata: { cwe: "CWE-295", owasp: "A02" }
+
+  - id: go-md5
+    pattern: "md5.Sum(...)"
+    message: "MD5 used — cryptographically broken"
+    languages: [go]
+    severity: WARNING
+    metadata: { cwe: "CWE-327" }
+
+  - id: go-sha1
+    pattern: "sha1.Sum(...)"
+    message: "SHA1 used — cryptographically broken for security"
+    languages: [go]
+    severity: WARNING
+    metadata: { cwe: "CWE-327" }
+
+  - id: go-hardcoded-secret
+    pattern-regex: '(?i)(api_key|secret|token|password)\s*[:=]\s*"[a-zA-Z0-9]{20,}"'
+    message: "Hardcoded secret"
+    languages: [go]
+    severity: ERROR
+    metadata: { cwe: "CWE-798", owasp: "A05" }
+
+  - id: go-rand-seed
+    pattern: "rand.Seed(...)"
+    message: "math/rand seeded — not cryptographically secure, use crypto/rand"
+    languages: [go]
+    severity: WARNING
+    metadata: { cwe: "CWE-338" }
+
+  - id: go-filepath-join-user-input
+    pattern: "filepath.Join(..., $INPUT)"
+    message: "filepath.Join with user input — path traversal risk"
+    languages: [go]
+    severity: WARNING
+    metadata: { cwe: "CWE-22" }
+
+  - id: go-os-open-user-input
+    pattern: "os.Open($INPUT)"
+    message: "os.Open with potentially user-controlled input — path traversal risk"
+    languages: [go]
+    severity: WARNING
+    metadata: { cwe: "CWE-22" }
+
+  - id: go-defer-in-loop
+    pattern: |
+      for ... {
+        ...
+        defer ...
+      }
+    message: "defer inside loop — resources accumulate until function returns"
+    languages: [go]
+    severity: WARNING
+    metadata: { cwe: "CWE-404" }
+
+  - id: go-err-shadow
+    pattern: |
+      if err := ...; err != nil {
+          ...
+      }
+      $INNER := ...
+      if err := ...; err != nil {
+      }
+    message: "Possible err shadowing in nested if"
+    languages: [go]
+    severity: INFO
+    metadata: { cwe: "CWE-1109" }
+
+  - id: go-empty-error
+    pattern: |
+      if err != nil {
+          return nil
+      }
+    message: "Error swallowed without logging"
+    languages: [go]
+    severity: WARNING
+    metadata: { cwe: "CWE-390" }

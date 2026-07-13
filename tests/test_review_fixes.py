@@ -11,15 +11,15 @@ from pathlib import Path
 
 import pytest
 
-from stca.business_logic import AuthViolationDetector, BusinessStateMachineAnalyzer
-from stca.cpg import build_cpg_for_file
-from stca.taint_cross_file import track_taint_cross_file
-from stca.typestate import analyze_typestate
-from stca.layers.l8_autofix import (
+from loomscan.business_logic import AuthViolationDetector, BusinessStateMachineAnalyzer
+from loomscan.cpg import build_cpg_for_file
+from loomscan.taint_cross_file import track_taint_cross_file
+from loomscan.typestate import analyze_typestate
+from loomscan.layers.l8_autofix import (
     _fix_eval_python, _fix_hardcoded_password, _verify_python_parses,
     _is_eval_arg_literal,
 )
-from stca.layers.l0_fast import MINI_SAST_RULES, SECRET_PATTERNS
+from loomscan.layers.l0_fast import MINI_SAST_RULES, SECRET_PATTERNS
 
 
 # === Tier 1: Auto-fix safety guards ===
@@ -31,7 +31,7 @@ class TestAutoFixSafety:
         """eval() with a literal argument should be fixed to ast.literal_eval()."""
         src = tmp_path / "app.py"
         src.write_text("def f():\n    return eval('[1, 2, 3]')\n")
-        from stca.models import Finding, LayerID
+        from loomscan.models import Finding, LayerID
         finding = Finding(
             layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
             message="eval()", file="app.py", start_line=2,
@@ -44,7 +44,7 @@ class TestAutoFixSafety:
 
     def test_eval_fix_rejects_dynamic_args(self, tmp_path):
         """eval() with a variable or f-string argument must NOT be fixed."""
-        from stca.models import Finding, LayerID
+        from loomscan.models import Finding, LayerID
 
         # Variable argument
         src = tmp_path / "app.py"
@@ -78,7 +78,7 @@ class TestAutoFixSafety:
             '        return True\n'
             '    return False\n'
         )
-        from stca.models import Finding, LayerID
+        from loomscan.models import Finding, LayerID
         finding = Finding(
             layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-hardcoded-password",
             message="hardcoded password", file="app.py", start_line=3,
@@ -254,7 +254,7 @@ class TestMetamorphicArityAware:
         The old version called concat_names(x) with one integer argument,
         got a TypeError, and mislabeled it as a "Determinism violation."
         """
-        from stca.metamorphic import _classify_function, _get_function_arity
+        from loomscan.metamorphic import _classify_function, _get_function_arity
         import ast as _ast
 
         src = """
@@ -273,7 +273,7 @@ def concat_names(first, last):
 
     def test_commutative_only_for_arithmetic(self, tmp_path):
         """Only add/sum/multiply with int params should be commutative."""
-        from stca.metamorphic import _classify_function, _get_function_arity
+        from loomscan.metamorphic import _classify_function, _get_function_arity
         import ast as _ast
 
         # add_numbers with int params → commutative

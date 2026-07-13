@@ -1,0 +1,257 @@
+# LoomScan Bash Security Rules — 51 rules
+rules:
+  - id: bash-eval
+    pattern: "\\beval\\s+"
+    severity: critical
+    message: "eval — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-eval-var
+    pattern: "\\beval\\s+[\\\"']?\\$\\{?\\w+"
+    severity: critical
+    message: "eval with variable — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-source-var
+    pattern: "(?:^|\\s)(?:source|\\.)\\s+\\$\\{?\\w+"
+    severity: high
+    message: "source with variable — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: bash-readlink-f-missing
+    pattern: "\\breadlink\\s+-f\\b"
+    severity: low
+    message: "readlink -f — verify -e or -m for portability"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-rm-rf-var
+    pattern: "\\brm\\s+-rf\\s+[\\\"']?\\$\\{?\\w+"
+    severity: high
+    message: "rm -rf with variable — destructive if variable empty"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-rm-rf-slash
+    pattern: "\\brm\\s+-rf\\s+/\\s*$|rm\\s+-rf\\s+/\\*"
+    severity: critical
+    message: "rm -rf / — disk wipe"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-rm-rf-home
+    pattern: "\\brm\\s+-rf\\s+~|rm\\s+-rf\\s+\\$HOME"
+    severity: critical
+    message: "rm -rf ~ — home dir wipe"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-rm-rf-star
+    pattern: "\\brm\\s+-rf\\s+\\*"
+    severity: high
+    message: "rm -rf * — directory wipe"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-cd-mkdir-rm
+    pattern: "\\bcd\\s+\\$\\{?\\w+[^;]*;\\s*rm\\s+-rf\\s+\\*"
+    severity: critical
+    message: "cd + rm -rf * — wipes target directory"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-unquoted-var
+    pattern: "\\b\\$\\w+\\s*(?:\\||>|<|;)"
+    severity: medium
+    message: "Unquoted variable in pipeline — word splitting risk"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-unquoted-var-redir
+    pattern: ">\\s*\\$\\w+|<\\s*\\$\\w+"
+    severity: medium
+    message: "Unquoted variable in redirection — path injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-echo-secret
+    pattern: "\\becho\\s+[\\\"']?\\$\\{?(?:PASSWORD|SECRET|TOKEN|API_KEY|AWS_SECRET)\\w*"
+    severity: high
+    message: "echo of secret — info leak"
+    metadata: {cwe: "CWE-532"}
+  - id: bash-printf-secret
+    pattern: "\\bprintf\\s+[^\\\"]*\\\"[^\\\"]*\\$\\{?(?:PASSWORD|SECRET|TOKEN|API_KEY)"
+    severity: high
+    message: "printf of secret — info leak"
+    metadata: {cwe: "CWE-532"}
+  - id: bash-wget-http
+    pattern: "\\bwget\\s+http://"
+    severity: medium
+    message: "wget HTTP (not HTTPS) — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: bash-curl-http
+    pattern: "\\bcurl\\s+http://"
+    severity: medium
+    message: "curl HTTP (not HTTPS) — MITM risk"
+    metadata: {cwe: "CWE-319"}
+  - id: bash-wget-no-check
+    pattern: "\\bwget\\s+[^|]*--no-check-certificate"
+    severity: critical
+    message: "wget --no-check-certificate — SSL bypass"
+    metadata: {cwe: "CWE-295"}
+  - id: bash-curl-insecure
+    pattern: "\\bcurl\\s+[^|]*-k\\b|--insecure"
+    severity: critical
+    message: "curl -k/--insecure — SSL bypass"
+    metadata: {cwe: "CWE-295"}
+  - id: bash-curl-pipe-bash
+    pattern: "\\bcurl\\s+[^|]+\\|\\s*(?:sh|bash|zsh)\\b"
+    severity: critical
+    message: "curl | sh — RCE from network"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-wget-pipe-bash
+    pattern: "\\bwget\\s+[^|]+\\|\\s*(?:sh|bash|zsh)\\b"
+    severity: critical
+    message: "wget | sh — RCE from network"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-curl-exec
+    pattern: "\\bcurl\\s+[^|]+[^|]\\s*;\\s*sh\\s+"
+    severity: critical
+    message: "curl; sh — RCE from network"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-ssh-pass
+    pattern: "\\bsshpass\\s+|\\bssh\\s+[^|]*-o\\s+PasswordAuthentication=no"
+    severity: high
+    message: "sshpass / hardcoded SSH password"
+    metadata: {cwe: "CWE-521"}
+  - id: bash-mysql-password
+    pattern: "\\bmysql\\s+[^|]*-p['\\\"]\\w+"
+    severity: high
+    message: "mysql with password on CLI — process list leak"
+    metadata: {cwe: "CWE-521"}
+  - id: bash-psql-password
+    pattern: "\\bPGPASSWORD=\\S+\\s+psql\\b"
+    severity: high
+    message: "PGPASSWORD env — process list leak"
+    metadata: {cwe: "CWE-521"}
+  - id: bash-pgpass-file
+    pattern: "\\b~/.pgpass|echo\\s+[^:]+:[^:]+:[^:]+:[^:]+:[^]+>\\s*~/.pgpass"
+    severity: high
+    message: ".pgpass with credentials — file leak"
+    metadata: {cwe: "CWE-521"}
+  - id: bash-aws-keys-env
+    pattern: "\\bexport\\s+AWS_(?:ACCESS_KEY_ID|SECRET_ACCESS_KEY)=\\S+"
+    severity: high
+    message: "AWS keys in env — process list leak"
+    metadata: {cwe: "CWE-522"}
+  - id: bash-chmod-777
+    pattern: "\\bchmod\\s+777\\b"
+    severity: high
+    message: "chmod 777 — world-writable"
+    metadata: {cwe: "CWE-732"}
+  - id: bash-chmod-666
+    pattern: "\\bchmod\\s+666\\b"
+    severity: medium
+    message: "chmod 666 — world-writable"
+    metadata: {cwe: "CWE-732"}
+  - id: bash-chown-root
+    pattern: "\\bchown\\s+root\\b"
+    severity: low
+    message: "chown root — verify sudo needed"
+    metadata: {cwe: "CWE-732"}
+  - id: bash-sudo-su
+    pattern: "\\bsudo\\s+su\\s+-|sudo\\s+-i"
+    severity: medium
+    message: "sudo su — privilege escalation shell"
+    metadata: {cwe: "CWE-269"}
+  - id: bash-sudo-chmod
+    pattern: "\\bsudo\\s+chmod\\s+\\+s"
+    severity: high
+    message: "sudo chmod +s — setuid binary, privesc risk"
+    metadata: {cwe: "CWE-269"}
+  - id: bash-sudo-with-var
+    pattern: "\\bsudo\\s+[\\\"']?\\$\\{?\\w+"
+    severity: high
+    message: "sudo with variable — command injection via sudo"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-execute-var
+    pattern: "\\b\\$\\(\\s*\\$\\w+"
+    severity: high
+    message: "$($VAR) — command injection via variable"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-backticks-var
+    pattern: "\\`\\s*\\$\\w+"
+    severity: high
+    message: "`$VAR` — command injection via variable"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-set-e-missing
+    pattern: "^(?:#!.*\\n)?(?!.*set\\s+-e\\b)"
+    severity: low
+    message: "Script without set -e — errors don't propagate"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-set-u-missing
+    pattern: "^(?:#!.*\\n)?(?!.*set\\s+-u\\b)"
+    severity: low
+    message: "Script without set -u — unset variables expand to empty"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-pipefail-missing
+    pattern: "^(?:#!.*\\n)?(?!.*set\\s+-o\\s+pipefail)"
+    severity: low
+    message: "Script without pipefail — pipe failures ignored"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-unsafe-cd
+    pattern: "\\bcd\\s+\\$\\w+[^;]*;\\s*rm\\s+"
+    severity: high
+    message: "cd then rm — if cd fails, rm runs in wrong dir"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-no-quotes-around-var
+    pattern: "\\b\\$\\w+\\.(?:txt|log|json|yaml|yml)"
+    severity: low
+    message: "Unquoted variable with extension — word splitting"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-kill-9
+    pattern: "\\bkill\\s+-9\\s+\\$\\w+"
+    severity: medium
+    message: "kill -9 — verify SIGTERM was tried first"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-pkill-f
+    pattern: "\\bpkill\\s+-f\\s+[\\\"']?\\$\\w"
+    severity: high
+    message: "pkill -f with variable — may kill wrong process"
+    metadata: {cwe: "CWE-754"}
+  - id: bash-awk-system
+    pattern: "\\bawk\\s+[^|]*system\\s*\\("
+    severity: high
+    message: "awk system() — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-sed-e-exec
+    pattern: "\\bsed\\s+[^|]*e\\s+[\\\"'][^\\\"']*system\\s*\\("
+    severity: high
+    message: "sed -e with system() — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-find-exec
+    pattern: "\\bfind\\s+[^|]*-exec\\s+[\\\"']?\\$\\w"
+    severity: high
+    message: "find -exec with variable — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-xargs-exec
+    pattern: "\\bxargs\\s+[^|]*--exec\\s+[\\\"']?\\$\\w"
+    severity: high
+    message: "xargs --exec with variable — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-perl-e
+    pattern: "\\bperl\\s+-e\\s+[\\\"']"
+    severity: high
+    message: "perl -e with string — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-python-c
+    pattern: "\\bpython\\s+-c\\s+[\\\"']"
+    severity: medium
+    message: "python -c with string — verify no user input"
+    metadata: {cwe: "CWE-78"}
+  - id: bash-tmpfile-predictable
+    pattern: "\\bmktemp\\b(?!.*--tmpdir)"
+    severity: medium
+    message: "mktemp without --tmpdir — predictable path risk"
+    metadata: {cwe: "CWE-377"}
+  - id: bash-tmpfile-hardcoded
+    pattern: "\\b(?:>|>>)\\s*/tmp/\\w+\\.(?:txt|log|json)"
+    severity: medium
+    message: "Hardcoded /tmp path — race condition"
+    metadata: {cwe: "CWE-377"}
+  - id: bash-dd-of
+    pattern: "\\bdd\\s+[^|]*of\\s*=\\s*/dev/"
+    severity: critical
+    message: "dd to /dev — destructive device write"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-fdisk
+    pattern: "\\bfdisk\\b|parted\\b|mkfs\\."
+    severity: critical
+    message: "Disk partition tool — destructive"
+    metadata: {cwe: "CWE-22"}
+  - id: bash-iptables-flush
+    pattern: "\\biptables\\s+-F\\b|iptables\\s+-X\\b"
+    severity: high
+    message: "iptables -F — flushes all firewall rules"
+    metadata: {cwe: "CWE-732"}

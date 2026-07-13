@@ -33,22 +33,22 @@ def _make_git_repo(root: Path) -> Path:
     subprocess.run(["git", "init", "-q"], cwd=root, check=True)
     subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=root, check=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=root, check=True)
-    (root / ".stca.yaml").write_text("strictness: 5\n")
+    (root / ".loomscan.yaml").write_text("strictness: 5\n")
     subprocess.run(["git", "add", "-A"], cwd=root, check=True)
     subprocess.run(["git", "commit", "-qm", "init"], cwd=root, check=True)
     return root
 
 
 def _run_cli(repo_root: Path, *args: str, env: dict | None = None):
-    """Invoke `stca <args>` via the CLI main entry, returning (stdout, stderr, exit_code)."""
+    """Invoke `loomscan <args>` via the CLI main entry, returning (stdout, stderr, exit_code)."""
     full_env = os.environ.copy()
     if env:
         full_env.update(env)
-    # Force the stca package onto PYTHONPATH
+    # Force the loomscan package onto PYTHONPATH
     pkg_root = Path(__file__).resolve().parent.parent
     full_env["PYTHONPATH"] = str(pkg_root) + os.pathsep + full_env.get("PYTHONPATH", "")
     proc = subprocess.run(
-        [sys.executable, "-c", "from stca.cli import main; main()", *args],
+        [sys.executable, "-c", "from loomscan.cli import main; main()", *args],
         cwd=repo_root, capture_output=True, text=True, env=full_env, timeout=120,
     )
     return proc.stdout, proc.stderr, proc.returncode
@@ -59,7 +59,7 @@ def _run_cli(repo_root: Path, *args: str, env: dict | None = None):
 # =============================================================================
 
 class TestSarifFlagSmoke:
-    """v4.32: `stca check --sarif` crashed with ImportError because
+    """v4.32: `loomscan check --sarif` crashed with ImportError because
     `generate_sarif` didn't exist (actual API is `to_sarif` / `save_sarif`).
     v4.33: should write a SARIF file and exit 0/1 cleanly.
     """
@@ -88,11 +88,11 @@ class TestSarifFlagSmoke:
         assert data["version"] == "2.1.0"
         assert "runs" in data
         assert len(data["runs"]) >= 1
-        # Driver must be STCA
-        assert data["runs"][0]["tool"]["driver"]["name"] == "STCA Pipeline"
+        # Driver must be LoomScan
+        assert data["runs"][0]["tool"]["driver"]["name"] == "LoomScan"
 
     def test_sarif_default_path(self, tmp_path):
-        """Without --output, SARIF should land in .stca-reports/result.sarif."""
+        """Without --output, SARIF should land in .loomscan-reports/result.sarif."""
         repo = _make_git_repo(tmp_path)
         (repo / "app.py").write_text('x = 1\n')
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
@@ -100,7 +100,7 @@ class TestSarifFlagSmoke:
 
         stdout, stderr, rc = _run_cli(repo, "check", "--full", "--sarif")
         assert "ImportError" not in stderr
-        expected = repo / ".stca-reports" / "result.sarif"
+        expected = repo / ".loomscan-reports" / "result.sarif"
         assert expected.exists(), f"Default SARIF path missing. stderr={stderr}"
 
     def test_sarif_stdout_dash(self, tmp_path):
@@ -185,9 +185,9 @@ class TestCrossFileTaintSmoke:
     def test_run_cross_file_taint_tracking_directly(self, tmp_path):
         """Direct call: pass hunks to _run_cross_file_taint_tracking.
         Must not raise NameError."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
-        from stca.models import DiffHunk
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
+        from loomscan.models import DiffHunk
 
         repo = _make_git_repo(tmp_path)
         (repo / "app.py").write_text('x = 1\n')
@@ -207,14 +207,14 @@ class TestCrossFileTaintSmoke:
 # =============================================================================
 
 class TestMaxFilesOverrideSmoke:
-    """v4.32: `stca check --max-files N` set STCA_MAX_FILES_OVERRIDE env var,
+    """v4.32: `loomscan check --max-files N` set STCA_MAX_FILES_OVERRIDE env var,
     but no engine read it. v4.33: _max_files() helper reads the env var
     and overrides the 20+ hardcoded caps.
     """
 
     def test_max_files_helper_overrides_default(self):
         """Unit test for the _max_files helper — the actual chokepoint."""
-        from stca.orchestrator import _max_files
+        from loomscan.orchestrator import _max_files
         old = os.environ.get("STCA_MAX_FILES_OVERRIDE")
         try:
             # No env: default returned
@@ -239,7 +239,7 @@ class TestMaxFilesOverrideSmoke:
         """End-to-end: with --max-files 0, large repos should NOT be silently
         truncated. We verify by setting the env var and confirming the
         orchestrator's _max_files helper reflects 'unlimited'."""
-        from stca.orchestrator import _max_files
+        from loomscan.orchestrator import _max_files
         old = os.environ.get("STCA_MAX_FILES_OVERRIDE")
         try:
             os.environ["STCA_MAX_FILES_OVERRIDE"] = "0"
@@ -256,8 +256,8 @@ class TestMaxFilesOverrideSmoke:
 
     def test_orchestrator_respects_override(self, tmp_path):
         """End-to-end: orchestrator's max_files= call sites use the override."""
-        from stca.orchestrator import Orchestrator, _max_files
-        from stca.config import STCAConfig
+        from loomscan.orchestrator import Orchestrator, _max_files
+        from loomscan.config import STCAConfig
 
         repo = _make_git_repo(tmp_path)
         (repo / "app.py").write_text('x = 1\n')
@@ -293,8 +293,8 @@ class TestDockerHealthcheckSmoke:
     """
 
     def test_no_healthcheck_fires_once(self, tmp_path):
-        from stca.layers.l0e_iac import L0eIaC
-        from stca.models import DiffHunk
+        from loomscan.layers.l0e_iac import L0eIaC
+        from loomscan.models import DiffHunk
 
         (tmp_path / "Dockerfile").write_text(
             "FROM python:3.12\n"
@@ -315,8 +315,8 @@ class TestDockerHealthcheckSmoke:
         )
 
     def test_with_healthcheck_fires_zero(self, tmp_path):
-        from stca.layers.l0e_iac import L0eIaC
-        from stca.models import DiffHunk
+        from loomscan.layers.l0e_iac import L0eIaC
+        from loomscan.models import DiffHunk
 
         (tmp_path / "Dockerfile").write_text(
             "FROM python:3.12\n"
@@ -345,7 +345,7 @@ class TestDockerHealthcheckSmoke:
 # =============================================================================
 
 class TestLspCommandSmoke:
-    """v4.32: `stca lsp` always printed 'LSP server not yet bundled' because
+    """v4.32: `loomscan lsp` always printed 'LSP server not yet bundled' because
     it tried to import a non-existent `run_server` symbol.
     v4.33: imports LSPServer successfully.
     """
@@ -353,12 +353,12 @@ class TestLspCommandSmoke:
     def test_lsp_cmd_does_not_say_not_bundled(self, tmp_path):
         # Importing the lsp_cmd and inspecting the source is brittle; instead
         # just verify the underlying import path works.
-        from stca.lsp.server import LSPServer
-        assert hasattr(LSPServer, "run"), "LSPServer.run must exist for stca lsp"
+        from loomscan.lsp.server import LSPServer
+        assert hasattr(LSPServer, "run"), "LSPServer.run must exist for loomscan lsp"
 
     def test_lsp_cmd_source_uses_LSPServer(self):
         """Static check: cli_v2.lsp_cmd callback must import LSPServer, not run_server."""
-        import stca.cli_v2 as cv2
+        import loomscan.cli_v2 as cv2
         import inspect
         # click.Command wraps the function in .callback
         cb = cv2.lsp_cmd.callback
@@ -384,20 +384,20 @@ class TestJsPatternScannerNoDuplicates:
     """
 
     def test_no_duplicate_rule_ids(self):
-        from stca.js_pattern_scanner import JS_PATTERNS
+        from loomscan.js_pattern_scanner import JS_PATTERNS
         ids = [p[0] for p in JS_PATTERNS]
         dupes = [i for i in set(ids) if ids.count(i) > 1]
         assert not dupes, f"Duplicate rule_ids in JS_PATTERNS: {dupes}"
 
     def test_cryptojs_usage_present_once(self):
-        from stca.js_pattern_scanner import JS_PATTERNS
+        from loomscan.js_pattern_scanner import JS_PATTERNS
         ids = [p[0] for p in JS_PATTERNS]
         assert ids.count("js-cryptojs-usage") == 1, (
             f"js-cryptojs-usage should appear exactly once; found {ids.count('js-cryptojs-usage')}"
         )
 
     def test_role_from_localstorage_present_once(self):
-        from stca.js_pattern_scanner import JS_PATTERNS
+        from loomscan.js_pattern_scanner import JS_PATTERNS
         ids = [p[0] for p in JS_PATTERNS]
         assert ids.count("js-role-from-localstorage") == 1, (
             f"js-role-from-localstorage should appear exactly once; "

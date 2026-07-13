@@ -1,0 +1,152 @@
+# LoomScan Julia Security Rules — 30 rules
+rules:
+  - id: julia-eval-string
+    pattern: "\\bMeta\\.eval\\s*\\("
+    severity: critical
+    message: "Meta.eval — RCE on user input"
+    metadata: {cwe: "CWE-94"}
+  - id: julia-eval-user
+    pattern: "\\bMeta\\.eval\\s*\\([^)]*(?:readline|stdin|input)"
+    severity: critical
+    message: "Meta.eval on user input — RCE"
+    metadata: {cwe: "CWE-94"}
+  - id: julia-parse-user
+    pattern: "\\bMeta\\.parse\\s*\\([^)]*(?:readline|stdin|input)"
+    severity: high
+    message: "Meta.parse on user input — RCE risk"
+    metadata: {cwe: "CWE-94"}
+  - id: julia-run-cmd
+    pattern: "\\brun\\s*\\(\\s*\\`[^\\`]*\\$\\{"
+    severity: high
+    message: "run with interpolation — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: julia-run-string
+    pattern: "\\brun\\s*\\(\\s*\\\"[^\\\"]+\\\"\\s*\\)"
+    severity: medium
+    message: "run with string — verify no user input"
+    metadata: {cwe: "CWE-78"}
+  - id: julia-shell-cmd
+    pattern: "\\b\\`[^\\`]*\\$\\{"
+    severity: high
+    message: "Shell command with interpolation — injection"
+    metadata: {cwe: "CWE-78"}
+  - id: julia-include-user
+    pattern: "\\binclude\\s*\\(\\s*[\\\"'][^\\\"']*\\$\\{"
+    severity: high
+    message: "include with interpolation — LFI"
+    metadata: {cwe: "CWE-98"}
+  - id: julia-include-string
+    pattern: "\\binclude\\s*\\(\\s*\\w+"
+    severity: medium
+    message: "include with variable — verify path"
+    metadata: {cwe: "CWE-98"}
+  - id: julia-md5
+    pattern: "\\bmd5\\s*\\("
+    severity: high
+    message: "MD5 broken — use sha256"
+    metadata: {cwe: "CWE-327"}
+  - id: julia-sha1
+    pattern: "\\bsha1\\s*\\("
+    severity: high
+    message: "SHA1 broken — use sha256"
+    metadata: {cwe: "CWE-327"}
+  - id: julia-random-not-secure
+    pattern: "\\bRandom\\s*\\.\\s*(?:rand|randn|randexp)\\b|rand\\s*\\(\\s*\\)"
+    severity: high
+    message: "Random.rand NOT CSPRNG — use RandomDevice or SecretRandom"
+    metadata: {cwe: "CWE-338"}
+  - id: julia-mersenne-twister
+    pattern: "\\bMersenneTwister\\s*\\(\\s*\\d+\\s*\\)"
+    severity: high
+    message: "MersenneTwister with seed — predictable, not CSPRNG"
+    metadata: {cwe: "CWE-338"}
+  - id: julia-hardcoded-secret
+    pattern: "\\b(?:password|secret|api[_-]?key|auth[_-]?token)\\s*=\\s*\\\"[^\\\"]{8,}\\\""
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: julia-http-not-https
+    pattern: "\\bHTTP\\.(?:get|post|put|delete)\\s*\\(\\s*\\\"http://"
+    severity: medium
+    message: "HTTP (not HTTPS) request"
+    metadata: {cwe: "CWE-319"}
+  - id: julia-ssl-verify-none
+    pattern: "\\bSSLConfig\\s*\\([^)]*verify\\s*=\\s*false"
+    severity: critical
+    message: "SSL verification disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: julia-println-prod
+    pattern: "\\bprintln\\s*\\("
+    severity: low
+    message: "println in production — use @info or Logging"
+    metadata: {cwe: "CWE-532"}
+  - id: julia-print-prod
+    pattern: "\\bprint\\s*\\("
+    severity: low
+    message: "print in production — use Logging"
+    metadata: {cwe: "CWE-532"}
+  - id: julia-@show-prod
+    pattern: "\\@show\\s+"
+    severity: low
+    message: "@show in production — debug macro"
+    metadata: {cwe: "CWE-532"}
+  - id: julia-display-prod
+    pattern: "\\bdisplay\\s*\\("
+    severity: low
+    message: "display in production"
+    metadata: {cwe: "CWE-532"}
+  - id: julia-try-catch-empty
+    pattern: "\\bcatch\\s*$"
+    severity: medium
+    message: "Empty catch — errors swallowed"
+    metadata: {cwe: "CWE-755"}
+  - id: julia-rethrow
+    pattern: "\\brethrow\\s*\\("
+    severity: low
+    message: "rethrow — verify error handling"
+    metadata: {cwe: "CWE-754"}
+  - id: julia-throw-error
+    pattern: "\\bthrow\\s+\\w*Error\\s*\\("
+    severity: low
+    message: "throw Error — verify catch hierarchy"
+    metadata: {cwe: "CWE-754"}
+  - id: julia-@assert
+    pattern: "\\@assert\\s+"
+    severity: low
+    message: "@assert — disabled with --inline=no, use real check"
+    metadata: {cwe: "CWE-749"}
+  - id: julia-error-no-msg
+    pattern: "\\berror\\s*\\(\\s*\\)"
+    severity: medium
+    message: "error() without message — unhelpful"
+    metadata: {cwe: "CWE-754"}
+  - id: julia-unsafe-string
+    pattern: "\\bunsafe_string\\s*\\("
+    severity: medium
+    message: "unsafe_string — verify memory safety"
+    metadata: {cwe: "CWE-843"}
+  - id: julia-unsafe-pointer
+    pattern: "\\bunsafe_(?:load|store|pointer)\\s*\\("
+    severity: high
+    message: "unsafe pointer operation — memory safety risk"
+    metadata: {cwe: "CWE-843"}
+  - id: julia-ccall-user
+    pattern: "\\bccall\\s*\\([^)]*\\$\\{"
+    severity: high
+    message: "ccall with interpolation — FFI injection"
+    metadata: {cwe: "CWE-78"}
+  - id: julia-serialize-user
+    pattern: "\\bserialize\\s*\\(\\s*[^,]+,\\s*(?:readline|stdin|input)"
+    severity: critical
+    message: "serialize on user input — RCE on deserialize"
+    metadata: {cwe: "CWE-502"}
+  - id: julia-deserialize
+    pattern: "\\bdeserialize\\s*\\("
+    severity: critical
+    message: "deserialize — RCE on untrusted data"
+    metadata: {cwe: "CWE-502"}
+  - id: julia-xml-parse-user
+    pattern: "\\bEzXML\\b.*parse\\s*\\(\\s*readline|LightXML\\b.*parse_string\\s*\\(\\s*input"
+    severity: high
+    message: "XML parse on user input — XXE risk"
+    metadata: {cwe: "CWE-611"}

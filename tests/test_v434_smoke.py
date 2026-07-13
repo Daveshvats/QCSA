@@ -27,7 +27,7 @@ import yaml
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PACKS_DIR = PROJECT_ROOT / "stca" / "rules" / "packs"
+PACKS_DIR = PROJECT_ROOT / "loomscan" / "rules" / "packs"
 
 
 # =============================================================================
@@ -39,13 +39,13 @@ class TestL8AutofixExpanded:
     Docker, K8s, Java, Go, C/C++, Rust, Ruby, PHP."""
 
     def test_has_at_least_50_patterns(self):
-        from stca.layers.l8_autofix import FIX_PATTERNS
+        from loomscan.layers.l8_autofix import FIX_PATTERNS
         assert len(FIX_PATTERNS) >= 50, (
             f"Expected 50+ fix patterns, got {len(FIX_PATTERNS)}"
         )
 
     def test_covers_multiple_languages(self):
-        from stca.layers.l8_autofix import FIX_PATTERNS
+        from loomscan.layers.l8_autofix import FIX_PATTERNS
         # Look at the rule_prefix family (e.g., L0.sast, L0.ast, L0e.docker, L0e.k8s,
         # L0.semgrep, L0.java, L0.go, L0.cpp, L0.hardcoded-url, etc.)
         prefixes = set()
@@ -60,8 +60,8 @@ class TestL8AutofixExpanded:
 
     def test_eval_fixer_still_works(self, tmp_path):
         """Make sure the v4.0 eval fixer still works after the expansion."""
-        from stca.layers.l8_autofix import _fix_eval_python
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_eval_python
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "app.py"
@@ -79,8 +79,8 @@ class TestL8AutofixExpanded:
 
     def test_shell_true_fixer(self, tmp_path):
         """v4.34: shell=True → shell=False fixer."""
-        from stca.layers.l8_autofix import _fix_shell_true
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_shell_true
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "app.py"
@@ -102,8 +102,8 @@ class TestL8AutofixExpanded:
 
     def test_md5_fixer(self, tmp_path):
         """v4.34: md5 → sha256 fixer."""
-        from stca.layers.l8_autofix import _fix_md5_usage
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_md5_usage
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "app.py"
@@ -121,8 +121,8 @@ class TestL8AutofixExpanded:
 
     def test_docker_root_user_fixer(self, tmp_path):
         """v4.34: Add non-root USER to Dockerfile."""
-        from stca.layers.l8_autofix import _fix_docker_root_user
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_docker_root_user
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "Dockerfile"
@@ -140,8 +140,8 @@ class TestL8AutofixExpanded:
 
     def test_rust_unwrap_fixer(self, tmp_path):
         """v4.34: .unwrap() → .expect() in Rust."""
-        from stca.layers.l8_autofix import _fix_rust_unwrap
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_rust_unwrap
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "main.rs"
@@ -159,8 +159,8 @@ class TestL8AutofixExpanded:
 
     def test_k8s_privileged_fixer(self, tmp_path):
         """v4.34: privileged: true → false in K8s YAML."""
-        from stca.layers.l8_autofix import _fix_k8s_privileged
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_k8s_privileged
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "pod.yaml"
@@ -189,56 +189,56 @@ class TestSecretDetectionExpanded:
     """v4.34: 98 additional regex-based secret patterns added."""
 
     def test_has_98_patterns(self):
-        from stca.advanced_secrets import SECRET_PATTERNS_V434
+        from loomscan.advanced_secrets import SECRET_PATTERNS_V434
         assert len(SECRET_PATTERNS_V434) >= 50, (
             f"Expected 50+ new patterns, got {len(SECRET_PATTERNS_V434)}"
         )
 
     def test_detects_aws_key(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "aws" for det in d)
 
     def test_detects_stripe_live_key(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'stripe = "sk_live_' + "A" * 30 + '"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "stripe" for det in d)
 
     def test_detects_postgres_url(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'DATABASE_URL = "postgres://user:secretpass@db.example.com:5432/mydb"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "postgres" for det in d)
 
     def test_detects_private_key(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = "-----BEGIN RSA PRIVATE KEY-----\nMII...\n-----END RSA PRIVATE KEY-----"
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "private_key" for det in d)
 
     def test_detects_github_pat(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'token = "ghp_1234567890abcdefghijklmnopqrstuvwxyz1234"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "github" for det in d)
 
     def test_detects_django_secret(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'SECRET_KEY = "' + "x" * 60 + '"'
         d = detect_secrets_entropy(text, "settings.py")
         assert any(det.secret_type == "django" for det in d)
 
     def test_detects_openai_key(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         # sk-XXXX...T3BlbkFJXXXX... pattern
         text = 'OPENAI_API_KEY = "sk-' + "a" * 20 + "T3BlbkFJ" + "b" * 20 + '"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "openai" for det in d)
 
     def test_no_false_positive_on_normal_string(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'name = "Alice"\nage = 30\nmessage = "Hello, world!"'
         d = detect_secrets_entropy(text, "test.py")
         # Should not fire on benign strings (entropy-based may catch a few generic ones)
@@ -375,47 +375,47 @@ class TestNewPacksRegistered:
     """v4.34: C#, Swift, Scala packs must be registered in BUILTIN_PACKS."""
 
     def test_csharp_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "csharp-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["csharp-security"]["language"] == "csharp"
 
     def test_swift_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "swift-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["swift-security"]["language"] == "swift"
 
     def test_scala_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "scala-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["scala-security"]["language"] == "scala"
 
     def test_rust_pack_count_updated(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert BUILTIN_PACKS["rust-security"]["rules"] >= 60
 
     def test_php_pack_count_updated(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert BUILTIN_PACKS["php-security"]["rules"] >= 100
 
     def test_ruby_pack_count_updated(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert BUILTIN_PACKS["ruby-security"]["rules"] >= 75
 
     def test_get_all_packs_for_csharp_files(self):
         """Auto-selection should include C# pack for .cs files."""
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["Program.cs"])
         pack_names = {p.stem for p in packs}
         assert "csharp-security" in pack_names
 
     def test_get_all_packs_for_swift_files(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["AppDelegate.swift"])
         pack_names = {p.stem for p in packs}
         assert "swift-security" in pack_names
 
     def test_get_all_packs_for_scala_files(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["Main.scala"])
         pack_names = {p.stem for p in packs}
         assert "scala-security" in pack_names
@@ -434,7 +434,7 @@ class TestPortedPacksMetadata:
 
     @pytest.mark.parametrize("pack_name", ["detekt-inspired", "spotbugs-inspired", "lintr-inspired", "luacheck-inspired"])
     def test_description_says_concepts(self, pack_name: str):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         desc = BUILTIN_PACKS[pack_name]["description"]
         # v4.36: Now says "Concepts inspired by" instead of "Concepts ported"
         assert ("inspired by" in desc.lower() or "concepts ported" in desc.lower()), (
@@ -443,7 +443,7 @@ class TestPortedPacksMetadata:
 
     def test_language_still_python(self):
         """The rules actually scan Python code, so language must stay 'python'."""
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         for name in ["detekt-inspired", "spotbugs-inspired", "lintr-inspired", "luacheck-inspired"]:
             assert BUILTIN_PACKS[name]["language"] == "python", (
                 f"{name}: language must be 'python' (the rules scan Python code)"
@@ -451,7 +451,7 @@ class TestPortedPacksMetadata:
 
     def test_old_ported_names_removed(self):
         """v4.36: The old -ported names should no longer exist in BUILTIN_PACKS."""
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         for old_name in ["detekt-ported", "spotbugs-ported", "lintr-ported", "luacheck-ported"]:
             assert old_name not in BUILTIN_PACKS, (
                 f"{old_name} should be removed (renamed to -inspired in v4.36)"
@@ -463,38 +463,38 @@ class TestPortedPacksMetadata:
 # =============================================================================
 
 class TestVSCodeExtension:
-    """v4.34: VS Code extension stub at editor/vscode-stca/."""
+    """v4.34: VS Code extension stub at editor/vscode-loomscan/."""
 
     def test_package_json_exists(self):
-        ext_dir = PROJECT_ROOT / "editor" / "vscode-stca"
+        ext_dir = PROJECT_ROOT / "editor" / "vscode-loomscan"
         assert (ext_dir / "package.json").exists(), "VS Code extension package.json missing"
 
     def test_package_json_valid(self):
         import json
-        ext_dir = PROJECT_ROOT / "editor" / "vscode-stca"
+        ext_dir = PROJECT_ROOT / "editor" / "vscode-loomscan"
         with open(ext_dir / "package.json") as f:
             data = json.load(f)
-        assert data["name"] == "stca"
+        assert data["name"] == "loomscan"
         assert "commands" in data["contributes"]
         commands = [c["command"] for c in data["contributes"]["commands"]]
-        assert "stca.checkRepo" in commands
-        assert "stca.applyFix" in commands
+        assert "loomscan.checkRepo" in commands
+        assert "loomscan.applyFix" in commands
 
     def test_extension_ts_exists(self):
-        ext_dir = PROJECT_ROOT / "editor" / "vscode-stca"
+        ext_dir = PROJECT_ROOT / "editor" / "vscode-loomscan"
         assert (ext_dir / "src" / "extension.ts").exists(), "extension.ts missing"
 
     def test_readme_exists(self):
-        ext_dir = PROJECT_ROOT / "editor" / "vscode-stca"
+        ext_dir = PROJECT_ROOT / "editor" / "vscode-loomscan"
         assert (ext_dir / "README.md").exists()
 
-    def test_supports_all_stca_languages(self):
+    def test_supports_all_loomscan_languages(self):
         import json
-        ext_dir = PROJECT_ROOT / "editor" / "vscode-stca"
+        ext_dir = PROJECT_ROOT / "editor" / "vscode-loomscan"
         with open(ext_dir / "package.json") as f:
             data = json.load(f)
         langs = data["activationEvents"]
-        # Should activate for all languages STCA supports
+        # Should activate for all languages LoomScan supports
         for lang_token in ["python", "javascript", "typescript", "go", "java",
                             "rust", "c", "cpp", "php", "ruby", "csharp", "swift", "scala"]:
             assert any(lang_token in ev for ev in langs), (
@@ -512,11 +512,11 @@ class TestStrictScannersSmoke:
     def test_strict_scanners_flag_exists(self):
         """Verify --strict-scanners is a recognized CLI flag."""
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["check", "--help"])
         assert "--strict-scanners" in result.output, (
-            "--strict-scanners must appear in `stca check --help`"
+            "--strict-scanners must appear in `loomscan check --help`"
         )
 
 
@@ -525,7 +525,7 @@ class TestStrictScannersSmoke:
 # =============================================================================
 
 class TestTotalRuleCount:
-    """v4.34: STCA should now have 1,200+ rules total."""
+    """v4.34: LoomScan should now have 1,200+ rules total."""
 
     def test_yaml_pack_total(self):
         """Sum of YAML pack rules should be 600+."""
@@ -538,11 +538,11 @@ class TestTotalRuleCount:
 
     def test_secret_patterns_count(self):
         """v4.34 added 50+ secret patterns."""
-        from stca.advanced_secrets import SECRET_PATTERNS_V434, SECRET_PREFIXES
+        from loomscan.advanced_secrets import SECRET_PATTERNS_V434, SECRET_PREFIXES
         assert len(SECRET_PATTERNS_V434) >= 50
         assert len(SECRET_PREFIXES) >= 10
 
     def test_l8_fix_patterns_count(self):
         """v4.34: L8 Autofix should have 50+ patterns."""
-        from stca.layers.l8_autofix import FIX_PATTERNS
+        from loomscan.layers.l8_autofix import FIX_PATTERNS
         assert len(FIX_PATTERNS) >= 50

@@ -1,0 +1,151 @@
+"""One-shot LLM-based fuzz harness generation (Google OSS-Fuzz-Gen pattern).
+
+Generates an Atheris fuzz harness for each function, ONCE, and writes it to
+tests/fuzz/<function>_fuzz.py. The harness is committed and run deterministically
+on every subsequent commit. The LLM is a *compiler*, not a runtime.
+"""
+from __future__ import annotations
+
+import ast
+import textwrap
+from pathlib import Path
+from typing import List, Optional
+import json
+
+from ..llm.client import LLMClient
+from ..llm.prm import PRMScorer
+
+
+class HarnessGenerator:
+    def __init__(self, repo_root: Path, llm: Optional[LLMClient] = None):
+        self.repo_root = repo_root
+        self.llm = llm
+        self.prm = PRMScorer()
+
+    def generate_for_file(self, file_path: Path) -> List[Path]:
+        """Generate fuzz harnesses for every function in the file."""
+        if not file_path.exists():
+            return []
+        try:
+            source = file_path.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+        except Exception:
+            return []
+
+        harnesses: List[Path] = []
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            if node.name.startswith("_"):
+                continue  # skip private
+            harness = self._generate_one(file_path, node, source)
+            if harness:
+                harnesses.append(harness)
+        return harnesses
+
+    def _generate_one(self, file_path: Path, func_node: ast.FunctionDef,
+                      source: str) -> Optional[Path]:
+        """Generate a single harness. Uses LLM if available, else template."""
+        func_name = func_node.name
+        func_body = ast.unparse(func_node)
+        rel_path = str(file_path.relative_to(self.repo_root))
+        module_path = rel_path.replace("/", ".").replace(".py", "").lstrip(".")
+
+        # check if a custom harness already exists
+        out_dir = self.repo_root / "tests" / "fuzz"
+        out_path = out_dir / f"{func_name}_fuzz.py"
+        if out_path.exists():
+            return out_path  # don't overwrite
+
+        # try LLM generation
+        if self.llm and self.llm.is_available():
+            harness_code = self._llm_generate(func_name, func_body, module_path)
+            if harness_code:
+                # validate PRM score of the LLM output (treat as reasoning)
+                score = self.prm.score_step(harness_code, func_body)
+                if score["overall"] >= 0.4:
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    out_path.write_text(harness_code, encoding="utf-8")
+                    return out_path
+
+        # fallback: template-based harness
+        return self._template_generate(func_name, func_node, module_path, out_dir, out_path)
+
+    def _llm_generate(self, func_name: str, func_body: str,
+                      module_path: str) -> Optional[str]:
+        prompt = f"""Generate an Atheris fuzz harness for the function `{func_name}`.
+
+Function source:
+```python
+{func_body[:1200]}
+```
+
+The harness should:
+1. Import the function from `{module_path}`
+2. Use atheris.FuzzedDataProvider to generate appropriate inputs
+3. Try calling the function with multiple input types based on its signature
+4. Catch expected exceptions (TypeError, ValueError) but NOT unexpected ones
+5. Use atheris.Setup and atheris.Fuzz at the end
+
+Output ONLY the Python code, no markdown fences, no explanations.
+"""
+        raw = self.llm.generate(prompt, system="You are a Python fuzzing expert.", temperature=0.1)
+        if not raw:
+            return None
+        # strip markdown fences if present
+        lines = raw.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        return "\n".join(lines)
+
+    def _template_generate(self, func_name: str, func_node: ast.FunctionDef,
+                           module_path: str, out_dir: Path, out_path: Path) -> Path:
+        """Generate a naive template harness when LLM isn't available."""
+        # count args
+        args = [a.arg for a in func_node.args.args if a.arg != "self"]
+
+        # build calls with different argument types
+        calls = []
+        if len(args) == 0:
+            calls.append(f"            {func_name}()")
+        elif len(args) == 1:
+            calls.append(f"            {func_name}(fdp.ConsumeUnicodeNoSurrogates(fdp.remaining_bytes() or 1))")
+            calls.append(f"            {func_name}(fdp.ConsumeInt(4))")
+        elif len(args) == 2:
+            calls.append(f"            {func_name}(fdp.ConsumeInt(4), fdp.ConsumeUnicodeNoSurrogates(20))")
+        else:
+            # too many args, just skip
+            return None
+
+        harness_code = textwrap.dedent(f'''
+            """Auto-generated Atheris fuzz harness for {func_name}.
+            Generated by `loomscan bootstrap harnesses` (template fallback).
+            Edit this file to improve the harness.
+            """
+            import sys
+            import atheris
+
+            with atheris.instrument_imports():
+                try:
+                    from {module_path} import {func_name}
+                except Exception:
+                    sys.exit(0)
+
+            def test_one_input(data):
+                fdp = atheris.FuzzedDataProvider(data)
+                try:
+{chr(10).join(calls)}
+                except (TypeError, ValueError, KeyError, IndexError):
+                    pass
+                except Exception:
+                    raise  # unexpected — that's the bug
+
+            atheris.Setup(sys.argv, test_one_input)
+            atheris.Fuzz()
+        ''').strip() + "\n"
+
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(harness_code, encoding="utf-8")
+        return out_path

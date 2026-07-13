@@ -6,14 +6,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stca.baseline import Baseline, BaselineEntry
-from stca.strictness import get_level, filter_findings_by_strictness, should_block, list_levels, LEVELS
-from stca.nullness import NullnessAnalyzer, NullnessIssue
-from stca.issue_store import IssueStore, Issue
-from stca.consistency import (check_string_formatting_consistency, check_logging_consistency,
+from loomscan.baseline import Baseline, BaselineEntry
+from loomscan.strictness import get_level, filter_findings_by_strictness, should_block, list_levels, LEVELS
+from loomscan.nullness import NullnessAnalyzer, NullnessIssue
+from loomscan.issue_store import IssueStore, Issue
+from loomscan.consistency import (check_string_formatting_consistency, check_logging_consistency,
                                check_none_check_consistency, check_all_consistencies,
                                check_import_consistency, Inconsistency)
-from stca.models import Finding, Severity, BlastRadius, LayerID, Category
+from loomscan.models import Finding, Severity, BlastRadius, LayerID, Category
 
 
 # === Baseline (detekt-inspired) ===

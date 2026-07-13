@@ -8,10 +8,10 @@ from pathlib import Path
 
 import pytest
 
-from stca.normalized_ast import (
+from loomscan.normalized_ast import (
     NormalizedNode, parse_file, get_language, is_supported, get_language
 )
-from stca.multi_language_bl import (
+from loomscan.multi_language_bl import (
     detect_all, detect_auth_violations, detect_reentrancy, detect_toctou,
     detect_missing_auth_in_chain, detect_typestate_violations,
     get_capabilities, get_supported_languages, BLFinding

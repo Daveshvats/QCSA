@@ -10,14 +10,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stca.hotspots import HotspotManager, HOTSPOT_PATTERNS
-from stca.advanced_secrets import (detect_secrets_entropy, shannon_entropy,
+from loomscan.hotspots import HotspotManager, HOTSPOT_PATTERNS
+from loomscan.advanced_secrets import (detect_secrets_entropy, shannon_entropy,
                                     detect_secrets_advanced, scan_git_history,
                                     SECRET_PREFIXES)
-from stca.coverage import (parse_coverage_py, parse_jacoco, parse_istanbul,
+from loomscan.coverage import (parse_coverage_py, parse_jacoco, parse_istanbul,
                             parse_go_coverage, find_coverage_report,
                             track_coverage_history, CoverageReport, FileCoverage)
-from stca.audit import AuditLogger
+from loomscan.audit import AuditLogger
 
 
 # === Shannon entropy ===
@@ -140,8 +140,8 @@ def test_hotspot_audit_chain_detects_tampering(tmp_path):
     hm = HotspotManager(tmp_path)
     new = hm.detect_hotspots([src])
     hm.review(new[0].id, "safe", "testuser", "ok")
-    # tamper with the hotspot audit log (now .stca-hotspot-audit.log)
-    audit_file = tmp_path / ".stca-hotspot-audit.log"
+    # tamper with the hotspot audit log (now .loomscan-hotspot-audit.log)
+    audit_file = tmp_path / ".loomscan-hotspot-audit.log"
     lines = audit_file.read_text().strip().splitlines()
     # modify the second line
     if len(lines) >= 2:
@@ -193,7 +193,7 @@ def test_audit_log_detects_tampering(tmp_path):
     for i in range(3):
         al.log("test_action", {"iteration": i})
     # tamper
-    log_file = tmp_path / ".stca-audit.log"
+    log_file = tmp_path / ".loomscan-audit.log"
     lines = log_file.read_text().strip().splitlines()
     entry = json.loads(lines[1])
     entry["details"] = '{"tampered": true}'
@@ -289,7 +289,7 @@ app.go:6.1,8.1 2 0
 
 def test_coverage_history_tracking(tmp_path):
     """Should track coverage over time and detect drops."""
-    history_file = tmp_path / ".stca-coverage-history.json"
+    history_file = tmp_path / ".loomscan-coverage-history.json"
     # first run
     report1 = CoverageReport(tool="coverage.py")
     report1.files["app.py"] = FileCoverage(file="app.py", line_rate=0.9, branch_rate=0.5)
@@ -319,14 +319,14 @@ def test_find_coverage_report_auto_discovers(tmp_path):
 # === Pysa integration (mock — no Pysa in CI) ===
 
 def test_pysa_module_imports():
-    from stca import pysa_integration
+    from loomscan import pysa_integration
     assert hasattr(pysa_integration, "PysaIntegration")
     assert hasattr(pysa_integration, "get_pysa_findings_or_fallback")
 
 
 def test_pysa_unavailable_returns_empty(tmp_path):
     """Without Pysa installed, run() should return empty list."""
-    from stca.pysa_integration import PysaIntegration
+    from loomscan.pysa_integration import PysaIntegration
     pysa = PysaIntegration(tmp_path)
     if not pysa.is_available():
         findings = pysa.run([tmp_path / "app.py"])

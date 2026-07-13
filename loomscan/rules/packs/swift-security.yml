@@ -1,0 +1,152 @@
+# LoomScan Swift Security Rules — 30 rules
+rules:
+  - id: swift-nsjsonserialization-user
+    pattern: "\\bNSJSONSerialization\\.jsonObject\\s*\\(with:[^)]*Request\\."
+    severity: high
+    message: "JSONSerialization on user input — DoS via huge payload"
+    metadata: {cwe: "CWE-400"}
+  - id: swift-eval-javascript
+    pattern: "\\bWKWebView.*evaluateJavaScript\\s*\\("
+    severity: high
+    message: "evaluateJavaScript — RCE if user input"
+    metadata: {cwe: "CWE-94"}
+  - id: swift-process-launch
+    pattern: "\\bProcess\\s*\\(\\s*\\)\\.launch\\s*\\(\\s*\\)|\\bProcess\\.run\\s*\\("
+    severity: high
+    message: "Process launch — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: swift-process-arguments
+    pattern: "\\b\\.arguments\\s*=\\s*\\["
+    severity: medium
+    message: "Process.arguments — verify no shell injection"
+    metadata: {cwe: "CWE-78"}
+  - id: swift-nsurlsession-http
+    pattern: "\\bURL\\(string:\\s*[\\\"\\']http://"
+    severity: medium
+    message: "HTTP (not HTTPS) request"
+    metadata: {cwe: "CWE-319"}
+  - id: swift-alamofire-http
+    pattern: "\\bAF\\.request\\s*\\(\\s*[\\\"\\']http://"
+    severity: medium
+    message: "Alamofire HTTP request — use HTTPS"
+    metadata: {cwe: "CWE-319"}
+  - id: swift-hardcoded-secret
+    pattern: "\\b(?:let|var)\\s+(?:password|secret|api[_-]?key|auth[_-]?token)\\s*[:=]\\s*[\\\"\\'][^\\\"\\']{8,}[\\\"\\']"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: swift-keychain-hardcoded
+    pattern: "\\bKeychainAccess\\b.*password\\s*=\\s*[\\\"\\']"
+    severity: high
+    message: "Keychain with hardcoded password"
+    metadata: {cwe: "CWE-798"}
+  - id: swift-userdefaults-secret
+    pattern: "\\bUserDefaults\\.standard\\.set\\s*\\([^,]+,\\s*forKey:\\s*[\\\"\\']\\w*(?:password|secret|token)\\w*[\\\"\\']"
+    severity: high
+    message: "UserDefaults for secret — use Keychain"
+    metadata: {cwe: "CWE-312"}
+  - id: swift-nsuserdefaults-cred
+    pattern: "\\bUserDefaults\\.standard\\.(?:string|array|dictionary)\\s*\\(\\s*forKey:\\s*[\\\"\\']\\w*(?:password|secret|token)\\w*[\\\"\\']"
+    severity: high
+    message: "Reading credential from UserDefaults — insecure"
+    metadata: {cwe: "CWE-312"}
+  - id: swift-md5
+    pattern: "\\bCommonCrypto\\.CC_MD5\\b|\\.md5\\s*\\(\\s*\\)"
+    severity: high
+    message: "MD5 broken — use SHA256"
+    metadata: {cwe: "CWE-327"}
+  - id: swift-sha1
+    pattern: "\\bCommonCrypto\\.CC_SHA1\\b|\\.sha1\\s*\\(\\s*\\)"
+    severity: high
+    message: "SHA1 broken — use SHA256"
+    metadata: {cwe: "CWE-327"}
+  - id: swift-cryptor-ecb
+    pattern: "\\bCryptor\\s*\\([^)]*mode:\\s*\\.ECB"
+    severity: critical
+    message: "AES-ECB — deterministic, leaks patterns"
+    metadata: {cwe: "CWE-327"}
+  - id: swift-arc4random
+    pattern: "\\barc4random(?:_uniform)?\\s*\\("
+    severity: medium
+    message: "arc4random — not for crypto, use SecRandomCopyBytes"
+    metadata: {cwe: "CWE-338"}
+  - id: swift-nsfilemanager-unprotected
+    pattern: "\\bFileManager\\.default\\.createFile\\s*\\([^)]*\\)(?!.*FileProtectionType)"
+    severity: medium
+    message: "File created without FileProtectionType — iOS data leak"
+    metadata: {cwe: "CWE-312"}
+  - id: swift-nsurlcredential-permanent
+    pattern: "\\bURLCredential\\s*\\([^)]*persistence:\\s*\\.forSession"
+    severity: medium
+    message: "URLCredential persistence — verify security"
+    metadata: {cwe: "CWE-522"}
+  - id: swift-nsurlsession-no-cert
+    pattern: "\\bURLSessionDelegate.*didReceiveChallenge.*useCredential"
+    severity: medium
+    message: "URLSession challenge — verify cert logic"
+    metadata: {cwe: "CWE-295"}
+  - id: swift-nsurlcache
+    pattern: "\\bURLCache\\s*\\(\\s*memoryCapacity:\\s*\\d+\\s*,\\s*diskCapacity:\\s*\\d+\\)"
+    severity: low
+    message: "URLCache — verify cache excludes sensitive data"
+    metadata: {cwe: "CWE-524"}
+  - id: swift-print-prod
+    pattern: "\\bprint\\s*\\("
+    severity: low
+    message: "print in production — use os_log or Logger"
+    metadata: {cwe: "CWE-532"}
+  - id: swift-nslog-prod
+    pattern: "\\bNSLog\\s*\\("
+    severity: low
+    message: "NSLog in production — use os_log"
+    metadata: {cwe: "CWE-532"}
+  - id: swift-debug-print
+    pattern: "\\bdebugPrint\\s*\\("
+    severity: low
+    message: "debugPrint in production"
+    metadata: {cwe: "CWE-532"}
+  - id: swift-dump-prod
+    pattern: "\\bdump\\s*\\("
+    severity: low
+    message: "dump() in production"
+    metadata: {cwe: "CWE-532"}
+  - id: swift-force-unwrap
+    pattern: "\\b\\w+!\\s*(?:[\\.\\[\\(]|$)"
+    severity: medium
+    message: "Force unwrap — crash on nil"
+    metadata: {cwe: "CWE-754"}
+  - id: swift-force-cast
+    pattern: "\\bas!\\s+"
+    severity: high
+    message: "Force cast — crash on type mismatch"
+    metadata: {cwe: "CWE-754"}
+  - id: swift-try-force
+    pattern: "\\btry!\\s+"
+    severity: medium
+    message: "try! — crash on error"
+    metadata: {cwe: "CWE-754"}
+  - id: swift-fatal-error
+    pattern: "\\bfatalError\\s*\\("
+    severity: medium
+    message: "fatalError — crashes app"
+    metadata: {cwe: "CWE-754"}
+  - id: swift-precondition-failure
+    pattern: "\\bpreconditionFailure\\s*\\("
+    severity: medium
+    message: "preconditionFailure — crashes app"
+    metadata: {cwe: "CWE-754"}
+  - id: swift-assertion-failure
+    pattern: "\\bassertionFailure\\s*\\("
+    severity: low
+    message: "assertionFailure — debug only"
+    metadata: {cwe: "CWE-749"}
+  - id: swift-keychain-accessible
+    pattern: "\\bkSecAttrAccessibleAlways\\b"
+    severity: critical
+    message: "Keychain AccessibleAlways — should be WhenUnlocked"
+    metadata: {cwe: "CWE-312"}
+  - id: swift-keychain-accessible-this
+    pattern: "\\bkSecAttrAccessibleAlwaysThisDeviceOnly\\b"
+    severity: medium
+    message: "Keychain AccessibleAlwaysThisDeviceOnly — verify intent"
+    metadata: {cwe: "CWE-312"}

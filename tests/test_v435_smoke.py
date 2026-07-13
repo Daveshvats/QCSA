@@ -6,7 +6,7 @@ Tests:
 3. 4 new language packs (Kotlin, SQL, Bash, Dart) registered and parse
 4. Secret detection 200+ patterns
 5. L8 Autofix 100+ patterns
-6. stca gate command (quality gates)
+6. loomscan gate command (quality gates)
 7. cli_v2.py lsp_cmd uses LSPServer (still works)
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ import yaml
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PACKS_DIR = PROJECT_ROOT / "stca" / "rules" / "packs"
+PACKS_DIR = PROJECT_ROOT / "loomscan" / "rules" / "packs"
 
 
 # =============================================================================
@@ -36,9 +36,9 @@ class TestIaCDedup:
 
     def test_dockerfile_no_duplicate_findings(self, tmp_path):
         """Scan a Dockerfile and verify no duplicate findings for the same issue."""
-        from stca.layers.l0e_iac import L0eIaC
-        from stca.iac_scanner import scan_dockerfile
-        from stca.models import DiffHunk
+        from loomscan.layers.l0e_iac import L0eIaC
+        from loomscan.iac_scanner import scan_dockerfile
+        from loomscan.models import DiffHunk
 
         # Create a Dockerfile with multiple issues
         dockerfile_content = (
@@ -81,9 +81,9 @@ class TestIaCDedup:
 
     def test_k8s_no_duplicate_findings(self, tmp_path):
         """Scan a K8s manifest and verify no duplicate findings."""
-        from stca.layers.l0e_iac import L0eIaC
-        from stca.iac_scanner import scan_kubernetes
-        from stca.models import DiffHunk
+        from loomscan.layers.l0e_iac import L0eIaC
+        from loomscan.iac_scanner import scan_kubernetes
+        from loomscan.models import DiffHunk
 
         k8s_content = (
             "apiVersion: v1\n"
@@ -134,7 +134,7 @@ class TestPackCountsReconciled:
     """v4.35: All BUILTIN_PACKS declared counts should match actual YAML pack counts."""
 
     def test_no_drift(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         for name, info in BUILTIN_PACKS.items():
             if 'path' not in info or not info['path'].startswith('packs/'):
                 continue
@@ -174,42 +174,42 @@ class TestNewV435Packs:
         )
 
     def test_kotlin_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "kotlin-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["kotlin-security"]["language"] == "kotlin"
 
     def test_sql_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "sql-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["sql-security"]["language"] == "sql"
 
     def test_bash_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "bash-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["bash-security"]["language"] == "bash"
 
     def test_dart_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "dart-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["dart-security"]["language"] == "dart"
 
     def test_kotlin_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["Main.kt"])
         assert any("kotlin-security" in str(p) for p in packs)
 
     def test_sql_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["schema.sql"])
         assert any("sql-security" in str(p) for p in packs)
 
     def test_bash_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["deploy.sh"])
         assert any("bash-security" in str(p) for p in packs)
 
     def test_dart_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["main.dart"])
         assert any("dart-security" in str(p) for p in packs)
 
@@ -252,37 +252,37 @@ class TestSecretDetection200Plus:
     """v4.35: Secret detection expanded from 104 → 275+ patterns."""
 
     def test_has_200_plus_patterns(self):
-        from stca.advanced_secrets import SECRET_PATTERNS_V434
+        from loomscan.advanced_secrets import SECRET_PATTERNS_V434
         assert len(SECRET_PATTERNS_V434) >= 200, (
             f"Expected 200+ patterns, got {len(SECRET_PATTERNS_V434)}"
         )
 
     def test_detects_openai_project_key(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'OPENAI_API_KEY = "sk-proj-' + 'a' * 50 + '"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "openai" for det in d)
 
     def test_detects_anthropic_key(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'ANTHROPIC_API_KEY = "sk-ant-' + 'a' * 50 + '"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "anthropic" for det in d)
 
     def test_detects_mongodb_url(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'DATABASE_URL = "mongodb://user:secretpass@cluster.example.com:27017/db"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "mongodb" for det in d)
 
     def test_detects_gcp_service_account(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = '"type": "service_account" "private_key": "-----BEGIN PRIVATE KEY-----"'
         d = detect_secrets_entropy(text, "test.json")
         assert any(det.secret_type == "gcp" for det in d)
 
     def test_detects_supabase_service_key(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         # JWT-like format
         text = 'SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIn0.HbdxiVdcRyO4GEpGRyZbrQ_dXLOjVwQmqFA-n4t4eGQ"'
         d = detect_secrets_entropy(text, "test.py")
@@ -290,13 +290,13 @@ class TestSecretDetection200Plus:
         assert len(d) > 0
 
     def test_detects_grafana_service_account(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'token = "glsa_' + 'a' * 40 + '"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "grafana" for det in d)
 
     def test_detects_clerk_secret(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'CLERK_SECRET_KEY = "sk_live_' + 'a' * 50 + '"'
         d = detect_secrets_entropy(text, "test.py")
         # The Stripe prefix (sk_live_) may catch it first — that's OK,
@@ -304,7 +304,7 @@ class TestSecretDetection200Plus:
         assert len(d) > 0, "Should detect some secret in CLERK_SECRET_KEY string"
 
     def test_detects_pinecone_key(self):
-        from stca.advanced_secrets import detect_secrets_entropy
+        from loomscan.advanced_secrets import detect_secrets_entropy
         text = 'PINECONE_API_KEY = "pcsk_' + 'a' * 50 + '"'
         d = detect_secrets_entropy(text, "test.py")
         assert any(det.secret_type == "pinecone" for det in d)
@@ -318,15 +318,15 @@ class TestL8Autofix100Plus:
     """v4.35: L8 Autofix expanded from 56 → 107 patterns."""
 
     def test_has_100_plus_patterns(self):
-        from stca.layers.l8_autofix import FIX_PATTERNS
+        from loomscan.layers.l8_autofix import FIX_PATTERNS
         assert len(FIX_PATTERNS) >= 100, (
             f"Expected 100+ patterns, got {len(FIX_PATTERNS)}"
         )
 
     def test_kotlin_unwrap_fixer(self, tmp_path):
         """v4.35: Kotlin !! → ?: error() fixer."""
-        from stca.layers.l8_autofix import _fix_kotlin_assert_not_null
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_kotlin_assert_not_null
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "Main.kt"
@@ -344,8 +344,8 @@ class TestL8Autofix100Plus:
 
     def test_sql_select_star_fixer(self, tmp_path):
         """v4.35: SQL SELECT * — add TODO comment."""
-        from stca.layers.l8_autofix import _fix_sql_select_star
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_sql_select_star
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "query.sql"
@@ -362,8 +362,8 @@ class TestL8Autofix100Plus:
 
     def test_sql_drop_table_fixer(self, tmp_path):
         """v4.35: SQL DROP TABLE — add CRITICAL comment."""
-        from stca.layers.l8_autofix import _fix_sql_drop_table
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_sql_drop_table
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "migration.sql"
@@ -380,8 +380,8 @@ class TestL8Autofix100Plus:
 
     def test_bash_chmod_777_fixer(self, tmp_path):
         """v4.35: Bash chmod 777 → 755 fixer."""
-        from stca.layers.l8_autofix import _fix_bash_chmod_777
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_bash_chmod_777
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "deploy.sh"
@@ -399,8 +399,8 @@ class TestL8Autofix100Plus:
 
     def test_bash_set_e_fixer(self, tmp_path):
         """v4.35: Bash — add set -euo pipefail."""
-        from stca.layers.l8_autofix import _fix_bash_set_e_missing
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_bash_set_e_missing
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "deploy.sh"
@@ -417,8 +417,8 @@ class TestL8Autofix100Plus:
 
     def test_dart_random_fixer(self, tmp_path):
         """v4.35: Dart Random() → Random.secure() fixer."""
-        from stca.layers.l8_autofix import _fix_dart_random
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_dart_random
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "main.dart"
@@ -435,8 +435,8 @@ class TestL8Autofix100Plus:
 
     def test_python_pyyaml_fixer(self, tmp_path):
         """v4.35: yaml.load → yaml.safe_load fixer."""
-        from stca.layers.l8_autofix import _fix_python_pyyaml_unsafe
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_python_pyyaml_unsafe
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "config.py"
@@ -454,8 +454,8 @@ class TestL8Autofix100Plus:
 
     def test_python_requests_verify_false_fixer(self, tmp_path):
         """v4.35: requests verify=False → verify=True fixer."""
-        from stca.layers.l8_autofix import _fix_python_requests_verify_false
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_python_requests_verify_false
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "client.py"
@@ -478,8 +478,8 @@ class TestL8Autofix100Plus:
 
     def test_python_django_debug_fixer(self, tmp_path):
         """v4.35: Django DEBUG=True → False fixer."""
-        from stca.layers.l8_autofix import _fix_python_django_debug
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_python_django_debug
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "settings.py"
@@ -497,8 +497,8 @@ class TestL8Autofix100Plus:
 
     def test_python_pdb_trace_fixer(self, tmp_path):
         """v4.35: Remove pdb.set_trace() fixer."""
-        from stca.layers.l8_autofix import _fix_python_pdb_trace
-        from stca.models import Finding, Severity, LayerID, BlastRadius
+        from loomscan.layers.l8_autofix import _fix_python_pdb_trace
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius
 
         repo = tmp_path
         f = repo / "app.py"
@@ -522,23 +522,23 @@ class TestL8Autofix100Plus:
 
 
 # =============================================================================
-# 6. stca gate command
+# 6. loomscan gate command
 # =============================================================================
 
 class TestStcaGateCommand:
-    """v4.35: stca gate command — SonarQube-style quality gates."""
+    """v4.35: loomscan gate command — SonarQube-style quality gates."""
 
     def test_gate_flag_exists(self):
         """Verify `gate` is a registered CLI command."""
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
-        assert "gate" in result.output, "stca gate must appear in main --help"
+        assert "gate" in result.output, "loomscan gate must appear in main --help"
 
     def test_gate_help_shows_thresholds(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["gate", "--help"])
         assert "--max-critical" in result.output
@@ -556,7 +556,7 @@ class TestStcaGateCommand:
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
-        (repo / ".stca.yaml").write_text("strictness: 5\n")
+        (repo / ".loomscan.yaml").write_text("strictness: 5\n")
         (repo / "app.py").write_text(
             'import os\n'
             'password = "hardcoded-secret-12345"\n'
@@ -569,7 +569,7 @@ class TestStcaGateCommand:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "gate", "--full", "--max-critical", "0"],
             cwd=repo, capture_output=True, text=True, env=env, timeout=60,
         )
@@ -587,7 +587,7 @@ class TestStcaGateCommand:
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
-        (repo / ".stca.yaml").write_text("strictness: 5\n")
+        (repo / ".loomscan.yaml").write_text("strictness: 5\n")
         (repo / "app.py").write_text('x = 1\n')
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
@@ -595,7 +595,7 @@ class TestStcaGateCommand:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "gate", "--full", "--max-critical", "100", "--max-high", "100",
              "--max-medium", "100", "--max-low", "100", "--max-density", "1000.0"],
             cwd=repo, capture_output=True, text=True, env=env, timeout=60,
@@ -613,7 +613,7 @@ class TestStcaGateCommand:
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
-        (repo / ".stca.yaml").write_text("strictness: 5\n")
+        (repo / ".loomscan.yaml").write_text("strictness: 5\n")
         (repo / "app.py").write_text('x = 1\n')
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
@@ -621,7 +621,7 @@ class TestStcaGateCommand:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "gate", "--full", "--json"],
             cwd=repo, capture_output=True, text=True, env=env, timeout=60,
         )
@@ -641,7 +641,7 @@ class TestLspCmdStillWorks:
 
     def test_lsp_cmd_uses_LSPServer(self):
         """Static check: cli_v2.lsp_cmd callback must import LSPServer."""
-        import stca.cli_v2 as cv2
+        import loomscan.cli_v2 as cv2
         import inspect
         cb = cv2.lsp_cmd.callback
         src = inspect.getsource(cb)
@@ -650,7 +650,7 @@ class TestLspCmdStillWorks:
         )
 
     def test_lsp_server_class_exists(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         assert hasattr(LSPServer, "run")
 
 
@@ -671,11 +671,11 @@ class TestTotalCounts:
         assert total >= 800, f"YAML packs total: {total} (expected 800+)"
 
     def test_secret_patterns_200_plus(self):
-        from stca.advanced_secrets import SECRET_PATTERNS_V434
+        from loomscan.advanced_secrets import SECRET_PATTERNS_V434
         assert len(SECRET_PATTERNS_V434) >= 200
 
     def test_l8_fix_patterns_100_plus(self):
-        from stca.layers.l8_autofix import FIX_PATTERNS
+        from loomscan.layers.l8_autofix import FIX_PATTERNS
         assert len(FIX_PATTERNS) >= 100
 
     def test_packs_count_23_plus(self):

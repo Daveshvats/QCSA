@@ -1,0 +1,152 @@
+# LoomScan Objective-C Security Rules — 30 rules
+rules:
+  - id: objc-nslog-prod
+    pattern: "\\bNSLog\\s*\\("
+    severity: low
+    message: "NSLog in production — use os_log"
+    metadata: {cwe: "CWE-532"}
+  - id: objc-printf-debug
+    pattern: "\\bprintf\\s*\\("
+    severity: low
+    message: "printf in production"
+    metadata: {cwe: "CWE-532"}
+  - id: objc-fprintf-stderr
+    pattern: "\\bfprintf\\s*\\(\\s*stderr"
+    severity: low
+    message: "fprintf to stderr in production"
+    metadata: {cwe: "CWE-532"}
+  - id: objc-sprintf-buffer
+    pattern: "\\bsprintf\\s*\\("
+    severity: high
+    message: "sprintf — buffer overflow risk, use snprintf"
+    metadata: {cwe: "CWE-120"}
+  - id: objc-strcpy-buffer
+    pattern: "\\bstrcpy\\s*\\("
+    severity: high
+    message: "strcpy — buffer overflow, use strncpy/strlcpy"
+    metadata: {cwe: "CWE-120"}
+  - id: objc-strcat-buffer
+    pattern: "\\bstrcat\\s*\\("
+    severity: high
+    message: "strcat — buffer overflow, use strlcat"
+    metadata: {cwe: "CWE-120"}
+  - id: objc-gets-buffer
+    pattern: "\\bgets\\s*\\("
+    severity: critical
+    message: "gets — always unsafe, use fgets"
+    metadata: {cwe: "CWE-242"}
+  - id: objc-system-call
+    pattern: "\\bsystem\\s*\\("
+    severity: high
+    message: "system() — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: objc-popen-call
+    pattern: "\\bpopen\\s*\\("
+    severity: high
+    message: "popen — command injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: objc-exec-cmd
+    pattern: "\\bexecl(?:p|e)?\\s*\\(|\\bexecv(?:p|e)?\\s*\\("
+    severity: medium
+    message: "exec* family — verify args are not user-controlled"
+    metadata: {cwe: "CWE-78"}
+  - id: objc-eval-nsstring
+    pattern: "\\bNSSelectorFromString\\s*\\(\\s*\\["
+    severity: high
+    message: "NSSelectorFromString with dynamic string — method dispatch attack"
+    metadata: {cwe: "CWE-913"}
+  - id: objc-perform-selector
+    pattern: "\\bperformSelector\\s*:\\s*NSSelectorFromString"
+    severity: high
+    message: "performSelector with NSSelectorFromString — dynamic dispatch"
+    metadata: {cwe: "CWE-913"}
+  - id: objc-keychain-hardcoded
+    pattern: "\\bSecItemAdd\\b[^;]*kSecAttrAccessibleAlways"
+    severity: critical
+    message: "Keychain with kSecAttrAccessibleAlways — should be WhenUnlocked"
+    metadata: {cwe: "CWE-312"}
+  - id: objc-userdefaults-secret
+    pattern: "\\bNSUserDefaults\\b.*setObject\\s*:\\s*[^;]*(?:password|secret|token|api[_-]?key)"
+    severity: high
+    message: "NSUserDefaults for secret — use Keychain"
+    metadata: {cwe: "CWE-312"}
+  - id: objc-hardcoded-secret
+    pattern: "@\\s*(?:password|secret|api[_-]?key|auth[_-]?token)\\s*=\\s*@?\\\"[^\\\"]{8,}\\\""
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: objc-ssl-verify-none
+    pattern: "\\bSSLSetSessionOption\\s*\\(\\s*[^,]+,\\s*kSSLSessionOptionBreakServerCertChecking\\s*,\\s*true"
+    severity: critical
+    message: "SSL verification disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: objc-allow-arbitrary-loads
+    pattern: "\\bNSAllowsArbitraryLoads\\s*=\\s*YES|NSAllowsArbitraryLoadsForMedia\\s*=\\s*YES"
+    severity: critical
+    message: "ATS arbitrary loads — MITM risk"
+    metadata: {cwe: "CWE-295"}
+  - id: objc-http-nsurl
+    pattern: "\\bNSURL\\s+urlWith(?:String|ContentsOfFile)\\s*:?\\s*@\\\"http://"
+    severity: medium
+    message: "HTTP (not HTTPS) URL"
+    metadata: {cwe: "CWE-319"}
+  - id: objc-nsurlsession-insecure
+    pattern: "\\bNSURLSessionConfiguration\\b.*TLSMinimumSupportedProtocol\\s*=\\s*kTLSProtocol1"
+    severity: high
+    message: "TLS 1.0 minimum — should be 1.2+"
+    metadata: {cwe: "CWE-326"}
+  - id: objc-random-not-secure
+    pattern: "\\b(?:arc4random|rand|random)\\s*\\(\\s*\\)"
+    severity: medium
+    message: "rand/random not CSPRNG — use SecRandomCopyBytes"
+    metadata: {cwe: "CWE-338"}
+  - id: objc-cc-md5
+    pattern: "\\bCC_MD5\\b|CC_MD5_Init\\b"
+    severity: high
+    message: "MD5 broken — use CC_SHA256"
+    metadata: {cwe: "CWE-327"}
+  - id: objc-cc-sha1
+    pattern: "\\bCC_SHA1\\b|CC_SHA1_Init\\b"
+    severity: high
+    message: "SHA1 broken — use CC_SHA256"
+    metadata: {cwe: "CWE-327"}
+  - id: objc-cc-crypt-ecb
+    pattern: "\\bCCCrypt\\b[^;]*kCCAlgorithmAES.*kCCOptionECBMode"
+    severity: critical
+    message: "AES-ECB — deterministic"
+    metadata: {cwe: "CWE-327"}
+  - id: objc-debug-nsassert
+    pattern: "\\bNSAssert\\s*\\("
+    severity: low
+    message: "NSAssert — disabled in release builds"
+    metadata: {cwe: "CWE-749"}
+  - id: objc-retain-cycle
+    pattern: "@\\bweak\\s+\\w+\\s*\\*?\\s*\\w+\\s*=\\s*\\w+\\b(?!.*__weak)"
+    severity: low
+    message: "Possible retain cycle — use __weak"
+    metadata: {cwe: "CWE-662"}
+  - id: objc-unsafe-unretained
+    pattern: "\\b__unsafe_unretained\\b"
+    severity: medium
+    message: "__unsafe_unretained — dangling pointer risk"
+    metadata: {cwe: "CWE-416"}
+  - id: objc-force-unwrap
+    pattern: "\\b\\w+!\\s*(?:[\\.\\[]|$)"
+    severity: medium
+    message: "Force unwrap — NPE risk"
+    metadata: {cwe: "CWE-690"}
+  - id: objc-throw-exception
+    pattern: "\\b@throw\\s+"
+    severity: medium
+    message: "@throw — verify @catch hierarchy"
+    metadata: {cwe: "CWE-754"}
+  - id: objc-empty-catch
+    pattern: "@catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}"
+    severity: medium
+    message: "Empty @catch — errors swallowed"
+    metadata: {cwe: "CWE-755"}
+  - id: objc-deprecated-api
+    pattern: "\\b__attribute__\\s*\\(\\s*deprecated\\b|@deprecated\\b"
+    severity: low
+    message: "Deprecated API — replace usage"
+    metadata: {cwe: "CWE-477"}

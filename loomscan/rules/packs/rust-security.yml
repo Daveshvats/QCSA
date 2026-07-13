@@ -1,0 +1,307 @@
+# LoomScan Rust Security Rules — 61 rules
+rules:
+  - id: rust-unsafe-block
+    pattern: "\\bunsafe\\s*(?:\\{|\\(|fn|impl|trait)"
+    severity: high
+    message: "unsafe block — audit for soundness violations"
+    metadata: {cwe: "CWE-733"}
+  - id: rust-transmute
+    pattern: "\\b(?:std::mem::)?transmute\\s*[<\\(]"
+    severity: critical
+    message: "transmute — type confusion / undefined behavior"
+    metadata: {cwe: "CWE-843"}
+  - id: rust-command-injection
+    pattern: "Command::new\\s*\\(\\s*(?:format!|[^\\\"\\n\\']+\\.as_str\\(\\))"
+    severity: high
+    message: "Command::new with non-literal — command injection"
+    metadata: {cwe: "CWE-78"}
+  - id: rust-unwrap
+    pattern: "\\.unwrap\\s*\\(\\s*\\)"
+    severity: medium
+    message: "unwrap() panics on None/Err"
+    metadata: {cwe: "CWE-754"}
+  - id: rust-expect-empty
+    pattern: "\\.expect\\s*\\(\\s*[\\\"\\']\\s*[\\\"\\']\\s*\\)"
+    severity: low
+    message: "expect() with empty message"
+    metadata: {cwe: "CWE-754"}
+  - id: rust-panic-macro
+    pattern: "\\bpanic!\\s*\\("
+    severity: medium
+    message: "panic! — crashes program"
+    metadata: {cwe: "CWE-248"}
+  - id: rust-todo-macro
+    pattern: "\\b(?:todo!|unimplemented!)\\s*\\("
+    severity: medium
+    message: "todo!/unimplemented! will panic at runtime"
+    metadata: {cwe: "CWE-754"}
+  - id: rust-static-mut
+    pattern: "\\bstatic\\s+mut\\s+"
+    severity: critical
+    message: "static mut — UB without unsafe synchronization"
+    metadata: {cwe: "CWE-843"}
+  - id: rust-md5
+    pattern: "\\bmd5::|Md5::"
+    severity: high
+    message: "MD5 cryptographically broken"
+    metadata: {cwe: "CWE-327"}
+  - id: rust-sha1
+    pattern: "\\bsha1::|Sha1::"
+    severity: high
+    message: "SHA1 cryptographically broken"
+    metadata: {cwe: "CWE-327"}
+  - id: rust-rc-shared
+    pattern: "\\bRc\\s*<|Rc::new\\s*\\("
+    severity: high
+    message: "Rc not thread-safe — use Arc"
+    metadata: {cwe: "CWE-662"}
+  - id: rust-refcell
+    pattern: "\\bRefCell\\s*<|RefCell::new\\s*\\("
+    severity: medium
+    message: "RefCell panics on double-borrow"
+    metadata: {cwe: "CWE-667"}
+  - id: rust-fs-read-user-path
+    pattern: "std::fs::(?:read|write|open|read_to_string)\\s*\\(\\s*(?:format!|[^\\\"\\n\\']+\\.as_str\\(\\))"
+    severity: medium
+    message: "File operation with non-literal path — path traversal"
+    metadata: {cwe: "CWE-22"}
+  - id: rust-println
+    pattern: "\\bprintln!\\s*\\("
+    severity: low
+    message: "println! in production code"
+    metadata: {cwe: "CWE-532"}
+  - id: rust-eprintln
+    pattern: "\\beprintln!\\s*\\("
+    severity: low
+    message: "eprintln! in production"
+    metadata: {cwe: "CWE-532"}
+  - id: rust-db-prepare-fmt
+    pattern: "\\.prepare\\s*\\(\\s*format!"
+    severity: high
+    message: "SQL via format! — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: rust-https-disabled
+    pattern: "reqwest::\\w+\\s*\\(\\s*[\\\"\\']http://"
+    severity: medium
+    message: "HTTP (not HTTPS) request"
+    metadata: {cwe: "CWE-319"}
+  - id: rust-ssl-verify-false
+    pattern: "\\.danger_accept_invalid_certs\\s*\\(\\s*true"
+    severity: critical
+    message: "SSL verification disabled"
+    metadata: {cwe: "CWE-295"}
+  - id: rust-hardcoded-secret
+    pattern: "\\b(?:password|secret|api_key|auth_token)\\s*[:=]\\s*[\\\"\\'][^\\\"\\']{8,}[\\\"\\']"
+    severity: high
+    message: "Hardcoded secret"
+    metadata: {cwe: "CWE-798"}
+  - id: rust-assert-debug
+    pattern: "\\bdebug_assert!\\s*\\("
+    severity: low
+    message: "debug_assert! removed in release builds"
+    metadata: {cwe: "CWE-749"}
+  - id: rust-expect-panic
+    pattern: "\\.expect\\s*\\(\\s*[\\\"\\']"
+    severity: low
+    message: "expect() can panic — handle error properly"
+    metadata: {cwe: "CWE-754"}
+  - id: rust-from-raw
+    pattern: "\\bfrom_raw_parts\\s*\\("
+    severity: high
+    message: "from_raw_parts — UB if lifetime invalid"
+    metadata: {cwe: "CWE-843"}
+  - id: rust-as-cast
+    pattern: "\\bas\\s+(?:i8|u8|i16|u16|i32|u32|i64|u64)\\b"
+    severity: low
+    message: "as cast — silent truncation on conversion"
+    metadata: {cwe: "CWE-197"}
+  - id: rust-unwrap-or-default
+    pattern: "\\.unwrap_or_default\\s*\\(\\s*\\)"
+    severity: low
+    message: "unwrap_or_default may hide logic errors"
+    metadata: {cwe: "CWE-754"}
+  - id: rust-std-process-exit
+    pattern: "\\bstd::process::exit\\s*\\("
+    severity: medium
+    message: "process::exit — skips Drop handlers"
+    metadata: {cwe: "CWE-459"}
+  - id: rust-cell-get
+    pattern: "\\bCell\\s*<|Cell::new\\s*\\("
+    severity: medium
+    message: "Cell — interior mutability, not thread-safe"
+    metadata: {cwe: "CWE-662"}
+  - id: rust-rwlock
+    pattern: "\\bRwLock\\s*<|RwLock::new\\s*\\("
+    severity: medium
+    message: "RwLock — potential deadlock if misused"
+    metadata: {cwe: "CWE-667"}
+  - id: rust-mutex-blocking
+    pattern: "\\bMutex::new\\s*\\("
+    severity: low
+    message: "Mutex — verify poisoning handling"
+    metadata: {cwe: "CWE-667"}
+  - id: rust-thread-sleep
+    pattern: "\\bstd::thread::sleep\\s*\\("
+    severity: low
+    message: "thread::sleep — possible race condition"
+    metadata: {cwe: "CWE-362"}
+  - id: rust-process-command
+    pattern: "\\bstd::process::Command\\s*::\\s*new\\s*\\("
+    severity: medium
+    message: "Command — verify shell injection risk"
+    metadata: {cwe: "CWE-78"}
+  - id: rust-tls-plaintext
+    pattern: "\\bTlsConnector\\s*::\\s*builder\\s*\\(\\s*\\)\\s*\\.danger_accept_invalid_certs"
+    severity: critical
+    message: "TLS with invalid certs accepted"
+    metadata: {cwe: "CWE-295"}
+  - id: rust-rsa-padding
+    pattern: "\\bRSA_PADDING_PKCS1|PaddingScheme::PKCS1"
+    severity: high
+    message: "RSA PKCS1 padding — Bleichenbacher attack"
+    metadata: {cwe: "CWE-780"}
+  - id: rust-ecb-mode
+    pattern: "\\bEcb\\s*<|Cipher::Ecb|aes_ecb"
+    severity: critical
+    message: "AES-ECB — deterministic, leaks patterns"
+    metadata: {cwe: "CWE-327"}
+  - id: rust-cbc-no-mac
+    pattern: "\\bCBC\\s*<.*>\\s*$"
+    severity: medium
+    message: "CBC without MAC — malleable ciphertext"
+    metadata: {cwe: "CWE-327"}
+  - id: rust-des-usage
+    pattern: "\\bDES\\s*<|Cipher::Des"
+    severity: critical
+    message: "DES broken — 56-bit key"
+    metadata: {cwe: "CWE-327"}
+  - id: rust-rc4-usage
+    pattern: "\\bRC4\\s*<|Cipher::Rc4"
+    severity: critical
+    message: "RC4 broken — bias attacks"
+    metadata: {cwe: "CWE-327"}
+  - id: rust-unsafe-impl
+    pattern: "\\bunsafe\\s+impl\\s+"
+    severity: high
+    message: "unsafe impl — manual soundness audit needed"
+    metadata: {cwe: "CWE-733"}
+  - id: rust-raw-pointer
+    pattern: "\\b\\*const\\s+\\w+|\\*mut\\s+\\w+"
+    severity: medium
+    message: "Raw pointer — Rust can't verify safety"
+    metadata: {cwe: "CWE-843"}
+  - id: rust-offset-arith
+    pattern: "\\b\\.offset\\s*\\(|\\.wrapping_offset\\s*\\("
+    severity: high
+    message: "Pointer offset arithmetic — UB if out of bounds"
+    metadata: {cwe: "CWE-843"}
+  - id: rust-read-bytes
+    pattern: "\\bstd::io::Read::read_exact\\s*\\("
+    severity: medium
+    message: "read_exact — panics on short read"
+    metadata: {cwe: "CWE-754"}
+  - id: rust-string-concat-fmt
+    pattern: "\\bformat!\\s*\\([^)]*\\$\\{.*\\}\\.as_str\\(\\)"
+    severity: low
+    message: "format! with as_str — extra allocation"
+    metadata: {cwe: "CWE-730"}
+  - id: rust-sql-concat
+    pattern: "\\b(?:query|execute)\\s*\\(\\s*(?:format!|concat!)"
+    severity: high
+    message: "SQL built with format!/concat! — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: rust-sql-string-concat
+    pattern: "\\b(?:query|execute)\\s*\\(\\s*[\\\"\\'][^\\\"\\']*\\+\\s*\\w"
+    severity: high
+    message: "SQL built with string concat — injection"
+    metadata: {cwe: "CWE-89"}
+  - id: rust-tempfile-hardcoded
+    pattern: "\\btempfile::NamedTempFile::new_in\\s*\\(\\s*[\\\"\\']"
+    severity: low
+    message: "Hardcoded temp path — predictable file"
+    metadata: {cwe: "CWE-377"}
+  - id: rust-file-write-no-fsync
+    pattern: "\\bstd::fs::write\\s*\\([^)]+\\)\\s*$"
+    severity: low
+    message: "fs::write — no fsync, data may be lost on crash"
+    metadata: {cwe: "CWE-459"}
+  - id: rust-env-var-default
+    pattern: "\\bstd::env::var\\s*\\([^)]+\\)\\.unwrap_or\\s*\\(\\s*[\\\"\\']"
+    severity: low
+    message: "env::var with default — config may be ignored"
+    metadata: {cwe: "CWE-1188"}
+  - id: rust-tokio-block-on
+    pattern: "\\btokio::runtime::Runtime\\s*::\\s*new\\s*\\(.*\\)\\.block_on"
+    severity: medium
+    message: "block_on — synchronous wait, defeats async"
+    metadata: {cwe: "CWE-833"}
+  - id: rust-sleep-loop
+    pattern: "\\bloop\\s*\\{[^}]*thread::sleep"
+    severity: medium
+    message: "loop with sleep — busy wait pattern"
+    metadata: {cwe: "CWE-833"}
+  - id: rust-from-str-panic
+    pattern: "\\b\\.parse\\s*\\(\\s*\\)\\.unwrap\\s*\\("
+    severity: medium
+    message: "parse().unwrap() — panics on invalid input"
+    metadata: {cwe: "CWE-754"}
+  - id: rust-collection-vec-grow
+    pattern: "\\bVec::with_capacity\\s*\\(\\s*\\d{5,}"
+    severity: low
+    message: "Vec::with_capacity with huge size — DoS"
+    metadata: {cwe: "CWE-770"}
+  - id: rust-mutex-with-lock
+    pattern: "\\bMutex::new\\s*\\([^)]+\\)\\.lock\\s*\\(\\s*\\)\\.unwrap"
+    severity: medium
+    message: "Mutex.lock().unwrap() — panic on poisoning"
+    metadata: {cwe: "CWE-667"}
+  - id: rust-println-debug
+    pattern: "\\bprintln!\\s*\\(\\s*[\\\"\\']\\{:\\?\\}\\{:\\?\\}\\{:\\?\\}"
+    severity: low
+    message: "println! with debug formatting — verbose logs"
+    metadata: {cwe: "CWE-532"}
+  - id: rust-rand-thread
+    pattern: "\\brand::thread_rng\\s*\\(\\s*\\)"
+    severity: medium
+    message: "thread_rng not CSPRNG — use OsRng for crypto"
+    metadata: {cwe: "CWE-338"}
+  - id: rust-time-system
+    pattern: "\\bstd::time::SystemTime::now\\s*\\(\\s*\\)"
+    severity: low
+    message: "SystemTime::now — non-monotonic, can go backwards"
+    metadata: {cwe: "CWE-208"}
+  - id: rust-panic-catch
+    pattern: "\\bstd::panic::catch_unwind\\s*\\("
+    severity: medium
+    message: "catch_unwind — masks bugs, anti-pattern"
+    metadata: {cwe: "CWE-754"}
+  - id: rust-extern-block
+    pattern: "\\bextern\\s+\\\"C\\\"\\s*\\{"
+    severity: high
+    message: "extern \"C\" block — FFI, audit soundness"
+    metadata: {cwe: "CWE-733"}
+  - id: rust-link-extern
+    pattern: "\\b#\\[link\\s+name\\s*="
+    severity: medium
+    message: "#[link] — external library, audit ABI"
+    metadata: {cwe: "CWE-733"}
+  - id: rust-asm-macro
+    pattern: "\\b(?:core::arch::asm|llvm_asm!)\\s*\\("
+    severity: critical
+    message: "asm! — inline assembly, full UB surface"
+    metadata: {cwe: "CWE-733"}
+  - id: rust-no-mangle
+    pattern: "\\b#\\[no_mangle\\]"
+    severity: high
+    message: "#[no_mangle] — extern ABI, audit caller"
+    metadata: {cwe: "CWE-733"}
+  - id: rust-deref-null
+    pattern: "\\bOption::unwrap\\s*\\(\\s*\\)"
+    severity: high
+    message: "Option::unwrap — None case panics"
+    metadata: {cwe: "CWE-690"}
+  - id: rust-atomic-ordering-relaxed
+    pattern: "\\bOrdering::Relaxed\\b"
+    severity: low
+    message: "Relaxed ordering — verify correctness for use case"
+    metadata: {cwe: "CWE-662"}

@@ -20,8 +20,8 @@ class TestMutableDefaultSentinelRegression:
 
     def test_generated_code_uses_sentinel_not_none(self, tmp_path):
         """The generated fix must use _SENTINEL, not None."""
-        from stca.layers.l8_autofix import _fix_mutable_default
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.layers.l8_autofix import _fix_mutable_default
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
         py_file = tmp_path / "app.py"
         py_file.write_text("def foo(x=[]):\n    return x\n")
         finding = Finding(
@@ -41,8 +41,8 @@ class TestMutableDefaultSentinelRegression:
 
     def test_generated_code_parses(self, tmp_path):
         """The generated fix must be valid Python."""
-        from stca.layers.l8_autofix import _fix_mutable_default
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.layers.l8_autofix import _fix_mutable_default
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
         py_file = tmp_path / "app.py"
         py_file.write_text("def foo(x=[]):\n    return x\n")
         finding = Finding(
@@ -69,8 +69,8 @@ class TestTuningAppliedRegression:
 
     def test_tuning_changes_aggregation_result(self):
         """A tuning adjustment should change the aggregation output."""
-        from stca.brain.aggregator import Aggregator
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.brain.aggregator import Aggregator
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
 
         # Create a finding
         finding = Finding(
@@ -109,14 +109,14 @@ class TestFPLearnModeWiredRegression:
 
     def test_config_has_fp_learn_mode(self):
         """STCAConfig.brain must have fp_learn_mode key."""
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         config = STCAConfig()
         assert "fp_learn_mode" in config.brain
 
     def test_orchestrator_reads_fp_learn_mode(self, tmp_path):
         """Orchestrator must pass learn_mode from config to FPLearner."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / ".git").mkdir()
@@ -139,16 +139,16 @@ class TestMissingPatchesDeletedRegression:
     """
 
     def test_missing_patches_not_importable(self):
-        """stca.missing_patches must not be importable."""
+        """loomscan.missing_patches must not be importable."""
         try:
-            import stca.missing_patches
-            pytest.fail("stca.missing_patches should be deleted in v4.13")
+            import loomscan.missing_patches
+            pytest.fail("loomscan.missing_patches should be deleted in v4.13")
         except ImportError:
             pass  # expected
 
     def test_version_vuln_checks_importable(self):
-        """stca.version_vuln_checks must be importable."""
-        from stca.version_vuln_checks import scan_version_vuln_checks
+        """loomscan.version_vuln_checks must be importable."""
+        from loomscan.version_vuln_checks import scan_version_vuln_checks
         assert callable(scan_version_vuln_checks)
 
 
@@ -162,17 +162,17 @@ class TestL2RenameCompleteRegression:
 
     def test_file_renamed(self):
         """l2_test_coverage.py must exist, l2_mutation.py must not."""
-        import stca.layers.l2_test_coverage
-        assert hasattr(stca.layers.l2_test_coverage, 'L2TestCoverage')
+        import loomscan.layers.l2_test_coverage
+        assert hasattr(loomscan.layers.l2_test_coverage, 'L2TestCoverage')
 
     def test_enum_value_renamed(self):
         """LayerID.L2_MUTATION value must be 'L2_test_coverage' not 'L2_mutation'."""
-        from stca.models import LayerID
+        from loomscan.models import LayerID
         assert LayerID.L2_MUTATION.value == "L2_test_coverage"
 
     def test_no_l2_mutation_string_in_config(self):
         """Config must not reference 'L2_mutation' string."""
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         config = STCAConfig()
         config_dict = str(config.__dict__)
         assert "L2_mutation" not in config_dict, \

@@ -5,7 +5,7 @@ Tests:
   2. scanner_health surfaces skipped-file warnings for unsupported languages
   3. CQ-PY-EVAL does NOT match obj.eval() (method calls like Z3's model.eval)
   4. ci.yml comment matches actual command (no --baseline drift)
-  5. End-to-end CLI test: stca check on a repo with .ts files
+  5. End-to-end CLI test: loomscan check on a repo with .ts files
 """
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ class TestTypeScriptParsingRegression:
 
     def test_ts_file_parses(self, tmp_path):
         """A .ts file must produce a non-None parse tree with function defs."""
-        from stca.normalized_ast import parse_file, get_language, is_supported
+        from loomscan.normalized_ast import parse_file, get_language, is_supported
         src = tmp_path / "app.ts"
         src.write_text("function add(x: number, y: number): number { return x + y; }")
         assert get_language(src) == "typescript"
@@ -46,7 +46,7 @@ class TestTypeScriptParsingRegression:
 
     def test_tsx_file_parses(self, tmp_path):
         """A .tsx file must produce a non-None parse tree."""
-        from stca.normalized_ast import parse_file, get_language, is_supported
+        from loomscan.normalized_ast import parse_file, get_language, is_supported
         src = tmp_path / "App.tsx"
         src.write_text("const App = () => { return <div>Hello</div>; };")
         assert get_language(src) == "tsx"
@@ -56,7 +56,7 @@ class TestTypeScriptParsingRegression:
 
     def test_typescript_not_in_unsupported_list(self):
         """TypeScript and TSX must NOT be in the unsupported languages set."""
-        from stca.normalized_ast import get_unsupported_languages
+        from loomscan.normalized_ast import get_unsupported_languages
         unsupported = get_unsupported_languages()
         assert "typescript" not in unsupported, (
             "TypeScript should be supported after v4.6 fix"
@@ -66,9 +66,9 @@ class TestTypeScriptParsingRegression:
         )
 
     def test_typescript_detects_eval(self, tmp_path):
-        """STCA should detect eval() in TypeScript files via CPG taint."""
-        from stca.v4_restored import detect_cpg_taint_multi
-        from stca.normalized_ast import parse_file
+        """LoomScan should detect eval() in TypeScript files via CPG taint."""
+        from loomscan.v4_restored import detect_cpg_taint_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "app.ts"
         src.write_text("""function handler(req: any) {
     const userInput: string = req.params.input;
@@ -100,8 +100,8 @@ class TestScannerHealthSkippedFilesRegression:
 
     def test_skipped_files_in_scanner_health(self, tmp_path):
         """Orchestrator output must include skipped-file warnings."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / ".git").mkdir()
@@ -139,7 +139,7 @@ class TestEvalMethodCallRegression:
 
     def test_method_eval_not_flagged(self, tmp_path):
         """obj.eval() must NOT be flagged as CQ-PY-EVAL."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text("""def solve(model):
     result = model.eval(x, model_completion=True)
@@ -154,7 +154,7 @@ class TestEvalMethodCallRegression:
 
     def test_bare_eval_still_caught(self, tmp_path):
         """Bare eval() MUST still be caught."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text("""def run(user_input):
     return eval(user_input)
@@ -164,25 +164,25 @@ class TestEvalMethodCallRegression:
         assert len(eval_findings) > 0, "Bare eval() should be caught"
 
     def test_self_scan_zero_eval_false_positives(self):
-        """STCA's own source should have 0 CQ-PY-EVAL findings.
+        """LoomScan's own source should have 0 CQ-PY-EVAL findings.
 
         Before v4.5: 93 false hits (comments/strings).
         After v4.5: 3 false hits (model.eval()).
         After v4.6: 0 false hits (negative lookbehind for '.').
         """
-        from stca.code_quality import analyze_code_quality
-        stca_source = Path(__file__).parent.parent / "stca"
-        if not stca_source.exists():
-            pytest.skip("STCA source not found")
+        from loomscan.code_quality import analyze_code_quality
+        loomscan_source = Path(__file__).parent.parent / "loomscan"
+        if not loomscan_source.exists():
+            pytest.skip("LoomScan source not found")
         total_eval = 0
-        for p in stca_source.rglob("*.py"):
+        for p in loomscan_source.rglob("*.py"):
             if "__pycache__" in str(p):
                 continue
             findings = analyze_code_quality(p)
             eval_findings = [f for f in findings if f.rule_id == "CQ-PY-EVAL"]
             total_eval += len(eval_findings)
         assert total_eval == 0, (
-            f"STCA self-scan should have 0 CQ-PY-EVAL findings. Got {total_eval}."
+            f"LoomScan self-scan should have 0 CQ-PY-EVAL findings. Got {total_eval}."
         )
 
 
@@ -205,7 +205,7 @@ class TestCIWorkflowConsistencyRegression:
         content = ci_path.read_text()
         # If --baseline is mentioned in comments, it must be in the command
         if "--baseline" in content:
-            assert "--baseline" in content.split("stca check")[1].split("\n")[0], (
+            assert "--baseline" in content.split("loomscan check")[1].split("\n")[0], (
                 "ci.yml mentions --baseline in comment but doesn't pass it in command"
             )
 
@@ -215,14 +215,14 @@ class TestCIWorkflowConsistencyRegression:
 # =============================================================================
 
 class TestEndToEndCLITypeScriptRegression:
-    """End-to-end test: stca check on a repo with .ts files must produce findings.
+    """End-to-end test: loomscan check on a repo with .ts files must produce findings.
 
     Claude recommended: "at least one test per fix goes through the actual CLI
     entry point, not just the module function." This test runs the real CLI.
     """
 
     def test_cli_scan_typescript_repo(self, tmp_path):
-        """stca check on a TypeScript repo must produce findings and 0 scanner errors."""
+        """loomscan check on a TypeScript repo must produce findings and 0 scanner errors."""
         repo = tmp_path / "ts_repo"
         repo.mkdir()
         (repo / ".git").mkdir()
@@ -234,7 +234,7 @@ class TestEndToEndCLITypeScriptRegression:
 """)
 
         result = subprocess.run(
-            [sys.executable, "-m", "stca.cli", "check",
+            [sys.executable, "-m", "loomscan.cli", "check",
              "--repo", str(repo), "--full", "--json"],
             capture_output=True, text=True, timeout=120,
             cwd=str(Path(__file__).parent.parent),

@@ -1,7 +1,7 @@
 """Tests for the diff slicer."""
 import pytest
 from pathlib import Path
-from stca.diff_slicer import parse_diff, extract_callees
+from loomscan.diff_slicer import parse_diff, extract_callees
 
 
 SAMPLE_DIFF = """diff --git a/app.py b/app.py

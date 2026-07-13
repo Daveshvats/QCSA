@@ -2,7 +2,7 @@
 # Place in policies/ directory of your repo
 # This policy fires when a log/print statement contains references to secrets or PII.
 
-package stca
+package loomscan
 
 deny[msg] {
   file := input.files[_]

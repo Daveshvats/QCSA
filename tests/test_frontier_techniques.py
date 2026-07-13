@@ -9,13 +9,13 @@ from pathlib import Path
 
 import pytest
 
-from stca.stateful_pbt import discover_stateful_targets, generate_stateful_test_code
-from stca.dynamic_invariants import infer_invariants_from_observations, InferredInvariant
-from stca.spec_mining import mine_api_patterns, check_spec_violations, mine_and_check
-from stca.runtime_verification import find_invariant_annotations, instrument_code_with_invariants
-from stca.multi_call import analyze_reentrancy, analyze_missing_auth_in_chain, analyze_toctou, analyze_multi_call
-from stca.counterexamples import generate_counterexample_for_invariant, Counterexample
-from stca.metamorphic import _classify_function, _get_function_arity, METAMORPHIC_RELATIONS
+from loomscan.stateful_pbt import discover_stateful_targets, generate_stateful_test_code
+from loomscan.dynamic_invariants import infer_invariants_from_observations, InferredInvariant
+from loomscan.spec_mining import mine_api_patterns, check_spec_violations, mine_and_check
+from loomscan.runtime_verification import find_invariant_annotations, instrument_code_with_invariants
+from loomscan.multi_call import analyze_reentrancy, analyze_missing_auth_in_chain, analyze_toctou, analyze_multi_call
+from loomscan.counterexamples import generate_counterexample_for_invariant, Counterexample
+from loomscan.metamorphic import _classify_function, _get_function_arity, METAMORPHIC_RELATIONS
 
 
 # === 1. Stateful PBT ===
@@ -198,7 +198,7 @@ class TestRuntimeVerification:
         """Should find @invariant annotations."""
         src = tmp_path / "app.py"
         src.write_text("""
-from stca.runtime_verification import invariant
+from loomscan.runtime_verification import invariant
 
 @invariant("self.balance >= 0")
 class Wallet:

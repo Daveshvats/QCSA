@@ -8,15 +8,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stca.precision import (FPLearner, ConfidenceCalibrator, apply_corroboration,
+from loomscan.precision import (FPLearner, ConfidenceCalibrator, apply_corroboration,
                               find_corroborating_findings, apply_precision_pipeline)
-from stca.bug_seeds import BUG_SEEDS, cross_reference_finding, boost_finding_confidence
-from stca.codebase_miner import (mine_assertion_rules, mine_guard_rules,
+from loomscan.bug_seeds import BUG_SEEDS, cross_reference_finding, boost_finding_confidence
+from loomscan.codebase_miner import (mine_assertion_rules, mine_guard_rules,
                                    mine_docstring_rules, mine_all_rules)
-from stca.rule_miner import (find_bug_fix_commits, extract_bug_fix_pairs,
+from loomscan.rule_miner import (find_bug_fix_commits, extract_bug_fix_pairs,
                                detect_language, generate_semgrep_rule)
-from stca.rule_compiler import mutate_function
-from stca.models import Finding, Severity, BlastRadius, LayerID
+from loomscan.rule_compiler import mutate_function
+from loomscan.models import Finding, Severity, BlastRadius, LayerID
 
 
 # === Bug-seed cross-referencing ===

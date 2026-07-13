@@ -3,9 +3,9 @@
 Tests:
 1. JetBrains extension structure (plugin.xml, Kotlin sources, settings, actions)
 2. 3 new YAML packs (owasp-top-10, sql-stored-procedures, bash-deep)
-3. Monorepo support (config workspaces, resolve_workspaces, stca monorepo command)
-4. PR comment bot (stca bot command, GitHub Actions workflow)
-5. Online rule playground (stca playground command, match-finding logic, HTTP server)
+3. Monorepo support (config workspaces, resolve_workspaces, loomscan monorepo command)
+4. PR comment bot (loomscan bot command, GitHub Actions workflow)
+5. Online rule playground (loomscan playground command, match-finding logic, HTTP server)
 6. Total counts (YAML 1150+, packs 30+)
 """
 from __future__ import annotations
@@ -23,8 +23,8 @@ import yaml
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PACKS_DIR = PROJECT_ROOT / "stca" / "rules" / "packs"
-INTELLIJ_DIR = PROJECT_ROOT / "editor" / "intellij-stca"
+PACKS_DIR = PROJECT_ROOT / "loomscan" / "rules" / "packs"
+INTELLIJ_DIR = PROJECT_ROOT / "editor" / "intellij-loomscan"
 WORKFLOWS_DIR = PROJECT_ROOT / ".github" / "workflows"
 
 
@@ -33,60 +33,60 @@ WORKFLOWS_DIR = PROJECT_ROOT / ".github" / "workflows"
 # =============================================================================
 
 class TestJetBrainsExtension:
-    """v4.37: IntelliJ/JetBrains extension at editor/intellij-stca/."""
+    """v4.37: IntelliJ/JetBrains extension at editor/intellij-loomscan/."""
 
     def test_plugin_xml_exists(self):
         assert (INTELLIJ_DIR / "src" / "main" / "resources" / "META-INF" / "plugin.xml").exists()
 
     def test_plugin_xml_has_id(self):
         content = (INTELLIJ_DIR / "src" / "main" / "resources" / "META-INF" / "plugin.xml").read_text()
-        assert "com.stca.pipeline.intellij" in content
-        assert "STCA Pipeline" in content
+        assert "com.loomscan.pipeline.intellij" in content
+        assert "LoomScan" in content
 
     def test_plugin_xml_has_lsp_support(self):
         content = (INTELLIJ_DIR / "src" / "main" / "resources" / "META-INF" / "plugin.xml").read_text()
         assert "platform.lsp.serverSupport" in content
-        assert "StcaLspServerSupport" in content
+        assert "LoomScanLspServerSupport" in content
 
     def test_plugin_xml_has_actions(self):
         content = (INTELLIJ_DIR / "src" / "main" / "resources" / "META-INF" / "plugin.xml").read_text()
-        for action_id in ["Stca.CheckRepo", "Stca.Gate", "Stca.Mine", "Stca.Restart"]:
+        for action_id in ["LoomScan.CheckRepo", "LoomScan.Gate", "LoomScan.Mine", "LoomScan.Restart"]:
             assert action_id in content, f"Action {action_id} missing in plugin.xml"
 
     def test_plugin_xml_has_tool_window(self):
         content = (INTELLIJ_DIR / "src" / "main" / "resources" / "META-INF" / "plugin.xml").read_text()
-        assert "StcaToolWindowFactory" in content
+        assert "LoomScanToolWindowFactory" in content
         assert "toolWindow" in content
 
     def test_plugin_xml_has_settings(self):
         content = (INTELLIJ_DIR / "src" / "main" / "resources" / "META-INF" / "plugin.xml").read_text()
-        assert "StcaSettingsConfigurable" in content
+        assert "LoomScanSettingsConfigurable" in content
         assert "applicationConfigurable" in content
 
     def test_kotlin_sources_exist(self):
-        kotlin_dir = INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "stca" / "pipeline"
-        assert (kotlin_dir / "lsp" / "StcaLspServerSupport.kt").exists()
-        assert (kotlin_dir / "action" / "StcaActions.kt").exists()
-        assert (kotlin_dir / "settings" / "StcaSettingsService.kt").exists()
-        assert (kotlin_dir / "settings" / "StcaSettingsConfigurable.kt").exists()
+        kotlin_dir = INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "loomscan" / "pipeline"
+        assert (kotlin_dir / "lsp" / "LoomScanLspServerSupport.kt").exists()
+        assert (kotlin_dir / "action" / "LoomScanActions.kt").exists()
+        assert (kotlin_dir / "settings" / "LoomScanSettingsService.kt").exists()
+        assert (kotlin_dir / "settings" / "LoomScanSettingsConfigurable.kt").exists()
 
     def test_kotlin_lsp_support_class(self):
-        content = (INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "stca" / "pipeline" / "lsp" / "StcaLspServerSupport.kt").read_text()
-        assert "class StcaLspServerSupport" in content
+        content = (INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "loomscan" / "pipeline" / "lsp" / "LoomScanLspServerSupport.kt").read_text()
+        assert "class LoomScanLspServerSupport" in content
         assert "LspServerSupportProvider" in content
-        assert "stca.cli import main" in content or "from stca.cli import main" in content
+        assert "loomscan.cli import main" in content or "from loomscan.cli import main" in content
 
     def test_kotlin_actions_class(self):
-        content = (INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "stca" / "pipeline" / "action" / "StcaActions.kt").read_text()
+        content = (INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "loomscan" / "pipeline" / "action" / "LoomScanActions.kt").read_text()
         assert "class CheckRepoAction" in content
         assert "class GateAction" in content
         assert "class MineAction" in content
         assert "class RestartAction" in content
 
     def test_kotlin_settings_supports_all_options(self):
-        content = (INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "stca" / "pipeline" / "settings" / "StcaSettingsService.kt").read_text()
+        content = (INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "loomscan" / "pipeline" / "settings" / "LoomScanSettingsService.kt").read_text()
         for setting in ["stcaEnabled", "pythonPath", "strictness", "gatePreset", "useLsp"]:
-            assert setting in content, f"Setting {setting} missing in StcaSettingsService"
+            assert setting in content, f"Setting {setting} missing in LoomScanSettingsService"
 
     def test_gradle_build_file(self):
         assert (INTELLIJ_DIR / "build.gradle.kts").exists()
@@ -97,9 +97,9 @@ class TestJetBrainsExtension:
     def test_readme_exists(self):
         assert (INTELLIJ_DIR / "README.md").exists()
 
-    def test_supports_all_stca_languages(self):
-        """The LSP support should list all 20+ STCA-supported languages."""
-        content = (INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "stca" / "pipeline" / "lsp" / "StcaLspServerSupport.kt").read_text()
+    def test_supports_all_loomscan_languages(self):
+        """The LSP support should list all 20+ LoomScan-supported languages."""
+        content = (INTELLIJ_DIR / "src" / "main" / "kotlin" / "com" / "loomscan" / "pipeline" / "lsp" / "LoomScanLspServerSupport.kt").read_text()
         # Check a representative sample
         for ext in ["py", "js", "ts", "go", "java", "rs", "php", "rb", "cs",
                      "swift", "scala", "kt", "sql", "sh", "dart", "lua", "r", "hs", "ex"]:
@@ -129,21 +129,21 @@ class TestNewV437Packs:
         )
 
     def test_owasp_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "owasp-top-10" in BUILTIN_PACKS
         assert BUILTIN_PACKS["owasp-top-10"]["language"] == "multi"
 
     def test_sql_sp_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "sql-stored-procedures" in BUILTIN_PACKS
 
     def test_bash_deep_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "bash-deep" in BUILTIN_PACKS
 
     def test_owasp_auto_selected_always(self):
         """OWASP Top 10 is multi-language — should be selected for any file."""
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         for ext in [".py", ".js", ".go", ".java", ".rs", ".php", ".rb", ".cs"]:
             packs = get_all_packs_for_files([f"file{ext}"])
             assert any("owasp-top-10" in str(p) for p in packs), (
@@ -151,12 +151,12 @@ class TestNewV437Packs:
             )
 
     def test_sql_sp_auto_selected_for_sql(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["procedure.sql"])
         assert any("sql-stored-procedures" in str(p) for p in packs)
 
     def test_bash_deep_auto_selected_for_sh(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["deploy.sh"])
         assert any("bash-deep" in str(p) for p in packs)
 
@@ -204,30 +204,30 @@ class TestNewV437Packs:
 # =============================================================================
 
 class TestMonorepoSupport:
-    """v4.37: Monorepo support — config.workspaces, resolve_workspaces, stca monorepo command."""
+    """v4.37: Monorepo support — config.workspaces, resolve_workspaces, loomscan monorepo command."""
 
     def test_config_has_workspaces_field(self):
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         cfg = STCAConfig.default()
         assert hasattr(cfg, "workspaces")
         assert cfg.workspaces == []  # default empty
 
     def test_config_has_workspace_exclude(self):
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         cfg = STCAConfig.default()
         assert hasattr(cfg, "workspace_exclude")
         assert "**/node_modules/**" in cfg.workspace_exclude
 
     def test_resolve_workspaces_default(self, tmp_path):
         """With no workspaces configured, returns [repo_root]."""
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         cfg = STCAConfig.default()
         resolved = cfg.resolve_workspaces(tmp_path)
         assert resolved == [tmp_path]
 
     def test_resolve_workspaces_with_patterns(self, tmp_path):
         """Resolve glob patterns to actual directories."""
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         (tmp_path / "apps" / "api").mkdir(parents=True)
         (tmp_path / "apps" / "web").mkdir(parents=True)
         (tmp_path / "packages" / "core").mkdir(parents=True)
@@ -240,7 +240,7 @@ class TestMonorepoSupport:
         assert rel_paths == ["apps/api", "apps/web", "packages/core"]
 
     def test_resolve_workspaces_excludes_node_modules(self, tmp_path):
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         (tmp_path / "apps" / "api").mkdir(parents=True)
         (tmp_path / "apps" / "node_modules").mkdir(parents=True)
 
@@ -252,33 +252,33 @@ class TestMonorepoSupport:
         assert "apps/node_modules" not in rel_paths
 
     def test_workspaces_round_trip_through_yaml(self, tmp_path):
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         cfg = STCAConfig.default()
         cfg.workspaces = ["apps/*", "packages/*"]
         cfg.workspace_exclude = ["**/build/**"]
-        cfg_path = tmp_path / ".stca.yaml"
+        cfg_path = tmp_path / ".loomscan.yaml"
         cfg.save(cfg_path)
 
         loaded = STCAConfig.from_file(cfg_path)
         assert loaded.workspaces == ["apps/*", "packages/*"]
         assert "**/build/**" in loaded.workspace_exclude
 
-    def test_stca_monorepo_command_exists(self):
+    def test_loomscan_monorepo_command_exists(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
         assert "monorepo" in result.output
 
-    def test_stca_monorepo_list_no_workspaces(self, tmp_path):
-        """`stca monorepo --list` with no workspaces should report single-repo mode."""
+    def test_loomscan_monorepo_list_no_workspaces(self, tmp_path):
+        """`loomscan monorepo --list` with no workspaces should report single-repo mode."""
         import subprocess
         repo = tmp_path / "repo"
         repo.mkdir()
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
-        (repo / ".stca.yaml").write_text("strictness: 5\n")
+        (repo / ".loomscan.yaml").write_text("strictness: 5\n")
         (repo / "app.py").write_text('x = 1\n')
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
@@ -286,7 +286,7 @@ class TestMonorepoSupport:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "monorepo", "--list"],
             cwd=repo, capture_output=True, text=True, env=env, timeout=30,
         )
@@ -298,18 +298,18 @@ class TestMonorepoSupport:
 # =============================================================================
 
 class TestPrBot:
-    """v4.37: stca bot command + GitHub Actions workflow."""
+    """v4.37: loomscan bot command + GitHub Actions workflow."""
 
     def test_bot_command_exists(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
         assert "bot" in result.output
 
     def test_bot_has_pr_flag(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["bot", "--help"])
         assert "--pr" in result.output
@@ -317,14 +317,14 @@ class TestPrBot:
         assert "--dry-run" in result.output
 
     def test_bot_dry_run_works(self, tmp_path):
-        """`stca bot --dry-run` should print findings without posting."""
+        """`loomscan bot --dry-run` should print findings without posting."""
         import subprocess
         repo = tmp_path / "repo"
         repo.mkdir()
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
-        (repo / ".stca.yaml").write_text("strictness: 5\n")
+        (repo / ".loomscan.yaml").write_text("strictness: 5\n")
         (repo / "app.py").write_text('import os\npassword = "hardcoded-secret-12345"\n')
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
@@ -332,24 +332,24 @@ class TestPrBot:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "bot", "--repo", str(repo), "--pr", "1", "--dry-run"],
             cwd=repo, capture_output=True, text=True, env=env, timeout=120,
         )
         # Should print findings without crashing
-        assert "Dry run" in proc.stdout or "would post" in proc.stdout.lower() or "STCA bot" in proc.stdout
+        assert "Dry run" in proc.stdout or "would post" in proc.stdout.lower() or "LoomScan bot" in proc.stdout
 
     def test_github_workflow_exists(self):
-        assert (WORKFLOWS_DIR / "stca-bot.yml").exists()
+        assert (WORKFLOWS_DIR / "loomscan-bot.yml").exists()
 
     def test_github_workflow_runs_on_pr(self):
-        content = (WORKFLOWS_DIR / "stca-bot.yml").read_text()
+        content = (WORKFLOWS_DIR / "loomscan-bot.yml").read_text()
         assert "pull_request" in content
-        assert "stca bot" in content
+        assert "loomscan bot" in content
         assert "GITHUB_TOKEN" in content
 
     def test_bot_module_imports(self):
-        from stca.bot import run_stca_check, post_pr_review, parse_pr_event, Finding
+        from loomscan.bot import run_loomscan_check, post_pr_review, parse_pr_event, Finding
         assert Finding is not None
 
 
@@ -358,18 +358,18 @@ class TestPrBot:
 # =============================================================================
 
 class TestPlayground:
-    """v4.37: stca playground command — web UI for testing rules."""
+    """v4.37: loomscan playground command — web UI for testing rules."""
 
     def test_playground_command_exists(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
         assert "playground" in result.output
 
     def test_playground_has_port_flag(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["playground", "--help"])
         assert "--port" in result.output
@@ -377,25 +377,25 @@ class TestPlayground:
         assert "--no-browser" in result.output
 
     def test_find_matches_basic(self):
-        from stca.playground import find_matches
+        from loomscan.playground import find_matches
         matches = find_matches(r"\beval\s*\(", "x = eval('1+1')\ny = 1\nz = eval(input())")
         assert len(matches) == 2
         assert matches[0][0] == 1  # line 1
         assert matches[1][0] == 3  # line 3
 
     def test_find_matches_invalid_regex(self):
-        from stca.playground import find_matches
+        from loomscan.playground import find_matches
         with pytest.raises(ValueError, match="Invalid regex"):
             find_matches(r"[unclosed", "test")
 
     def test_find_matches_no_matches(self):
-        from stca.playground import find_matches
+        from loomscan.playground import find_matches
         matches = find_matches(r"\beval\s*\(", "x = 1\ny = 2")
         assert matches == []
 
     def test_playground_http_server(self):
         """End-to-end: start the playground server, GET /, POST /test."""
-        from stca.playground import HTTPServer, PlaygroundHandler
+        from loomscan.playground import HTTPServer, PlaygroundHandler
         import urllib.request
         import urllib.parse
 
@@ -408,7 +408,7 @@ class TestPlayground:
             # GET /
             resp = urllib.request.urlopen("http://localhost:8770/")
             html_content = resp.read().decode()
-            assert "STCA Rule Playground" in html_content
+            assert "LoomScan Rule Playground" in html_content
 
             # POST /test with a pattern that matches
             data = urllib.parse.urlencode({
@@ -429,7 +429,7 @@ class TestPlayground:
 
     def test_playground_invalid_pattern_shows_error(self):
         """POST with an invalid regex should show an error message, not crash."""
-        from stca.playground import HTTPServer, PlaygroundHandler
+        from loomscan.playground import HTTPServer, PlaygroundHandler
         import urllib.request
         import urllib.parse
 

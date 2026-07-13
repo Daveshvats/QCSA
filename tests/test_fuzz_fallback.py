@@ -16,10 +16,10 @@ from pathlib import Path
 
 import pytest
 
-from stca.fuzz_fallback import FuzzedDataProvider, fuzz, _generate_random_input
-from stca.fuzz_coverage import fuzz_coverage, CoverageGuidedFuzzer
-from stca.layers.l4_fuzz import L4Fuzz
-from stca.models import DiffHunk, Severity
+from loomscan.fuzz_fallback import FuzzedDataProvider, fuzz, _generate_random_input
+from loomscan.fuzz_coverage import fuzz_coverage, CoverageGuidedFuzzer
+from loomscan.layers.l4_fuzz import L4Fuzz
+from loomscan.models import DiffHunk, Severity
 
 
 # === FuzzedDataProvider tests ===
@@ -180,7 +180,7 @@ class TestL4FuzzLayer:
 
         assert harness_path.exists()
         code = harness_path.read_text()
-        assert "from stca.fuzz_coverage import" in code
+        assert "from loomscan.fuzz_coverage import" in code
         assert "def test_one_input" in code
         assert "fuzz_coverage" in code
         ast.parse(code)  # valid Python

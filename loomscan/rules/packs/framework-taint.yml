@@ -1,0 +1,601 @@
+rules:
+- id: flask-xss-render-template-string-user
+  pattern: render_template_string\s*\(\s*(?:request\.|session\.|g\.|params|args)
+  severity: critical
+  message: "Flask SSTI: render_template_string with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-1336
+- id: flask-xss-render-template-string-concat
+  pattern: render_template_string\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: critical
+  message: "Flask SSTI: render_template_string with concat \u2014 RCE"
+  metadata:
+    cwe: CWE-1336
+- id: flask-xss-render-template-string-format
+  pattern: render_template_string\s*\(\s*['\"].*\.format\s*\(
+  severity: critical
+  message: "Flask SSTI: render_template_string with .format \u2014 RCE"
+  metadata:
+    cwe: CWE-1336
+- id: flask-xss-render-template-string-fstring
+  pattern: render_template_string\s*\(\s*f['\"]
+  severity: critical
+  message: "Flask SSTI: render_template_string with f-string \u2014 RCE"
+  metadata:
+    cwe: CWE-1336
+- id: flask-xss-markup-user
+  pattern: Markup\s*\(\s*(?:request\.|session\.|g\.|params|args)
+  severity: high
+  message: "Flask XSS: Markup with user input \u2014 XSS bypass"
+  metadata:
+    cwe: CWE-79
+- id: flask-xss-markup-concat
+  pattern: Markup\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: "Flask XSS: Markup with concat \u2014 XSS bypass"
+  metadata:
+    cwe: CWE-79
+- id: flask-xss-marksafe-user
+  pattern: mark_safe\s*\(\s*(?:request\.|session\.|g\.|params|args)
+  severity: high
+  message: "Flask XSS: mark_safe with user input \u2014 XSS bypass"
+  metadata:
+    cwe: CWE-79
+- id: flask-xss-marksafe-concat
+  pattern: mark_safe\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: "Flask XSS: mark_safe with concat \u2014 XSS"
+  metadata:
+    cwe: CWE-79
+- id: flask-xss-marksafe-fstring
+  pattern: mark_safe\s*\(\s*f['\"]
+  severity: high
+  message: "Flask XSS: mark_safe with f-string \u2014 XSS"
+  metadata:
+    cwe: CWE-79
+- id: ft-flask-redirect-user
+  pattern: redirect\s*\(\s*(?:request\.|session\.|g\.|params|args)
+  severity: high
+  message: 'Flask open redirect: redirect with user input'
+  metadata:
+    cwe: CWE-601
+- id: flask-redirect-concat
+  pattern: redirect\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: 'Flask open redirect: redirect with concat'
+  metadata:
+    cwe: CWE-601
+- id: ft-flask-send-file-user
+  pattern: send_file\s*\(\s*(?:request\.|session\.|g\.|params|args)
+  severity: high
+  message: 'Flask path traversal: send_file with user input'
+  metadata:
+    cwe: CWE-22
+- id: flask-send-file-concat
+  pattern: send_file\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: 'Flask path traversal: send_file with concat'
+  metadata:
+    cwe: CWE-22
+- id: ft-flask-send-from-directory-user
+  pattern: send_from_directory\s*\(\s*(?:request\.|session\.|g\.|params|args)
+  severity: high
+  message: 'Flask path traversal: send_from_directory with user input'
+  metadata:
+    cwe: CWE-22
+- id: flask-send-from-directory-concat
+  pattern: send_from_directory\s*\(\s*[^,]+,\s*(?:request\.|session\.|g\.|params|args)
+  severity: high
+  message: 'Flask path traversal: send_from_directory filename from user'
+  metadata:
+    cwe: CWE-22
+- id: flask-jsonify-secret
+  pattern: jsonify\s*\(\s*[^)]*(?:password|secret|token|api[_-]?key|private_key)
+  severity: high
+  message: 'Flask info leak: jsonify with secret'
+  metadata:
+    cwe: CWE-532
+- id: flask-response-user-html
+  pattern: Response\s*\(\s*(?:request\.|session\.|g\.|params|args).*content_type\s*=\s*['\"]text/html
+  severity: high
+  message: 'Flask XSS: Response with user input + HTML content type'
+  metadata:
+    cwe: CWE-79
+- id: flask-make-response-user-html
+  pattern: make_response\s*\(\s*(?:request\.|session\.|g\.|params|args)
+  severity: medium
+  message: "Flask: make_response with user input \u2014 verify content type"
+  metadata:
+    cwe: CWE-79
+- id: flask-session-secret-hardcoded
+  pattern: app\.secret_key\s*=\s*['\"][^'\"]{8,}['\"]
+  severity: high
+  message: Flask hardcoded secret_key
+  metadata:
+    cwe: CWE-798
+- id: flask-debug-true-prod
+  pattern: app\.debug\s*=\s*True|app\.run\s*\([^)]*debug\s*=\s*True
+  severity: high
+  message: "Flask debug=True \u2014 RCE via Werkzeug debugger"
+  metadata:
+    cwe: CWE-489
+- id: django-xss-mark-safe-user
+  pattern: mark_safe\s*\(\s*(?:request\.|GET|POST|user|args)
+  severity: high
+  message: 'Django XSS: mark_safe with user input'
+  metadata:
+    cwe: CWE-79
+- id: django-xss-mark-safe-concat
+  pattern: mark_safe\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: 'Django XSS: mark_safe with concat'
+  metadata:
+    cwe: CWE-79
+- id: django-xss-mark-safe-fstring
+  pattern: mark_safe\s*\(\s*f['\"]
+  severity: high
+  message: 'Django XSS: mark_safe with f-string'
+  metadata:
+    cwe: CWE-79
+- id: django-xss-mark-safe-format
+  pattern: mark_safe\s*\(\s*['\"].*\.format\s*\(
+  severity: high
+  message: 'Django XSS: mark_safe with .format'
+  metadata:
+    cwe: CWE-79
+- id: django-xss-conditional-format
+  pattern: \.format\s*\(\s*[^)]*request\.
+  severity: high
+  message: 'Django SSTI: format with request data'
+  metadata:
+    cwe: CWE-1336
+- id: django-redirect-user
+  pattern: redirect\s*\(\s*(?:request\.|GET|POST|user|args)
+  severity: high
+  message: 'Django open redirect: redirect with user input'
+  metadata:
+    cwe: CWE-601
+- id: django-redirect-concat
+  pattern: redirect\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: 'Django open redirect: redirect with concat'
+  metadata:
+    cwe: CWE-601
+- id: django-file-response-user
+  pattern: FileResponse\s*\(\s*open\s*\(\s*(?:request\.|GET|POST|user|args)
+  severity: high
+  message: 'Django path traversal: FileResponse with user input'
+  metadata:
+    cwe: CWE-22
+- id: django-raw-sql-user
+  pattern: \.raw\s*\(\s*['\"].*%[sd].*['\"]\s*%\s*(?:request\.|GET|POST|user|args)
+  severity: critical
+  message: 'Django SQL injection: raw with user input'
+  metadata:
+    cwe: CWE-89
+- id: django-raw-sql-fstring
+  pattern: \.raw\s*\(\s*f['\"]
+  severity: critical
+  message: 'Django SQL injection: raw with f-string'
+  metadata:
+    cwe: CWE-89
+- id: django-extra-where-user
+  pattern: \.extra\s*\(\s*where\s*=\s*\[[^\]]*request\.
+  severity: critical
+  message: 'Django SQL injection: .extra(where=) with user input'
+  metadata:
+    cwe: CWE-89
+- id: django-extra-select-user
+  pattern: \.extra\s*\(\s*select\s*=\s*\{[^}]*request\.
+  severity: high
+  message: 'Django SQL injection: .extra(select=) with user input'
+  metadata:
+    cwe: CWE-89
+- id: ft-django-debug-true
+  pattern: DEBUG\s*=\s*True
+  severity: high
+  message: Django DEBUG=True in production
+  metadata:
+    cwe: CWE-489
+- id: ft-django-secret-key-hardcoded
+  pattern: SECRET_KEY\s*=\s*['\"][^'\"]{20,}['\"]
+  severity: high
+  message: Django hardcoded SECRET_KEY
+  metadata:
+    cwe: CWE-798
+- id: django-allowed-hosts-wildcard
+  pattern: ALLOWED_HOSTS\s*=\s*\[[^\]]*['\"]\*['\"]
+  severity: high
+  message: Django ALLOWED_HOSTS wildcard
+  metadata:
+    cwe: CWE-918
+- id: express-xss-res-send-html
+  pattern: res\.send\s*\(\s*['\"<][^<]*<[^>]*>.*(?:req\.|request\.|params|query|body)
+  severity: high
+  message: 'Express XSS: res.send with HTML + user input'
+  metadata:
+    cwe: CWE-79
+- id: express-xss-res-write-html
+  pattern: res\.write\s*\(\s*['\"<][^<]*<[^>]*>.*(?:req\.|request\.|params|query|body)
+  severity: high
+  message: 'Express XSS: res.write with HTML + user input'
+  metadata:
+    cwe: CWE-79
+- id: express-xss-res-render-user
+  pattern: res\.render\s*\(\s*[^,]+,\s*\{[^}]*(?:req\.|request\.|params|query|body)
+  severity: medium
+  message: "Express XSS: res.render with user data \u2014 verify auto-escape"
+  metadata:
+    cwe: CWE-79
+- id: express-redirect-user
+  pattern: res\.redirect\s*\(\s*(?:req\.|request\.|params|query|body)
+  severity: high
+  message: 'Express open redirect: res.redirect with user input'
+  metadata:
+    cwe: CWE-601
+- id: express-redirect-concat
+  pattern: res\.redirect\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: 'Express open redirect: res.redirect with concat'
+  metadata:
+    cwe: CWE-601
+- id: express-sendfile-user
+  pattern: res\.sendFile\s*\(\s*(?:req\.|request\.|params|query|body)
+  severity: high
+  message: 'Express path traversal: res.sendFile with user input'
+  metadata:
+    cwe: CWE-22
+- id: express-sendfile-concat
+  pattern: res\.sendFile\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: 'Express path traversal: res.sendFile with concat'
+  metadata:
+    cwe: CWE-22
+- id: express-download-user
+  pattern: res\.download\s*\(\s*(?:req\.|request\.|params|query|body)
+  severity: high
+  message: 'Express path traversal: res.download with user input'
+  metadata:
+    cwe: CWE-22
+- id: express-json-secret
+  pattern: res\.json\s*\(\s*\{[^}]*(?:password|secret|token|api_key)
+  severity: high
+  message: 'Express info leak: res.json with secret'
+  metadata:
+    cwe: CWE-532
+- id: express-session-secret-hardcoded
+  pattern: secret\s*:\s*['\"][^'\"]{8,}['\"]\s*,?\s*resave|session\s*\(\s*\{[^}]*secret\s*:\s*['\"][^'\"]{8,}['\"]
+  severity: high
+  message: Express session hardcoded secret
+  metadata:
+    cwe: CWE-798
+- id: ft-express-cors-wildcard
+  pattern: app\.use\s*\(\s*cors\s*\(\s*\{[^}]*origin\s*:\s*['\"]\*['\"]
+  severity: high
+  message: Express CORS wildcard origin
+  metadata:
+    cwe: CWE-942
+- id: express-cors-credentials-wildcard
+  pattern: app\.use\s*\(\s*cors\s*\(\s*\{[^}]*credentials\s*:\s*true[^}]*origin\s*:\s*['\"]\*['\"]
+  severity: critical
+  message: Express CORS credentials + wildcard
+  metadata:
+    cwe: CWE-942
+- id: express-body-limit-large
+  pattern: express\.json\s*\(\s*\{\s*limit\s*:\s*['\"]?\d{4,}
+  severity: medium
+  message: "Express body limit > 10MB \u2014 DoS risk"
+  metadata:
+    cwe: CWE-400
+- id: express-helmet-missing
+  pattern: const\s+app\s*=\s*express\s*\(\s*\)(?!.*helmet)
+  severity: low
+  message: "Express without helmet \u2014 missing security headers"
+  metadata:
+    cwe: CWE-693
+- id: express-csrf-missing
+  pattern: app\.use\s*\(\s*express\.session(?!.*csrf|.*csurf)
+  severity: medium
+  message: Express session without CSRF protection
+  metadata:
+    cwe: CWE-352
+- id: spring-xss-thymeleaf-utext
+  pattern: th:utext\s*=
+  severity: high
+  message: "Spring Thymeleaf th:utext \u2014 XSS bypass (unescaped)"
+  metadata:
+    cwe: CWE-79
+- id: spring-xss-thymeleaf-inline-text
+  pattern: th:inline\s*=\s*\"text\"
+  severity: medium
+  message: "Spring Thymeleaf th:inline text \u2014 verify auto-escape"
+  metadata:
+    cwe: CWE-79
+- id: spring-xss-thymeleaf-inline-javascript
+  pattern: th:inline\s*=\s*\"javascript\"
+  severity: medium
+  message: "Spring Thymeleaf th:inline javascript \u2014 verify escaping"
+  metadata:
+    cwe: CWE-79
+- id: spring-xss-model-attribute-user
+  pattern: model\.addAttribute\s*\(\s*['\"]\w+['\"]\s*,\s*(?:request\.|req\.getParameter|input|user|args)
+  severity: medium
+  message: "Spring Model attribute from user input \u2014 verify Thymeleaf escaping"
+  metadata:
+    cwe: CWE-79
+- id: spring-xss-response-body-html
+  pattern: '@ResponseBody.*return\s+\"<html>|@RestController.*return\s+\"<html>'
+  severity: medium
+  message: "Spring @ResponseBody returning HTML \u2014 verify escaping"
+  metadata:
+    cwe: CWE-79
+- id: ft-spring-redirect-user
+  pattern: return\s+\"redirect:\"\s*\+\s*(?:request\.|req\.getParameter|input|user|args)
+  severity: high
+  message: 'Spring open redirect: redirect with user input'
+  metadata:
+    cwe: CWE-601
+- id: ft-spring-forward-user
+  pattern: return\s+\"forward:\"\s*\+\s*(?:request\.|req\.getParameter|input|user|args)
+  severity: high
+  message: "Spring forward with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: spring-jdbc-template-concat
+  pattern: jdbcTemplate\.(?:query|update|execute)\s*\(\s*\"[^\"]*\"\s*\+
+  severity: critical
+  message: "Spring JdbcTemplate with concat \u2014 SQL injection"
+  metadata:
+    cwe: CWE-89
+- id: ft-spring-jpa-query-concat
+  pattern: '@Query\s*\(\s*\"[^\"]*\"\s*\+'
+  severity: critical
+  message: "Spring @Query with concat \u2014 SQL injection"
+  metadata:
+    cwe: CWE-89
+- id: ft-spring-cors-allow-all
+  pattern: '@CrossOrigin\s*\(\s*origins\s*=\s*\"\\*\"|@CrossOrigin\s*\(\s*origins\s*=\s*\{\"\\*\"\}'
+  severity: high
+  message: Spring CORS wildcard origin
+  metadata:
+    cwe: CWE-942
+- id: ft-spring-csrf-disabled
+  pattern: http\.csrf\s*\(\s*\)\.disable
+  severity: high
+  message: Spring CSRF disabled
+  metadata:
+    cwe: CWE-352
+- id: ft-spring-actuator-exposed
+  pattern: management\.endpoints\.web\.exposure\.include\s*=\s*\*
+  severity: high
+  message: Spring Actuator all endpoints exposed
+  metadata:
+    cwe: CWE-200
+- id: ft-spring-h2-console-enabled
+  pattern: spring\.h2\.console\.enabled\s*=\s*true
+  severity: high
+  message: "H2 console enabled \u2014 RCE risk"
+  metadata:
+    cwe: CWE-489
+- id: ft-spring-spel-user
+  pattern: parser\.parseExpression\s*\(\s*(?:request\.|req\.getParameter|input|user|args)
+  severity: critical
+  message: "Spring SpEL expression with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: ft-spring-no-auth-annotation
+  pattern: '@(?:Get|Post|Put|Delete|Patch|Request)Mapping\s*\(\s*[''\"]/(?:api|admin)[^''\"]*[''\"](?!.*@(?:PreAuthorize|Secured|RolesAllowed|PermitAll))'
+  severity: high
+  message: Spring endpoint without auth annotation
+  metadata:
+    cwe: CWE-862
+- id: react-xss-dangerouslysetinnerhtml
+  pattern: dangerouslySetInnerHTML\s*=
+  severity: high
+  message: 'React XSS: dangerouslySetInnerHTML'
+  metadata:
+    cwe: CWE-79
+- id: react-xss-dangerouslysetinnerhtml-user
+  pattern: dangerouslySetInnerHTML\s*:\s*\{[^}]*__html\s*:\s*(?:props|params|data|response|req|location|searchParams)
+  severity: critical
+  message: 'React XSS: dangerouslySetInnerHTML with user input'
+  metadata:
+    cwe: CWE-79
+- id: react-xss-innerhtml
+  pattern: \.innerHTML\s*=
+  severity: high
+  message: 'React XSS: innerHTML assignment'
+  metadata:
+    cwe: CWE-79
+- id: react-xss-innerhtml-user
+  pattern: \.innerHTML\s*=\s*(?:props|params|data|response|req|location|searchParams)
+  severity: critical
+  message: 'React XSS: innerHTML with user input'
+  metadata:
+    cwe: CWE-79
+- id: react-xss-document-write
+  pattern: document\.write\s*\(
+  severity: high
+  message: 'React XSS: document.write'
+  metadata:
+    cwe: CWE-79
+- id: react-xss-document-write-user
+  pattern: document\.write\s*\(\s*(?:props|params|data|response|req|location|searchParams)
+  severity: critical
+  message: 'React XSS: document.write with user input'
+  metadata:
+    cwe: CWE-79
+- id: react-xss-href-javascript
+  pattern: 'href\s*=\s*[''\"]javascript:'
+  severity: high
+  message: 'React XSS: href javascript:'
+  metadata:
+    cwe: CWE-79
+- id: react-xss-src-javascript
+  pattern: 'src\s*=\s*[''\"]javascript:'
+  severity: high
+  message: 'React XSS: src javascript:'
+  metadata:
+    cwe: CWE-79
+- id: react-xss-eval
+  pattern: \beval\s*\(
+  severity: high
+  message: 'React XSS: eval()'
+  metadata:
+    cwe: CWE-95
+- id: react-xss-eval-user
+  pattern: \beval\s*\(\s*(?:props|params|data|response|req|location|searchParams)
+  severity: critical
+  message: "React XSS: eval with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-95
+- id: react-redirect-user
+  pattern: window\.location\s*=\s*(?:props|params|data|response|req|location|searchParams)
+  severity: high
+  message: 'React open redirect: window.location with user input'
+  metadata:
+    cwe: CWE-601
+- id: ft-react-window-open-user
+  pattern: window\.open\s*\(\s*(?:props|params|data|response|req|location|searchParams)
+  severity: medium
+  message: "React: window.open with user input \u2014 open redirect"
+  metadata:
+    cwe: CWE-601
+- id: ft-react-localstorage-jwt
+  pattern: localStorage\.setItem\s*\(\s*['\"]\w*token['\"]
+  severity: high
+  message: "React: JWT in localStorage \u2014 XSS session theft"
+  metadata:
+    cwe: CWE-922
+- id: ft-react-localstorage-secret
+  pattern: localStorage\.setItem\s*\(\s*['\"]\w*(?:password|secret|api[_-]?key|auth)['\"]
+  severity: high
+  message: "React: Secret in localStorage \u2014 XSS leak"
+  metadata:
+    cwe: CWE-922
+- id: ft-react-cryptojs
+  pattern: CryptoJS\.(?:AES|DES|RC4|MD5|SHA1)\.
+  severity: high
+  message: "React: CryptoJS \u2014 client-side crypto is insecure"
+  metadata:
+    cwe: CWE-327
+- id: ssrf-requests-get-user
+  pattern: requests\.(?:get|post|put|delete|patch|head)\s*\(\s*(?:request\.|req\.|input|user|args|params|os\.environ|sys\.argv)
+  severity: critical
+  message: 'SSRF: requests with user-controlled URL'
+  metadata:
+    cwe: CWE-918
+- id: ssrf-requests-get-concat
+  pattern: requests\.(?:get|post|put|delete|patch)\s*\(\s*['\"][^'\"]*['\"]\s*\+
+  severity: high
+  message: "SSRF: requests with URL concat \u2014 verify"
+  metadata:
+    cwe: CWE-918
+- id: ssrf-requests-get-fstring
+  pattern: requests\.(?:get|post|put|delete|patch)\s*\(\s*f['\"]
+  severity: high
+  message: 'SSRF: requests with f-string URL'
+  metadata:
+    cwe: CWE-918
+- id: ssrf-urllib-urlopen-user
+  pattern: urllib\.request\.urlopen\s*\(\s*(?:request\.|req\.|input|user|args|params)
+  severity: critical
+  message: 'SSRF: urlopen with user URL'
+  metadata:
+    cwe: CWE-918
+- id: ssrf-urllib-urlretrieve-user
+  pattern: urllib\.request\.urlretrieve\s*\(\s*(?:request\.|req\.|input|user|args|params)
+  severity: high
+  message: 'SSRF: urlretrieve with user URL'
+  metadata:
+    cwe: CWE-918
+- id: ssrf-http-user
+  pattern: http\.(?:get|post|put|delete)\s*\(\s*(?:req\.|request\.|input|user|args|params)
+  severity: critical
+  message: 'SSRF: http.get with user URL'
+  metadata:
+    cwe: CWE-918
+- id: ssrf-fetch-user
+  pattern: fetch\s*\(\s*(?:req\.|request\.|input|user|args|params|process\.argv)
+  severity: critical
+  message: 'SSRF: fetch with user URL'
+  metadata:
+    cwe: CWE-918
+- id: ssrf-axios-user
+  pattern: axios\.(?:get|post|put|delete|patch)\s*\(\s*(?:req\.|request\.|input|user|args|params)
+  severity: critical
+  message: 'SSRF: axios with user URL'
+  metadata:
+    cwe: CWE-918
+- id: ssrf-curl-user
+  pattern: curl_setopt\s*\([^,]+,\s*CURLOPT_URL\s*,\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: 'SSRF: cURL with superglobal URL'
+  metadata:
+    cwe: CWE-918
+- id: ssrf-file-get-contents-user
+  pattern: file_get_contents\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: 'SSRF: file_get_contents with superglobal'
+  metadata:
+    cwe: CWE-918
+- id: auth-missing-decorator-flask
+  pattern: '@(?:app|bp)\.(?:route|get|post|put|delete)\s*\([''\"]/(?:api|admin)[^''\"]*[''\"](?!.*login_required|.*auth_required|.*@jwt_required|.*@token_required)'
+  severity: high
+  message: Flask route without auth decorator
+  metadata:
+    cwe: CWE-862
+- id: auth-missing-decorator-django
+  pattern: urlpatterns\s*=\s*\[[^\]]*path\s*\(\s*['\"]/(?:api|admin)[^'\"]*['\"](?!.*LoginRequiredMixin|.*@login_required|.*permission_required)
+  severity: high
+  message: Django URL without auth mixin
+  metadata:
+    cwe: CWE-862
+- id: auth-missing-decorator-express
+  pattern: app\.(?:get|post|put|delete)\s*\(\s*['\"]/(?:api|admin)[^'\"]*['\"](?!.*auth|.*verifyToken|.*authenticate)
+  severity: medium
+  message: Express route without auth middleware
+  metadata:
+    cwe: CWE-862
+- id: auth-skip-before-action
+  pattern: skip_before_action\s+:require_login|skip_before_action\s+:authenticate
+  severity: high
+  message: 'Auth skipped: skip_before_action :require_login'
+  metadata:
+    cwe: CWE-306
+- id: auth-csrf-exempt-django
+  pattern: '@csrf_exempt'
+  severity: medium
+  message: "Django @csrf_exempt \u2014 verify intent"
+  metadata:
+    cwe: CWE-352
+- id: auth-csrf-disabled-spring
+  pattern: http\.csrf\s*\(\s*\)\.disable
+  severity: high
+  message: Spring CSRF disabled
+  metadata:
+    cwe: CWE-352
+- id: auth-csrf-disabled-rails
+  pattern: protect_from_forgery\s+with:\s*:null_session|skip_before_action\s+:verify_authenticity_token
+  severity: high
+  message: Rails CSRF protection disabled
+  metadata:
+    cwe: CWE-352
+- id: auth-jwt-verify-false
+  pattern: jwt\.verify\s*\([^)]*verify\s*=\s*False|jwt\.decode\s*\(\s*(?:req\.|request\.|user)
+  severity: critical
+  message: "JWT verify disabled or decode without verify \u2014 auth bypass"
+  metadata:
+    cwe: CWE-345
+- id: auth-jwt-none-alg
+  pattern: jwt\.sign\s*\([^)]*algorithm\s*:\s*['\"]none['\"]|algorithm\s*=\s*['\"]none['\"]
+  severity: critical
+  message: "JWT with alg=none \u2014 auth bypass"
+  metadata:
+    cwe: CWE-345
+- id: auth-session-fixation
+  pattern: session_id\s*=\s*request\.|session\.session_key\s*=\s*\w+
+  severity: high
+  message: 'Session fixation: session ID from user input'
+  metadata:
+    cwe: CWE-384

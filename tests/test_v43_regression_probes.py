@@ -35,8 +35,8 @@ class TestTypestateTypeEvidenceRegression:
 
     def test_cache_get_no_fp_v4_restored(self, tmp_path):
         """cache.get() must NOT be flagged by v4_restored typestate."""
-        from stca.v4_restored import detect_typestate_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_typestate_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "app.js"
         src.write_text('''function syncData(apiClient, cache) {
     const data = apiClient.get("/users");
@@ -54,7 +54,7 @@ class TestTypestateTypeEvidenceRegression:
 
     def test_cache_get_no_fp_multi_language_bl(self, tmp_path):
         """cache.get() must NOT be flagged by multi_language_bl typestate."""
-        from stca.multi_language_bl import detect_repo as detect_bl_multi
+        from loomscan.multi_language_bl import detect_repo as detect_bl_multi
         src_dir = tmp_path / "repo"
         src_dir.mkdir()
         (src_dir / "app.js").write_text('''function syncData(apiClient, cache) {
@@ -71,8 +71,8 @@ class TestTypestateTypeEvidenceRegression:
 
     def test_real_violation_still_caught_v4_restored(self, tmp_path):
         """Real session.get() without login() MUST still be caught."""
-        from stca.v4_restored import detect_typestate_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_typestate_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "app.js"
         src.write_text('''function handleSession(session) {
     session.get("key");
@@ -85,8 +85,8 @@ class TestTypestateTypeEvidenceRegression:
 
     def test_real_use_after_close_still_caught(self, tmp_path):
         """conn.execute() after conn.close() MUST still be caught."""
-        from stca.v4_restored import detect_typestate_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_typestate_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "app.js"
         src.write_text('''function handleConn(conn) {
     conn.close();
@@ -114,8 +114,8 @@ class TestStateMachineBranchAwarenessRegression:
 
     def test_if_else_branch_no_fp(self, tmp_path):
         """cancel_order with if/else must NOT be flagged as invalid transition."""
-        from stca.v4_restored import detect_state_machine_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_state_machine_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "app.js"
         src.write_text('''function cancel_order(order, reason) {
     if (reason === "customer_request") {
@@ -134,8 +134,8 @@ class TestStateMachineBranchAwarenessRegression:
 
     def test_real_sequential_violation_still_caught(self, tmp_path):
         """Two calls in the SAME branch (sequential) MUST still be flagged."""
-        from stca.v4_restored import detect_state_machine_multi
-        from stca.normalized_ast import parse_file
+        from loomscan.v4_restored import detect_state_machine_multi
+        from loomscan.normalized_ast import parse_file
         src = tmp_path / "app.js"
         src.write_text('''function process_order(order) {
     order.create();
@@ -160,7 +160,7 @@ class TestLanguageSupportAssertionRegression:
 
     def test_unsupported_languages_tracked(self, tmp_path):
         """Unsupported languages must be tracked for warning surfacing."""
-        from stca.normalized_ast import (
+        from loomscan.normalized_ast import (
             get_unsupported_languages, reset_skipped_file_stats,
             get_skipped_file_stats, parse_file,
         )
@@ -195,7 +195,7 @@ class TestDeepDataflowFunctionScopeRegression:
 
     def test_no_cross_function_taint_bleed(self, tmp_path):
         """Taint must NOT bleed from handleRequest to renderStaticGreeting."""
-        from stca.deep_dataflow import analyze_js_dataflow
+        from loomscan.deep_dataflow import analyze_js_dataflow
         src = tmp_path / "app.js"
         src.write_text('''function handleRequest(req, res) {
     const data = req.params.value;
@@ -218,7 +218,7 @@ function renderStaticGreeting(name) {
 
     def test_same_function_flow_still_caught(self, tmp_path):
         """Real same-function taint flow MUST still be caught."""
-        from stca.deep_dataflow import analyze_js_dataflow
+        from loomscan.deep_dataflow import analyze_js_dataflow
         src = tmp_path / "app.js"
         src.write_text('''function handler(req) {
     const data = req.params.value;
@@ -243,7 +243,7 @@ class TestEngineFieldCorroborationRegression:
 
     def test_engine_field_distinguishes_detectors(self):
         """Two findings with same layer but different engines should corroborate."""
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
         f1 = Finding(
             layer=LayerID.L0_FAST, rule_id="L0.v4.TS.REQUIRES-PRIOR",
             message="test", file="app.js", start_line=1,
@@ -260,8 +260,8 @@ class TestEngineFieldCorroborationRegression:
 
     def test_corroboration_boosts_different_engines(self):
         """Corroboration should boost findings from different engines at same location."""
-        from stca.precision import find_corroborating_findings
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.precision import find_corroborating_findings
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
         f1 = Finding(
             layer=LayerID.L0_FAST, rule_id="L0.v4.TS.REQUIRES-PRIOR",
             message="test", file="app.js", start_line=1,

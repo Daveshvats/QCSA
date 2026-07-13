@@ -2,7 +2,7 @@
 import tempfile
 from pathlib import Path
 import pytest
-from stca.v4_restored import (
+from loomscan.v4_restored import (
     JS_EXPANDED_RULES, JAVA_EXPANDED_RULES,
     scan_expanded_js, scan_expanded_java, scan_expanded_repo,
     analyze_codebase, detect_semantic_bl, detect_semantic_repo,
@@ -89,7 +89,7 @@ class TestSemanticBL:
         assert any("MISMATCH" in x.rule_id for x in f)
 
     def test_no_fp_on_matching_action(self, tmp_path):
-        from stca.v4_restored import _check_endpoint_mismatch
+        from loomscan.v4_restored import _check_endpoint_mismatch
         assert _check_endpoint_mismatch("update_profile", "/api/users/update") is None
 
 

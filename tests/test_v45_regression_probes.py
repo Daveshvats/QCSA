@@ -22,14 +22,14 @@ import pytest
 class TestCommentStringStrippingRegression:
     """Regex rules like CQ-PY-EVAL must not match inside comments/strings.
 
-    Claude found 93 false CQ-PY-EVAL hits on STCA's self-scan — all were
+    Claude found 93 false CQ-PY-EVAL hits on LoomScan's self-scan — all were
     the word 'eval' appearing in comments, docstrings, or rule-definition
     strings, not actual eval() calls.
     """
 
     def test_eval_in_comment_not_flagged(self, tmp_path):
         """eval() in a comment must NOT be flagged."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text("""# This function uses eval() to parse user input
 def parse(s):
@@ -43,7 +43,7 @@ def parse(s):
 
     def test_eval_in_docstring_not_flagged(self, tmp_path):
         """eval() in a docstring must NOT be flagged."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text('''def dangerous():
     """This function calls eval() on user input — dangerous!"""
@@ -57,7 +57,7 @@ def parse(s):
 
     def test_eval_in_string_literal_not_flagged(self, tmp_path):
         """eval() in a string literal must NOT be flagged."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text('''rule = r"\\beval\\s*\\("
 desc = "eval() — code injection"
@@ -70,7 +70,7 @@ desc = "eval() — code injection"
 
     def test_real_eval_still_caught(self, tmp_path):
         """A real eval() call MUST still be caught."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text("""def run(user_input):
     return eval(user_input)
@@ -81,7 +81,7 @@ desc = "eval() — code injection"
 
     def test_exec_in_comment_not_flagged(self, tmp_path):
         """exec() in a comment must NOT be flagged."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text("""# Don't use exec() in production
 def run(s):
@@ -95,7 +95,7 @@ def run(s):
 
     def test_real_exec_still_caught(self, tmp_path):
         """A real exec() call MUST still be caught."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text("""def run(code):
     exec(code)
@@ -106,7 +106,7 @@ def run(s):
 
     def test_assert_in_comment_not_flagged(self, tmp_path):
         """assert in a comment must NOT be flagged."""
-        from stca.code_quality import analyze_code_quality
+        from loomscan.code_quality import analyze_code_quality
         src = tmp_path / "app.py"
         src.write_text("""# assert x > 0 — checked above
 def process(x):
@@ -119,18 +119,18 @@ def process(x):
         )
 
     def test_self_scan_eval_false_positives_eliminated(self, tmp_path):
-        """STCA's own source should have ~0 false CQ-PY-EVAL hits.
+        """LoomScan's own source should have ~0 false CQ-PY-EVAL hits.
 
         Claude found 93 false hits. After the fix, only real eval() calls
         (like Z3's model.eval()) should be flagged.
         """
-        from stca.code_quality import analyze_code_quality
-        # Scan STCA's own code_quality.py (which contains rule definitions
+        from loomscan.code_quality import analyze_code_quality
+        # Scan LoomScan's own code_quality.py (which contains rule definitions
         # with 'eval' in string literals)
-        stca_source = Path(__file__).parent.parent / "stca" / "code_quality.py"
-        if not stca_source.exists():
-            pytest.skip("STCA source not found")
-        findings = analyze_code_quality(stca_source)
+        loomscan_source = Path(__file__).parent.parent / "loomscan" / "code_quality.py"
+        if not loomscan_source.exists():
+            pytest.skip("LoomScan source not found")
+        findings = analyze_code_quality(loomscan_source)
         eval_findings = [f for f in findings if f.rule_id == "CQ-PY-EVAL"]
         assert len(eval_findings) == 0, (
             f"code_quality.py should have 0 CQ-PY-EVAL findings (all are string "
@@ -192,15 +192,15 @@ class TestDependencyManifestRegression:
 class TestCIWorkflowRegression:
     """CI workflow must exist and run the test suite.
 
-    Claude found that the only CI workflow (stca.yml) was a template for
-    users, not a workflow that tests STCA itself.
+    Claude found that the only CI workflow (loomscan.yml) was a template for
+    users, not a workflow that tests LoomScan itself.
     """
 
     def test_ci_workflow_exists(self):
         """ci.yml must exist in .github/workflows/."""
         ci_path = Path(__file__).parent.parent / ".github" / "workflows" / "ci.yml"
         assert ci_path.exists(), (
-            "ci.yml must exist — Claude found no CI that tests STCA itself."
+            "ci.yml must exist — Claude found no CI that tests LoomScan itself."
         )
 
     def test_ci_runs_tests(self):

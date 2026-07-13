@@ -5,17 +5,17 @@ import sys
 import subprocess
 from pathlib import Path
 
-# Make sure we can import stca
+# Make sure we can import loomscan
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stca.taint_tracker import track_taint_python, TaintFlow
-from stca.suppressions import find_suppressions, is_suppressed, filter_suppressed
-from stca.layers.l0d_behavioral import L0dBehavioral
-from stca.layers.l0e_iac import L0eIaC
-from stca.layers.l0f_commit_risk import L0fCommitRisk
-from stca.layers.l8_autofix import L8AutoFix, FIX_PATTERNS
-from stca.brain.tuner import compute_adjustments
-from stca.models import Finding, Severity, BlastRadius, LayerID
+from loomscan.taint_tracker import track_taint_python, TaintFlow
+from loomscan.suppressions import find_suppressions, is_suppressed, filter_suppressed
+from loomscan.layers.l0d_behavioral import L0dBehavioral
+from loomscan.layers.l0e_iac import L0eIaC
+from loomscan.layers.l0f_commit_risk import L0fCommitRisk
+from loomscan.layers.l8_autofix import L8AutoFix, FIX_PATTERNS
+from loomscan.brain.tuner import compute_adjustments
+from loomscan.models import Finding, Severity, BlastRadius, LayerID
 
 
 # === Taint tracker ===
@@ -62,7 +62,7 @@ def add(a, b):
 
 def test_suppression_inline_all_rules(tmp_path):
     src = tmp_path / "app.py"
-    src.write_text("eval(x)  # stca: ignore\n")
+    src.write_text("eval(x)  # loomscan: ignore\n")
     sups = find_suppressions(src)
     assert len(sups) == 1
     assert sups[0].rule_id is None
@@ -70,7 +70,7 @@ def test_suppression_inline_all_rules(tmp_path):
 
 def test_suppression_specific_rule(tmp_path):
     src = tmp_path / "app.py"
-    src.write_text("eval(x)  # stca: ignore[L0.sast.mini:py-eval]\n")
+    src.write_text("eval(x)  # loomscan: ignore[L0.sast.mini:py-eval]\n")
     sups = find_suppressions(src)
     assert len(sups) == 1
     assert sups[0].rule_id == "L0.sast.mini:py-eval"
@@ -78,7 +78,7 @@ def test_suppression_specific_rule(tmp_path):
 
 def test_is_suppressed_same_line(tmp_path):
     src = tmp_path / "app.py"
-    src.write_text("eval(x)  # stca: ignore\n")
+    src.write_text("eval(x)  # loomscan: ignore\n")
     sups = find_suppressions(src, tmp_path)  # v4.15: pass repo_root for relative paths
     finding = Finding(layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
                       message="eval()", file="app.py", start_line=1)  # v4.15: relative path
@@ -89,7 +89,7 @@ def test_is_suppressed_same_line(tmp_path):
 def test_is_suppressed_line_above(tmp_path):
     """Comment on line N suppresses finding on line N+1."""
     src = tmp_path / "app.py"
-    src.write_text("# stca: ignore\neval(x)\n")
+    src.write_text("# loomscan: ignore\neval(x)\n")
     sups = find_suppressions(src, tmp_path)  # v4.15: pass repo_root
     is_sup, _ = is_suppressed("app.py", 2, "L0.sast.mini:py-eval", sups)  # v4.15: relative
     assert is_sup
@@ -97,7 +97,7 @@ def test_is_suppressed_line_above(tmp_path):
 
 def test_filter_suppressed_returns_kept_and_suppressed(tmp_path):
     src = tmp_path / "app.py"
-    src.write_text("eval(x)  # stca: ignore\nprint('safe')\n")
+    src.write_text("eval(x)  # loomscan: ignore\nprint('safe')\n")
     findings = [
         Finding(layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
                 message="eval()", file="app.py", start_line=1),  # v4.15: relative
@@ -105,7 +105,7 @@ def test_filter_suppressed_returns_kept_and_suppressed(tmp_path):
                 message="print", file="app.py", start_line=2),  # v4.15: relative
     ]
     kept, suppressed = filter_suppressed(findings, tmp_path)
-    # the stca: ignore on line 1 suppresses BOTH findings on that line
+    # the loomscan: ignore on line 1 suppresses BOTH findings on that line
     # (because rule_id=None means "all rules")
     # But the print() finding is on line 2 — the suppression on line 1
     # only covers line 1 and line 2 (line above rule)
@@ -117,7 +117,7 @@ def test_filter_suppressed_returns_kept_and_suppressed(tmp_path):
 def test_filter_suppressed_specific_rule(tmp_path):
     """A specific rule suppression should only suppress that rule, not others."""
     src = tmp_path / "app.py"
-    src.write_text("eval(x)  # stca: ignore[L0.sast.mini:py-eval]\n")
+    src.write_text("eval(x)  # loomscan: ignore[L0.sast.mini:py-eval]\n")
     findings = [
         Finding(layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
                 message="eval()", file="app.py", start_line=1),  # v4.15: relative
@@ -343,7 +343,7 @@ def test_autofix_eval_to_literal_eval(tmp_path):
         layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-eval",
         message="eval()", file="app.py", start_line=2,
     )
-    from stca.layers.l8_autofix import _fix_eval_python
+    from loomscan.layers.l8_autofix import _fix_eval_python
     patch = _fix_eval_python(finding, tmp_path)
     assert patch is not None
     assert "ast.literal_eval" in patch
@@ -358,7 +358,7 @@ def test_autofix_eval_rejects_dynamic_args(tmp_path):
 
     ast.literal_eval would crash on these — the fixer must reject them.
     """
-    from stca.layers.l8_autofix import _fix_eval_python
+    from loomscan.layers.l8_autofix import _fix_eval_python
 
     # Variable argument — should NOT be fixed
     src = tmp_path / "app.py"
@@ -399,7 +399,7 @@ def test_autofix_hardcoded_password_produces_valid_syntax(tmp_path):
         layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-hardcoded-password",
         message="hardcoded password", file="app.py", start_line=3,
     )
-    from stca.layers.l8_autofix import _fix_hardcoded_password
+    from loomscan.layers.l8_autofix import _fix_hardcoded_password
     patch = _fix_hardcoded_password(finding, tmp_path)
     assert patch is not None
     # CRITICAL: the patched code must parse without SyntaxError
@@ -419,7 +419,7 @@ def test_autofix_bare_except(tmp_path):
         layer=LayerID.L0_FAST, rule_id="L0.sast.mini:py-bare-except",
         message="bare except", file="app.py", start_line=3,
     )
-    from stca.layers.l8_autofix import _fix_bare_except
+    from loomscan.layers.l8_autofix import _fix_bare_except
     patch = _fix_bare_except(finding, tmp_path)
     assert patch is not None
     assert "except Exception:" in patch

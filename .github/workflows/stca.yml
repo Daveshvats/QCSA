@@ -1,9 +1,11 @@
 name: STCA Pipeline
+
 on:
   pull_request:
     branches: [main, master, develop]
   push:
     branches: [main, master]
+
 jobs:
   stca:
     runs-on: ubuntu-latest
@@ -15,42 +17,58 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
       - name: Install STCA
         run: pip install --user .
-        # Install from the repo's local copy (checked out by actions/checkout above).
-        # To install from PyPI: pip install --user stca-pipeline
-        # To install from GitHub: pip install --user git+https://github.com/YOUR_ORG/stca-pipeline.git
+
+      # v5.0 FIX: Run STCA but don't fail the step if STCA finds findings.
+      # STCA exits 1 on BLOCK decision, but we still want the SARIF uploaded.
+      # The "Fail on critical" step below decides whether to fail the build.
       - name: Run STCA on PR diff
         if: github.event_name == 'pull_request'
         run: |
-          stca check --sarif --output stca.sarif --strictness 5
+          stca check --sarif --output stca.sarif --strictness 5 || true
+
       - name: Run STCA on full repo (push)
         if: github.event_name == 'push'
         run: |
-          stca check --sarif --output stca.sarif --full --strictness 5
+          stca check --sarif --output stca.sarif --full --strictness 5 || true
+
+      # v5.0 FIX: Always upload the SARIF, even if STCA found findings
       - name: Upload SARIF
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: stca.sarif
-      - name: Fail on critical
+
+      # v5.0 FIX: Only fail the build on CRITICAL findings, not any findings
+      - name: Fail on critical only
         if: always()
         run: |
+          if [ ! -f stca.sarif ]; then
+            echo "No SARIF file generated — STCA may have crashed"
+            exit 1
+          fi
           python3 -c "
           import json
           with open('stca.sarif') as f:
               data = json.load(f)
+          critical_count = 0
           for run in data.get('runs', []):
               for result in run.get('results', []):
-                  # v4.44: SARIF 'level' is none/note/warning/error — not 'critical'.
-                  # Check severity in properties instead.
                   props = result.get('properties', {})
                   sev = (props.get('severity') or props.get('fis_severity') or '').lower()
                   if sev == 'critical':
-                      print(f'STCA: critical finding — failing build: {result.get(\"ruleId\", \"unknown\")}')
-                      exit(1)
-          print('STCA: no critical findings')
+                      critical_count += 1
+                      print(f'CRITICAL: {result.get(\"ruleId\", \"unknown\")} — {result.get(\"message\", {}).get(\"text\", \"\")[:80]}')
+          if critical_count > 0:
+              print(f'\nSTCA: {critical_count} critical finding(s) — failing build')
+              exit(1)
+          else:
+              print(f'STCA: no critical findings (SARIF uploaded successfully)')
           "

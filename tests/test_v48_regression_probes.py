@@ -23,9 +23,9 @@ class TestCounterfactualInversionRegression:
     def test_true_positive_not_downgraded(self, tmp_path):
         """A verified TP (detector stops after line removal) should keep or
         boost its confidence, not lose 0.3."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
-        from stca.models import Finding, Severity, LayerID, BlastRadius, Category
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
+        from loomscan.models import Finding, Severity, LayerID, BlastRadius, Category
 
         repo = tmp_path / "repo"
         repo.mkdir()
@@ -48,13 +48,13 @@ class TestCounterfactualInversionRegression:
 
 class TestRunUnificationRegression:
     """run() was missing v2_analyzers, html_config_scan, js_taint_tracking,
-    js_pattern_scan — causing stca check and stca check --full to produce
+    js_pattern_scan — causing loomscan check and loomscan check --full to produce
     different results with no warning.
     """
 
     def test_run_has_v2_analyzers(self):
         """The run() method must call _run_v2_analyzers."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run)
         assert "_run_v2_analyzers" in source, (
@@ -63,7 +63,7 @@ class TestRunUnificationRegression:
 
     def test_run_has_js_scanners(self):
         """The run() method must call JS scanners."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run)
         assert "_run_js_taint_tracking" in source
@@ -83,8 +83,8 @@ class TestSupplyChainToolMissingRegression:
     def test_npm_missing_warned(self, tmp_path):
         """When npm is not available but package-lock.json exists, an INFO
         finding should be produced (not silent zero)."""
-        from stca.layers.l0b_supply_chain import L0bSupplyChain
-        from stca.config import STCAConfig
+        from loomscan.layers.l0b_supply_chain import L0bSupplyChain
+        from loomscan.config import STCAConfig
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / "package-lock.json").write_text('{"name": "test"}')
@@ -110,7 +110,7 @@ class TestPysaFallbackRegression:
     def test_pysa_zero_does_not_skip_cpg(self):
         """The _run_cross_file_taint_tracking_with_pysa method must not
         return early when pysa finds nothing."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator._run_cross_file_taint_tracking_with_pysa)
         # The old code had "return []  # Pysa found nothing — trust it"
@@ -131,7 +131,7 @@ class TestLayerTimeoutRegression:
 
     def test_timeout_enforced(self):
         """future.result() must be called with a timeout parameter."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run_full)
         assert "timeout=" in source, (
@@ -150,7 +150,7 @@ class TestL8AutoFixSafetyRegression:
 
     def test_autofix_wrapped_in_try(self):
         """L8AutoFix call sites must be wrapped in try/except."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         run_full_source = inspect.getsource(Orchestrator.run_full)
         # Check that there's a try/except around the L8AutoFix call
@@ -168,7 +168,7 @@ class TestFPLearnerPathGeneralizationRegression:
 
     def test_different_dirs_not_collapsed(self):
         """auth/login.py and payments/login.py must produce different keys."""
-        from stca.precision import FPLearner
+        from loomscan.precision import FPLearner
         learner = FPLearner(Path("/tmp"))
         key1 = learner._make_key("L0.sast.test", "auth/login.py")
         key2 = learner._make_key("L0.sast.test", "payments/login.py")
@@ -188,7 +188,7 @@ class TestSuppressionsFullPathRegression:
 
     def test_different_paths_not_matched(self):
         """A suppression in frontend/auth.py must not match backend/auth.py."""
-        from stca.suppressions import is_suppressed, Suppression
+        from loomscan.suppressions import is_suppressed, Suppression
         sup = Suppression(file="frontend/utils/auth.py", line=5, rule_id=None, reason="", raw={})
         # A finding in a DIFFERENT file with the same basename should NOT match
         is_sup, _ = is_suppressed("backend/admin/auth.py", 5, "L0.test", [sup])
@@ -208,7 +208,7 @@ class TestConcurrencyStubsRegression:
 
     def test_is_assigned_returns_false_for_unassigned(self):
         """_is_assigned must return False for unassigned calls (so the rule CAN fire)."""
-        from stca.concurrency import PythonAsyncAnalyzer
+        from loomscan.concurrency import PythonAsyncAnalyzer
         import ast
         analyzer = PythonAsyncAnalyzer()
         # v4.9: _is_assigned now takes func parameter. Test with a function
@@ -232,7 +232,7 @@ async def handler():
 
     def test_check_toctou_not_empty_stub(self):
         """_check_toctou must not be a stub that returns []."""
-        from stca.concurrency import PythonAsyncAnalyzer
+        from loomscan.concurrency import PythonAsyncAnalyzer
         import inspect
         source = inspect.getsource(PythonAsyncAnalyzer._check_toctou)
         # The old stub had "return []" as the only statement
@@ -252,7 +252,7 @@ class TestDeadInfoFuzzyRuleRegression:
 
     def test_no_dead_info_rule(self):
         """The fuzzy rules must not contain a dead severity='info' rule."""
-        from stca.brain.rules import get_rules
+        from loomscan.brain.rules import get_rules
         rules = get_rules()
         info_rules = [r for r in rules if getattr(r, 'severity', '') == 'info']
         assert len(info_rules) == 0, (
@@ -271,7 +271,7 @@ class TestLLMTieBreakerBodyRegression:
 
     def test_llm_tie_break_reads_file(self):
         """_llm_tie_break must read the finding's file to populate function_body."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator._llm_tie_break)
         # The actual no-op pattern was "for hunk in []:" followed by "pass"
@@ -305,7 +305,7 @@ class TestCodeQualityRegexFixesRegression:
 
     def test_go_thread_sleep_uses_go_syntax(self):
         """CQ-GO-THREAD-SLEEP must use time.Sleep (Go) not Thread.sleep (Java)."""
-        from stca.code_quality import GO_RULES
+        from loomscan.code_quality import GO_RULES
         rule = next((r for r in GO_RULES if r[0] == "CQ-GO-THREAD-SLEEP"), None)
         assert rule is not None
         regex = rule[1]

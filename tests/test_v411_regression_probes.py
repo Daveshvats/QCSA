@@ -27,7 +27,7 @@ class TestCounterfactualLanguageGuardRegression:
 
     def test_source_path_set_after_verify_finding(self, tmp_path):
         """After calling verify_finding, _source_path must be set."""
-        from stca.counterfactual import CounterfactualMutator
+        from loomscan.counterfactual import CounterfactualMutator
         js_file = tmp_path / "app.js"
         js_file.write_text("function foo() {\n  eval(x);\n}\n")
         mutator = CounterfactualMutator(lambda p: [])
@@ -41,7 +41,7 @@ class TestCounterfactualLanguageGuardRegression:
 
     def test_js_file_gets_comment_not_pass(self, tmp_path):
         """JS file mutation must produce /* */ not pass."""
-        from stca.counterfactual import CounterfactualMutator
+        from loomscan.counterfactual import CounterfactualMutator
         js_file = tmp_path / "app.js"
         js_source = "function foo() {\n  eval(x);\n}\n"
         js_file.write_text(js_source)
@@ -70,7 +70,7 @@ class TestCounterfactualAllStrategiesRegression:
     def test_all_strategies_checked(self):
         """The _apply_counterfactual method must check result_mut.mutated
         (which is True for ALL strategies), not just line_removal."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator._apply_counterfactual)
         # v4.11 checks `result_mut.mutated` not `result_mut.strategy == "line_removal"`
@@ -84,7 +84,7 @@ class TestCounterfactualAllStrategiesRegression:
 
     def test_threshold_lowered(self):
         """Confidence threshold should be 0.5, not 0.7."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator._apply_counterfactual)
         assert "0.5" in source, (
@@ -102,7 +102,7 @@ class TestLayerIDEnumRegression:
 
     def test_layer_ids_exist(self):
         """All layer IDs must exist in the enum."""
-        from stca.models import LayerID
+        from loomscan.models import LayerID
         assert hasattr(LayerID, 'L0C_DEPENDENCIES')
         assert hasattr(LayerID, 'L0D_BEHAVIORAL')
         assert hasattr(LayerID, 'L0E_IAC')
@@ -111,12 +111,12 @@ class TestLayerIDEnumRegression:
 
     def test_layers_use_own_ids(self):
         """Layers must use their own LayerID, not borrow L0_FAST."""
-        from stca.layers.l0c_dependencies import L0cDependencies
-        from stca.layers.l0d_behavioral import L0dBehavioral
-        from stca.layers.l0e_iac import L0eIaC
-        from stca.layers.l0f_commit_risk import L0fCommitRisk
-        from stca.layers.l8_autofix import L8AutoFix
-        from stca.models import LayerID
+        from loomscan.layers.l0c_dependencies import L0cDependencies
+        from loomscan.layers.l0d_behavioral import L0dBehavioral
+        from loomscan.layers.l0e_iac import L0eIaC
+        from loomscan.layers.l0f_commit_risk import L0fCommitRisk
+        from loomscan.layers.l8_autofix import L8AutoFix
+        from loomscan.models import LayerID
 
         assert L0cDependencies.id != LayerID.L0_FAST, "L0c must use own LayerID"
         assert L0dBehavioral.id != LayerID.L0_FAST, "L0d must use own LayerID"
@@ -135,7 +135,7 @@ class TestSuppressedFindingsRegression:
 
     def test_suppressed_findings_field_exists(self):
         """PipelineResult must have suppressed_findings field."""
-        from stca.models import PipelineResult
+        from loomscan.models import PipelineResult
         result = PipelineResult()
         assert hasattr(result, 'suppressed_findings')
         assert result.suppressed_findings == []
@@ -151,7 +151,7 @@ class TestSemgrepAutofixRegression:
 
     def test_no_config_auto(self):
         """_semgrep_autofix must not use --config auto."""
-        from stca.layers.l8_autofix import L8AutoFix
+        from loomscan.layers.l8_autofix import L8AutoFix
         import inspect
         source = inspect.getsource(L8AutoFix._semgrep_autofix)
         assert '"auto"' not in source or "--config" not in source.split('"auto"')[0][-20:], (
@@ -169,8 +169,8 @@ class TestFixDockerLatestRegression:
 
     def test_node_image_gets_node_version(self, tmp_path):
         """node:latest should become node:20-slim, not python:3.12-slim."""
-        from stca.layers.l8_autofix import _fix_docker_latest
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.layers.l8_autofix import _fix_docker_latest
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
         dockerfile = tmp_path / "Dockerfile"
         dockerfile.write_text("FROM node:latest\n")
         finding = Finding(

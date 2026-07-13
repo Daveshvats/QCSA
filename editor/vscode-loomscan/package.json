@@ -1,0 +1,139 @@
+{
+  "name": "loomscan",
+  "displayName": "LoomScan",
+  "description": "Real-time squiggles from LoomScan (Static + Test + Constraint Analysis) in your editor. Connects to the LoomScan LSP server.",
+  "version": "0.2.0",
+  "publisher": "loomscan",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "security",
+    "static-analysis",
+    "linter",
+    "sast",
+    "taint"
+  ],
+  "activationEvents": [
+    "onLanguage:python",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:go",
+    "onLanguage:java",
+    "onLanguage:rust",
+    "onLanguage:c",
+    "onLanguage:cpp",
+    "onLanguage:php",
+    "onLanguage:ruby",
+    "onLanguage:csharp",
+    "onLanguage:swift",
+    "onLanguage:scala",
+    "onLanguage:kotlin",
+    "onLanguage:sql",
+    "onLanguage:shell",
+    "onLanguage:dart"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "loomscan.checkRepo",
+        "title": "LoomScan: Run full check on repo"
+      },
+      {
+        "command": "loomscan.checkFile",
+        "title": "LoomScan: Check current file"
+      },
+      {
+        "command": "loomscan.applyFix",
+        "title": "LoomScan: Apply auto-fix for current finding"
+      },
+      {
+        "command": "loomscan.showUncertain",
+        "title": "LoomScan: Show uncertain findings (30-70% confidence)"
+      },
+      {
+        "command": "loomscan.gate",
+        "title": "LoomScan: Run quality gate (SonarQube-style thresholds)"
+      },
+      {
+        "command": "loomscan.restart",
+        "title": "LoomScan: Restart LSP server"
+      }
+    ],
+    "configuration": {
+      "title": "LoomScan",
+      "properties": {
+        "loomscan.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable LoomScan real-time diagnostics"
+        },
+        "loomscan.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to the Python interpreter that has LoomScan installed"
+        },
+        "loomscan.strictness": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 9,
+          "description": "Strictness level 1-9 (PHPStan-inspired). Higher = more findings."
+        },
+        "loomscan.debounceMs": {
+          "type": "number",
+          "default": 500,
+          "description": "Debounce interval (ms) for re-running diagnostics after a save"
+        },
+        "loomscan.showUncertainOnly": {
+          "type": "boolean",
+          "default": false,
+          "description": "Only show findings in the 30-70% confidence band (worth human review)"
+        },
+        "loomscan.useLsp": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use the LSP server for real-time diagnostics (true) or fall back to CLI invocation (false). LSP is faster but may be less reliable on large repos."
+        },
+        "loomscan.gatePreset": {
+          "type": "string",
+          "enum": ["strict", "balanced", "permissive", "custom"],
+          "default": "balanced",
+          "description": "Quality gate preset: strict (0 critical, 0 high), balanced (0 critical, 5 high), permissive (5 critical, 20 high), custom (use loomscan.gate* settings)"
+        },
+        "loomscan.gateMaxCritical": {
+          "type": "number",
+          "default": 0,
+          "description": "Custom gate: max critical findings (only used when gatePreset=custom)"
+        },
+        "loomscan.gateMaxHigh": {
+          "type": "number",
+          "default": 0,
+          "description": "Custom gate: max high findings (only used when gatePreset=custom)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}

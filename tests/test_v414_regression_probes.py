@@ -4,7 +4,7 @@ All tests are BEHAVIORAL — they test runtime behavior, not source strings.
 
 Tests:
   1. config.brain loaded from YAML (BUG #1)
-  2. Auto-tuner reads from .stca.yaml (BUG #2)
+  2. Auto-tuner reads from .loomscan.yaml (BUG #2)
   3. Inline suppressions actually work (BUG #3)
   4. run() has ProjectTuner (BUG #4)
   5. suppressed_findings serialized in to_dict (BUG #5)
@@ -23,20 +23,20 @@ import pytest
 # =============================================================================
 
 class TestConfigBrainLoadedRegression:
-    """v4.13: config.brain was never loaded from .stca.yaml.
+    """v4.13: config.brain was never loaded from .loomscan.yaml.
     v4.14: from_dict now calls cfg.brain.update(raw.get("brain", {})).
     """
 
     def test_brain_loaded_from_yaml(self, tmp_path):
-        """Setting brain.enable_bayesian in .stca.yaml must actually enable it."""
-        from stca.config import STCAConfig
+        """Setting brain.enable_bayesian in .loomscan.yaml must actually enable it."""
+        from loomscan.config import STCAConfig
         yaml_content = """
 brain:
   enable_bayesian: true
   enable_project_tuner: true
   fp_learn_mode: false
 """
-        config_file = tmp_path / ".stca.yaml"
+        config_file = tmp_path / ".loomscan.yaml"
         config_file.write_text(yaml_content)
         config = STCAConfig.from_file(config_file)
         assert config.brain.get("enable_bayesian") is True, \
@@ -48,7 +48,7 @@ brain:
 
     def test_brain_serialized_to_dict(self):
         """to_dict must include brain config."""
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         config = STCAConfig()
         config.brain["enable_bayesian"] = True
         d = config.to_dict()
@@ -57,11 +57,11 @@ brain:
 
     def test_brain_round_trips_through_yaml(self, tmp_path):
         """Config must round-trip: save → load → same values."""
-        from stca.config import STCAConfig
+        from loomscan.config import STCAConfig
         config = STCAConfig()
         config.brain["enable_bayesian"] = True
         config.brain["fp_learn_mode"] = False
-        config_file = tmp_path / ".stca.yaml"
+        config_file = tmp_path / ".loomscan.yaml"
         config.save(config_file)
         loaded = STCAConfig.from_file(config_file)
         assert loaded.brain.get("enable_bayesian") is True
@@ -69,8 +69,8 @@ brain:
 
     def test_orchestrator_bayesian_enabled_from_yaml(self, tmp_path):
         """Orchestrator must instantiate Bayesian when YAML enables it."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / ".git").mkdir()
@@ -80,33 +80,33 @@ brain:
 brain:
   enable_bayesian: true
 """
-        (repo / ".stca.yaml").write_text(yaml_content)
-        config = STCAConfig.from_file(repo / ".stca.yaml")
+        (repo / ".loomscan.yaml").write_text(yaml_content)
+        config = STCAConfig.from_file(repo / ".loomscan.yaml")
         orch = Orchestrator(repo, config)
         assert orch.bayesian is not None, \
-            "Bayesian must be enabled when .stca.yaml has brain.enable_bayesian: true"
+            "Bayesian must be enabled when .loomscan.yaml has brain.enable_bayesian: true"
 
 
 # =============================================================================
-# BUG #2: Auto-tuner reads from .stca.yaml (not .stca-tuning.json)
+# BUG #2: Auto-tuner reads from .loomscan.yaml (not .loomscan-tuning.json)
 # =============================================================================
 
 class TestAutoTunerReadPathRegression:
-    """v4.13: aggregator read .stca-tuning.json but tuner wrote .stca.yaml.
-    v4.14: aggregator reads .stca.yaml.
+    """v4.13: aggregator read .loomscan-tuning.json but tuner wrote .loomscan.yaml.
+    v4.14: aggregator reads .loomscan.yaml.
     """
 
-    def test_aggregator_reads_stca_yaml(self):
-        """Aggregator._load_tuning must read .stca.yaml, not .stca-tuning.json."""
-        from stca.brain.aggregator import Aggregator
+    def test_aggregator_reads_loomscan_yaml(self):
+        """Aggregator._load_tuning must read .loomscan.yaml, not .loomscan-tuning.json."""
+        from loomscan.brain.aggregator import Aggregator
         import inspect
         source = inspect.getsource(Aggregator._load_tuning)
-        assert ".stca.yaml" in source, \
-            "Aggregator must read .stca.yaml (where tuner writes)"
-        # The docstring mentions .stca-tuning.json for context — that's fine.
-        # What matters is the actual code path uses .stca.yaml
-        assert 'config_path = self.stats_path.parent / ".stca.yaml"' in source, \
-            "Aggregator must use .stca.yaml as config_path"
+        assert ".loomscan.yaml" in source, \
+            "Aggregator must read .loomscan.yaml (where tuner writes)"
+        # The docstring mentions .loomscan-tuning.json for context — that's fine.
+        # What matters is the actual code path uses .loomscan.yaml
+        assert 'config_path = self.stats_path.parent / ".loomscan.yaml"' in source, \
+            "Aggregator must use .loomscan.yaml as config_path"
 
 
 # =============================================================================
@@ -114,17 +114,17 @@ class TestAutoTunerReadPathRegression:
 # =============================================================================
 
 class TestSuppressionsWorkRegression:
-    """v4.13: absolute-vs-relative path mismatch meant # stca: ignore did nothing.
+    """v4.13: absolute-vs-relative path mismatch meant # loomscan: ignore did nothing.
     v4.14: find_suppressions stores relative path.
     """
 
     def test_suppression_matches_finding(self, tmp_path):
-        """A # stca: ignore comment must actually suppress the finding."""
-        from stca.suppressions import find_suppressions, is_suppressed
+        """A # loomscan: ignore comment must actually suppress the finding."""
+        from loomscan.suppressions import find_suppressions, is_suppressed
         repo = tmp_path / "repo"
         repo.mkdir()
         app = repo / "app.py"
-        app.write_text("eval(x)  # stca: ignore\n")
+        app.write_text("eval(x)  # loomscan: ignore\n")
         sups = find_suppressions(app, repo)
         assert len(sups) == 1, "Should find 1 suppression"
         # The suppression file should be relative (matching finding.file)
@@ -137,11 +137,11 @@ class TestSuppressionsWorkRegression:
 
     def test_suppression_does_not_cross_files(self, tmp_path):
         """A suppression in app.py must not match a finding in other.py."""
-        from stca.suppressions import find_suppressions, is_suppressed
+        from loomscan.suppressions import find_suppressions, is_suppressed
         repo = tmp_path / "repo"
         repo.mkdir()
         app = repo / "app.py"
-        app.write_text("eval(x)  # stca: ignore\n")
+        app.write_text("eval(x)  # loomscan: ignore\n")
         sups = find_suppressions(app, repo)
         # Finding in a different file should NOT match
         is_sup, _ = is_suppressed("other.py", 1, "L0.sast.mini:py-eval", sups)
@@ -159,7 +159,7 @@ class TestRunHasProjectTunerRegression:
 
     def test_run_has_project_tuner(self):
         """run() must apply ProjectTuner confidence adjustments."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run)
         assert "self.project_tuner" in source, \
@@ -167,7 +167,7 @@ class TestRunHasProjectTunerRegression:
 
     def test_run_full_has_llm_tie_breaker(self):
         """run_full() must have LLM tie-breaker (was only in run before v4.14)."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run_full)
         assert "_llm_tie_break" in source, \
@@ -185,7 +185,7 @@ class TestSuppressedFindingsSerializedRegression:
 
     def test_to_dict_includes_suppressed_findings(self):
         """to_dict must include suppressed_findings key."""
-        from stca.models import PipelineResult
+        from loomscan.models import PipelineResult
         result = PipelineResult()
         d = result.to_dict()
         assert "suppressed_findings" in d, \
@@ -203,7 +203,7 @@ class TestProjectTunerFiltersZeroConfidenceRegression:
 
     def test_run_full_filters_zero_confidence(self):
         """run_full must filter confidence=0 findings after ProjectTuner."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run_full)
         assert "f.confidence > 0.0" in source or "confidence > 0" in source, \
@@ -211,7 +211,7 @@ class TestProjectTunerFiltersZeroConfidenceRegression:
 
     def test_run_filters_zero_confidence(self):
         """run must also filter confidence=0 findings."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator.run)
         assert "f.confidence > 0.0" in source or "confidence > 0" in source, \
@@ -229,7 +229,7 @@ class TestDynamicInvariantsImportRegression:
 
     def test_tempfile_imported(self):
         """dynamic_invariants must import tempfile."""
-        import stca.dynamic_invariants as di
+        import loomscan.dynamic_invariants as di
         assert hasattr(di, 'tempfile') or 'tempfile' in dir(di), \
             "dynamic_invariants must import tempfile (was missing, caused NameError)"
 
@@ -245,7 +245,7 @@ class TestPreCommitSymbolicCallRegression:
 
     def test_pre_commit_calls_analyze_file_correctly(self):
         """pre_commit must call analyze_file with correct arguments."""
-        from stca import pre_commit
+        from loomscan import pre_commit
         import inspect
         source = inspect.getsource(pre_commit)
         # Must NOT pass repo_root as second arg

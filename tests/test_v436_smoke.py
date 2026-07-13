@@ -6,9 +6,9 @@ Tests:
 3. VS Code extension supports all 17 languages (13 + Kotlin/SQL/Bash/Dart + Lua/R/Haskell/Elixir)
 4. 4 new YAML packs (Lua, R, Haskell, Elixir)
 5. Ported packs renamed to -inspired
-6. stca gate --preset flag (strict/balanced/permissive/custom)
-7. stca watch command (upgraded with --json, --quiet, --strictness)
-8. stca mine command (rule_miner wired)
+6. loomscan gate --preset flag (strict/balanced/permissive/custom)
+7. loomscan watch command (upgraded with --json, --quiet, --strictness)
+8. loomscan mine command (rule_miner wired)
 9. Total counts (YAML 950+, packs 27+)
 """
 from __future__ import annotations
@@ -24,8 +24,8 @@ import yaml
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PACKS_DIR = PROJECT_ROOT / "stca" / "rules" / "packs"
-VSCODE_DIR = PROJECT_ROOT / "editor" / "vscode-stca"
+PACKS_DIR = PROJECT_ROOT / "loomscan" / "rules" / "packs"
+VSCODE_DIR = PROJECT_ROOT / "editor" / "vscode-loomscan"
 
 
 # =============================================================================
@@ -83,7 +83,7 @@ class TestVSCodeExtensionCompiled:
 # =============================================================================
 
 class TestVSCodeExtensionLanguages:
-    """v4.36: VS Code extension should activate for all 17 STCA-supported languages
+    """v4.36: VS Code extension should activate for all 17 LoomScan-supported languages
     (13 original + 4 v4.35: Kotlin/SQL/Bash/Dart + 4 v4.36: Lua/R/Haskell/Elixir)."""
 
     def test_activates_for_v435_languages(self):
@@ -97,21 +97,21 @@ class TestVSCodeExtensionLanguages:
             )
 
     def test_has_gate_command(self):
-        """v4.36: Extension should have a stca.gate command."""
+        """v4.36: Extension should have a loomscan.gate command."""
         import json as _json
         with open(VSCODE_DIR / "package.json") as f:
             data = _json.load(f)
         commands = [c["command"] for c in data["contributes"]["commands"]]
-        assert "stca.gate" in commands, "stca.gate command should be registered"
+        assert "loomscan.gate" in commands, "loomscan.gate command should be registered"
 
     def test_has_gate_preset_config(self):
-        """v4.36: Extension should have stca.gatePreset config option."""
+        """v4.36: Extension should have loomscan.gatePreset config option."""
         import json as _json
         with open(VSCODE_DIR / "package.json") as f:
             data = _json.load(f)
         props = data["contributes"]["configuration"]["properties"]
-        assert "stca.gatePreset" in props, "stca.gatePreset config missing"
-        assert props["stca.gatePreset"]["enum"] == ["strict", "balanced", "permissive", "custom"]
+        assert "loomscan.gatePreset" in props, "loomscan.gatePreset config missing"
+        assert props["loomscan.gatePreset"]["enum"] == ["strict", "balanced", "permissive", "custom"]
 
 
 # =============================================================================
@@ -138,42 +138,42 @@ class TestNewV436Packs:
         )
 
     def test_lua_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "lua-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["lua-security"]["language"] == "lua"
 
     def test_r_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "r-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["r-security"]["language"] == "r"
 
     def test_haskell_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "haskell-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["haskell-security"]["language"] == "haskell"
 
     def test_elixir_pack_registered(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert "elixir-security" in BUILTIN_PACKS
         assert BUILTIN_PACKS["elixir-security"]["language"] == "elixir"
 
     def test_lua_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["init.lua"])
         assert any("lua-security" in str(p) for p in packs)
 
     def test_r_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["analysis.R"])
         assert any("r-security" in str(p) for p in packs)
 
     def test_haskell_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["Main.hs"])
         assert any("haskell-security" in str(p) for p in packs)
 
     def test_elixir_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["app.ex"])
         assert any("elixir-security" in str(p) for p in packs)
 
@@ -227,14 +227,14 @@ class TestPortedPacksRenamed:
             )
 
     def test_builtin_packs_uses_inspired_names(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         for name in ["detekt-inspired", "spotbugs-inspired", "lintr-inspired", "luacheck-inspired"]:
             assert name in BUILTIN_PACKS
         for old_name in ["detekt-ported", "spotbugs-ported", "lintr-ported", "luacheck-ported"]:
             assert old_name not in BUILTIN_PACKS
 
     def test_descriptions_say_inspired(self):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         for name in ["detekt-inspired", "spotbugs-inspired", "lintr-inspired", "luacheck-inspired"]:
             desc = BUILTIN_PACKS[name]["description"]
             assert "inspired by" in desc.lower(), (
@@ -243,15 +243,15 @@ class TestPortedPacksRenamed:
 
 
 # =============================================================================
-# 5. stca gate --preset flag
+# 5. loomscan gate --preset flag
 # =============================================================================
 
 class TestStcaGatePreset:
-    """v4.36: stca gate now has --preset flag with 4 options."""
+    """v4.36: loomscan gate now has --preset flag with 4 options."""
 
     def test_preset_flag_in_help(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["gate", "--help"])
         assert "--preset" in result.output
@@ -268,7 +268,7 @@ class TestStcaGatePreset:
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
-        (repo / ".stca.yaml").write_text("strictness: 5\n")
+        (repo / ".loomscan.yaml").write_text("strictness: 5\n")
         (repo / "app.py").write_text(
             'import os\n'
             'password = "hardcoded-secret-12345"\n'
@@ -281,7 +281,7 @@ class TestStcaGatePreset:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "gate", "--full", "--preset", "strict"],
             cwd=repo, capture_output=True, text=True, env=env, timeout=60,
         )
@@ -297,7 +297,7 @@ class TestStcaGatePreset:
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
-        (repo / ".stca.yaml").write_text("strictness: 5\n")
+        (repo / ".loomscan.yaml").write_text("strictness: 5\n")
         (repo / "app.py").write_text('x = 1\n')
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
@@ -305,7 +305,7 @@ class TestStcaGatePreset:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "gate", "--full", "--preset", "permissive"],
             cwd=repo, capture_output=True, text=True, env=env, timeout=60,
         )
@@ -321,7 +321,7 @@ class TestStcaGatePreset:
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
-        (repo / ".stca.yaml").write_text("strictness: 5\n")
+        (repo / ".loomscan.yaml").write_text("strictness: 5\n")
         (repo / "app.py").write_text('x = 1\n')
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
@@ -329,7 +329,7 @@ class TestStcaGatePreset:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "gate", "--full", "--preset", "balanced", "--json"],
             cwd=repo, capture_output=True, text=True, env=env, timeout=60,
         )
@@ -338,16 +338,16 @@ class TestStcaGatePreset:
 
 
 # =============================================================================
-# 6. stca watch command (upgraded)
+# 6. loomscan watch command (upgraded)
 # =============================================================================
 
 class TestStcaWatchUpgraded:
-    """v4.36: stca watch command now actually re-scans and reports findings
+    """v4.36: loomscan watch command now actually re-scans and reports findings
     (was just printing changed files in v4.34)."""
 
     def test_watch_has_strictness_flag(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["watch", "--help"])
         assert "--strictness" in result.output
@@ -357,7 +357,7 @@ class TestStcaWatchUpgraded:
 
     def test_watch_default_debounce_is_sub_second(self):
         """v4.36: Default debounce should be 0.5s for sub-second feedback."""
-        from stca.cli_v2 import watch_cmd
+        from loomscan.cli_v2 import watch_cmd
         debounce_opt = next(p for p in watch_cmd.params if p.name == "debounce")
         assert debounce_opt.default == 0.5, (
             f"Default debounce should be 0.5s, got {debounce_opt.default}"
@@ -366,7 +366,7 @@ class TestStcaWatchUpgraded:
     def test_watch_callback_uses_orchestrator(self):
         """Static check: watch_cmd callback should reference Orchestrator."""
         import inspect
-        import stca.cli_v2 as cv2
+        import loomscan.cli_v2 as cv2
         cb = cv2.watch_cmd.callback
         src = inspect.getsource(cb)
         assert "Orchestrator" in src, "watch_cmd should use Orchestrator"
@@ -374,22 +374,22 @@ class TestStcaWatchUpgraded:
 
 
 # =============================================================================
-# 7. stca mine command
+# 7. loomscan mine command
 # =============================================================================
 
 class TestStcaMineCommand:
-    """v4.36: stca mine command — auto-derive rules from bug-fix commits."""
+    """v4.36: loomscan mine command — auto-derive rules from bug-fix commits."""
 
     def test_mine_command_exists(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
-        assert "mine" in result.output, "stca mine must appear in main --help"
+        assert "mine" in result.output, "loomscan mine must appear in main --help"
 
     def test_mine_has_max_commits_flag(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["mine", "--help"])
         assert "--max-commits" in result.output
@@ -399,7 +399,7 @@ class TestStcaMineCommand:
     def test_mine_callback_uses_rule_miner(self):
         """Static check: mine_cmd callback should import from rule_miner."""
         import inspect
-        import stca.cli_v2 as cv2
+        import loomscan.cli_v2 as cv2
         cb = cv2.mine_cmd.callback
         src = inspect.getsource(cb)
         assert "rule_miner" in src, "mine_cmd should import from rule_miner"
@@ -407,7 +407,7 @@ class TestStcaMineCommand:
 
     def test_mine_registered_in_v2_commands(self):
         """mine_cmd should be in _V2_COMMANDS list."""
-        import stca.cli_v2 as cv2
+        import loomscan.cli_v2 as cv2
         assert cv2.mine_cmd in cv2._V2_COMMANDS, (
             "mine_cmd should be registered in _V2_COMMANDS"
         )
@@ -436,7 +436,7 @@ class TestTotalCountsV436:
 
     def test_languages_supported_20_plus(self):
         """Should support 20+ languages (16 v4.35 + 4 v4.36: Lua/R/Haskell/Elixir)."""
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         langs = set()
         for info in BUILTIN_PACKS.values():
             lang = info.get("language", "")

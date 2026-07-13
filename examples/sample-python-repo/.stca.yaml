@@ -1,4 +1,4 @@
-# STCA Pipeline configuration — sample-python-repo
+# LoomScan configuration — sample-python-repo
 layers:
   L0_fast:       { enabled: true,  timeout_seconds: 10 }
   L1_property:   { enabled: true,  timeout_seconds: 30 }
@@ -23,5 +23,5 @@ llm:
   only_on_uncertain: true
 
 tools: {}
-stats_file: ".stca-stats.json"
-report_dir: ".stca-reports"
+stats_file: ".loomscan-stats.json"
+report_dir: ".loomscan-reports"

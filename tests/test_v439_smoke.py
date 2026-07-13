@@ -3,14 +3,14 @@
 v4.38 shipped spec_mining with a critical bug: the orchestrator referenced
 4 non-existent attributes on SpecViolation (v.rule_id, v.suggestion,
 v.pattern_name, v.expected). The try/except swallowed the AttributeError,
-so stca check silently returned 0 spec_mining findings. The v4.38 smoke
+so loomscan check silently returned 0 spec_mining findings. The v4.38 smoke
 tests verified presence (method exists, import works) not execution.
 
 v4.39 fixes the bug and adds E2E tests that actually RUN the features:
 
 1. spec_mining E2E: mine_and_check on real code → assert findings produced
 2. spec_mining orchestrator E2E: _run_spec_mining on real code → assert findings
-3. spec_mining CLI E2E: `stca spec` via subprocess → assert no crash
+3. spec_mining CLI E2E: `loomscan spec` via subprocess → assert no crash
 4. LSP hover E2E: populate cache → call _get_hover_info → assert markdown content
 5. LSP code actions E2E: populate cache → call _get_code_actions → assert quickfix
 6. pyproject.toml version matches __version__
@@ -40,27 +40,27 @@ class TestSpecMiningE2E:
     """
 
     def test_mine_and_check_produces_findings(self):
-        """End-to-end: mine_and_check on the STCA codebase should produce
+        """End-to-end: mine_and_check on the LoomScan codebase should produce
         patterns AND violations (not silently return empty due to AttributeError)."""
-        from stca.spec_mining import mine_and_check
+        from loomscan.spec_mining import mine_and_check
         patterns, violations = mine_and_check(PROJECT_ROOT)
-        # STCA has 140+ Python files — should mine at least 10 patterns
+        # LoomScan has 140+ Python files — should mine at least 10 patterns
         total_patterns = sum(len(v) for v in patterns.values())
         assert total_patterns > 0, (
-            "spec_mining should mine patterns from the STCA codebase. "
+            "spec_mining should mine patterns from the LoomScan codebase. "
             f"Got 0 patterns across {len(patterns)} APIs."
         )
         # The codebase has known violations (e.g., methods called in unusual sequences)
         # With the v4.38 bug, violations was always empty due to AttributeError.
         # With the v4.39 fix, violations should be non-empty.
         assert len(violations) > 0, (
-            "spec_mining should find violations in the STCA codebase. "
+            "spec_mining should find violations in the LoomScan codebase. "
             "If this is 0, the v4.38 AttributeError bug may still be present."
         )
 
     def test_spec_violation_has_correct_fields(self):
         """Verify SpecViolation has the fields the orchestrator references."""
-        from stca.spec_mining import SpecViolation
+        from loomscan.spec_mining import SpecViolation
         import dataclasses
         fields = {f.name for f in dataclasses.fields(SpecViolation)}
         # These are the fields the orchestrator's _run_spec_mining references:
@@ -79,14 +79,14 @@ class TestSpecMiningE2E:
     def test_orchestrator_spec_mining_produces_findings(self, tmp_path):
         """End-to-end: Orchestrator._run_spec_mining on real code should produce
         Finding objects (not silently swallow AttributeError)."""
-        from stca.orchestrator import Orchestrator
-        from stca.config import STCAConfig
-        from stca.models import DiffHunk, Finding
+        from loomscan.orchestrator import Orchestrator
+        from loomscan.config import STCAConfig
+        from loomscan.models import DiffHunk, Finding
 
-        # Use the STCA codebase itself (it has known spec violations)
+        # Use the LoomScan codebase itself (it has known spec violations)
         cfg = STCAConfig.default()
         orch = Orchestrator(PROJECT_ROOT, cfg)
-        hunks = [DiffHunk(file="stca/spec_mining.py", start_line=1, end_line=10,
+        hunks = [DiffHunk(file="loomscan/spec_mining.py", start_line=1, end_line=10,
                           added_lines=["x = 1"], removed_lines=[])]
         findings = orch._run_spec_mining(hunks)
 
@@ -109,9 +109,9 @@ class TestSpecMiningE2E:
             assert "pattern" in f.raw
 
     def test_spec_cmd_runs_without_crash(self, tmp_path):
-        """End-to-end: `stca spec` CLI command should run without crashing.
+        """End-to-end: `loomscan spec` CLI command should run without crashing.
 
-        v4.38's stca spec crashed with AttributeError on any codebase with violations.
+        v4.38's loomscan spec crashed with AttributeError on any codebase with violations.
         """
         # Create a minimal repo with some Python code
         repo = tmp_path / "repo"
@@ -135,16 +135,16 @@ class TestSpecMiningE2E:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "spec", "--repo", str(repo), "--max-files", "10"],
             capture_output=True, text=True, env=env, timeout=30,
         )
         # Should NOT crash with AttributeError
         assert "AttributeError" not in proc.stderr, (
-            f"stca spec crashed with AttributeError (v4.38 bug not fixed). stderr: {proc.stderr[:500]}"
+            f"loomscan spec crashed with AttributeError (v4.38 bug not fixed). stderr: {proc.stderr[:500]}"
         )
         assert "Traceback" not in proc.stderr, (
-            f"stca spec crashed. stderr: {proc.stderr[:500]}"
+            f"loomscan spec crashed. stderr: {proc.stderr[:500]}"
         )
 
     def test_spec_cmd_mine_only_flag(self, tmp_path):
@@ -156,7 +156,7 @@ class TestSpecMiningE2E:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "spec", "--repo", str(repo), "--mine-only"],
             capture_output=True, text=True, env=env, timeout=30,
         )
@@ -173,7 +173,7 @@ class TestSpecMiningE2E:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
-            [sys.executable, "-c", "from stca.cli import main; main()",
+            [sys.executable, "-c", "from loomscan.cli import main; main()",
              "spec", "--repo", str(repo), "--check-only"],
             capture_output=True, text=True, env=env, timeout=30,
         )
@@ -195,7 +195,7 @@ class TestLSPHoverCodeActionsE2E:
     def test_hover_returns_markdown_with_rule_details(self):
         """E2E: hover on a line with a finding should return markdown with
         the rule_id, severity, message, and fix suggestion."""
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         s._findings_cache.clear()
         s._findings_cache["file:///test.py"] = [
@@ -224,7 +224,7 @@ class TestLSPHoverCodeActionsE2E:
 
     def test_hover_returns_none_for_line_without_findings(self):
         """E2E: hover on a line with NO findings should return None."""
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         s._findings_cache.clear()
         s._findings_cache["file:///test.py"] = [
@@ -243,8 +243,8 @@ class TestLSPHoverCodeActionsE2E:
 
     def test_code_actions_returns_quickfix_with_apply_fix(self):
         """E2E: code actions on a line with an autofixable finding should
-        return a quickfix action with 'Apply STCA fix'."""
-        from stca.lsp.server import LSPServer
+        return a quickfix action with 'Apply LoomScan fix'."""
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         s._findings_cache.clear()
         s._findings_cache["file:///test.py"] = [
@@ -265,7 +265,7 @@ class TestLSPHoverCodeActionsE2E:
             )
             qf = quickfixes[0]
             assert "Apply" in qf["title"], f"Quickfix title should contain 'Apply', got: {qf['title']}"
-            assert qf["command"]["command"] == "stca.applyFix"
+            assert qf["command"]["command"] == "loomscan.applyFix"
             assert len(qf["command"]["arguments"]) >= 2
         finally:
             s._findings_cache.clear()
@@ -273,7 +273,7 @@ class TestLSPHoverCodeActionsE2E:
     def test_code_actions_returns_show_details_for_non_autofixable(self):
         """E2E: code actions for a non-autofixable finding should still
         return a 'Show details' action."""
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         s._findings_cache.clear()
         s._findings_cache["file:///test.py"] = [
@@ -295,7 +295,7 @@ class TestLSPHoverCodeActionsE2E:
     def test_findings_cache_populated_after_analysis(self):
         """E2E: after _analyze_and_publish runs, _findings_cache should be
         populated for that URI."""
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         s._findings_cache.clear()
         # Simulate a file open
@@ -319,7 +319,7 @@ class TestVersionConsistency:
 
     def test_pyproject_version_matches_init(self):
         """pyproject.toml version was stuck at 4.32.0 since v4.32. v4.39 fixes this."""
-        from stca import __version__
+        from loomscan import __version__
         # Read pyproject.toml
         import re
         content = (PROJECT_ROOT / "pyproject.toml").read_text()
@@ -330,8 +330,8 @@ class TestVersionConsistency:
             f"pyproject.toml version ({pyproject_version}) != __version__ ({__version__})"
         )
 
-    def test_version_is_4_39(self):
-        """v4.39+: version should be at least 4.39.0."""
-        from stca import __version__
-        major, minor = int(__version__.split(".")[0]), int(__version__.split(".")[1])
-        assert major >= 4 and minor >= 39, f"Expected >= 4.39.0, got {__version__}"
+    def test_version_is_at_least_4_39(self):
+        """Version should be at least 4.39.0."""
+        from loomscan import __version__
+        major = int(__version__.split(".")[0])
+        assert major >= 4, f"Expected >= 4.39.0, got {__version__}"

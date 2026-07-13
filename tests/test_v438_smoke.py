@@ -20,7 +20,7 @@ import yaml
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PACKS_DIR = PROJECT_ROOT / "stca" / "rules" / "packs"
+PACKS_DIR = PROJECT_ROOT / "loomscan" / "rules" / "packs"
 
 
 # =============================================================================
@@ -31,18 +31,18 @@ class TestWorkflowUrlsFixed:
     """v4.38: All 3 install URLs now use `pip install .` instead of the
     non-existent github.com/Daveshvats/QCSA.git."""
 
-    def test_no_broken_urls_in_stca_yml(self):
-        content = (PROJECT_ROOT / ".github" / "workflows" / "stca.yml").read_text()
-        assert "Daveshvats/QCSA" not in content, "Broken URL still in stca.yml"
+    def test_no_broken_urls_in_loomscan_yml(self):
+        content = (PROJECT_ROOT / ".github" / "workflows" / "loomscan.yml").read_text()
+        assert "Daveshvats/QCSA" not in content, "Broken URL still in loomscan.yml"
         assert "pip install --user ." in content
 
-    def test_no_broken_urls_in_stca_bot_yml(self):
-        content = (PROJECT_ROOT / ".github" / "workflows" / "stca-bot.yml").read_text()
-        assert "Daveshvats/QCSA" not in content, "Broken URL still in stca-bot.yml"
+    def test_no_broken_urls_in_loomscan_bot_yml(self):
+        content = (PROJECT_ROOT / ".github" / "workflows" / "loomscan-bot.yml").read_text()
+        assert "Daveshvats/QCSA" not in content, "Broken URL still in loomscan-bot.yml"
         assert "pip install --user ." in content
 
     def test_no_broken_urls_in_action_yml(self):
-        content = (PROJECT_ROOT / ".github" / "actions" / "stca-action" / "action.yml").read_text()
+        content = (PROJECT_ROOT / ".github" / "actions" / "loomscan-action" / "action.yml").read_text()
         assert "Daveshvats/QCSA" not in content, "Broken URL still in action.yml"
         assert "pip install --user ." in content
 
@@ -65,10 +65,10 @@ class TestJetBrainsBuildCI:
     def test_build_workflow_uploads_artifact(self):
         content = (PROJECT_ROOT / ".github" / "workflows" / "build-jetbrains.yml").read_text()
         assert "upload-artifact" in content
-        assert "stca-intellij-plugin" in content
+        assert "loomscan-intellij-plugin" in content
 
     def test_build_md_exists(self):
-        assert (PROJECT_ROOT / "editor" / "intellij-stca" / "BUILD.md").exists()
+        assert (PROJECT_ROOT / "editor" / "intellij-loomscan" / "BUILD.md").exists()
 
 
 # =============================================================================
@@ -103,32 +103,32 @@ class TestNewV438Packs:
         ("cobol-security", "cobol"),
     ])
     def test_pack_registered(self, pack_name: str, lang: str):
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         assert pack_name in BUILTIN_PACKS
         assert BUILTIN_PACKS[pack_name]["language"] == lang
 
     def test_objectivec_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["AppDelegate.m"])
         assert any("objectivec-security" in str(p) for p in packs)
 
     def test_groovy_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["build.gradle"])
         assert any("groovy-security" in str(p) for p in packs)
 
     def test_julia_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["analysis.jl"])
         assert any("julia-security" in str(p) for p in packs)
 
     def test_perl_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["script.pl"])
         assert any("perl-security" in str(p) for p in packs)
 
     def test_cobol_auto_selection(self):
-        from stca.rules import get_all_packs_for_files
+        from loomscan.rules import get_all_packs_for_files
         packs = get_all_packs_for_files(["PAYROLL.CBL"])
         assert any("cobol-security" in str(p) for p in packs)
 
@@ -170,14 +170,14 @@ class TestSpecMining:
 
     def test_spec_command_exists(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
-        assert "spec" in result.output, "stca spec must appear in main --help"
+        assert "spec" in result.output, "loomscan spec must appear in main --help"
 
     def test_spec_has_flags(self):
         from click.testing import CliRunner
-        from stca.cli import main
+        from loomscan.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["spec", "--help"])
         assert "--max-files" in result.output
@@ -185,14 +185,14 @@ class TestSpecMining:
         assert "--mine-only" in result.output
 
     def test_orchestrator_has_spec_mining_method(self):
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         assert hasattr(Orchestrator, "_run_spec_mining"), (
             "Orchestrator must have _run_spec_mining method"
         )
 
     def test_spec_cmd_callback_uses_spec_mining(self):
         import inspect
-        import stca.spec_mining_cmd as smc
+        import loomscan.spec_mining_cmd as smc
         src = inspect.getsource(smc.spec_cmd.callback)
         assert "mine_api_patterns" in src
         assert "check_spec_violations" in src
@@ -206,24 +206,24 @@ class TestLSPServerDepth:
     """v4.38: LSP server now has real hover + code actions (not stubs)."""
 
     def test_lsp_has_hover_method(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         assert hasattr(LSPServer, "_get_hover_info")
 
     def test_lsp_has_code_actions_method(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         assert hasattr(LSPServer, "_get_code_actions")
 
     def test_lsp_has_has_autofix_method(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         assert hasattr(LSPServer, "_has_autofix")
 
     def test_lsp_findings_cache_exists(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         # _findings_cache is a class attribute
         assert hasattr(LSPServer, "_findings_cache")
 
     def test_hover_returns_none_for_empty_cache(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         # Empty cache → no hover
         result = s._get_hover_info({
@@ -233,7 +233,7 @@ class TestLSPServerDepth:
         assert result is None
 
     def test_hover_returns_markdown_for_cached_finding(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         # Manually populate cache
         s._findings_cache.clear()
@@ -254,7 +254,7 @@ class TestLSPServerDepth:
             s._findings_cache.clear()
 
     def test_code_actions_empty_for_no_findings(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         # Use a URI that has no cached findings
         s._findings_cache.clear()
@@ -265,7 +265,7 @@ class TestLSPServerDepth:
         assert result == []
 
     def test_code_actions_returns_quickfix_for_findings(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         s._findings_cache.clear()
         s._findings_cache["file:///action_test.py"] = [
@@ -279,18 +279,18 @@ class TestLSPServerDepth:
             })
             assert len(result) >= 1
             titles = [a["title"] for a in result]
-            assert any("STCA" in t for t in titles)
+            assert any("LoomScan" in t for t in titles)
         finally:
             s._findings_cache.clear()
 
     def test_has_autofix_returns_true_for_known_rule(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         # L0.sast.mini:py-eval has an autofix pattern
         assert s._has_autofix("L0.sast.mini:py-eval") is True
 
     def test_has_autofix_returns_false_for_unknown_rule(self):
-        from stca.lsp.server import LSPServer
+        from loomscan.lsp.server import LSPServer
         s = LSPServer()
         assert s._has_autofix("UNKNOWN.RULE.12345") is False
 
@@ -316,7 +316,7 @@ class TestTotalCountsV438:
 
     def test_languages_supported_25_plus(self):
         """Should support 25+ languages (was 21 in v4.37)."""
-        from stca.rules import BUILTIN_PACKS
+        from loomscan.rules import BUILTIN_PACKS
         langs = set()
         for info in BUILTIN_PACKS.values():
             lang = info.get("language", "")

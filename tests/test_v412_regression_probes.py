@@ -26,8 +26,8 @@ class TestDockerLatestUnknownImageRegression:
 
     def test_unknown_image_gets_comment_not_malformed_tag(self, tmp_path):
         """Unknown image should get a TODO comment, not a malformed tag."""
-        from stca.layers.l8_autofix import _fix_docker_latest
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.layers.l8_autofix import _fix_docker_latest
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
         dockerfile = tmp_path / "Dockerfile"
         dockerfile.write_text("FROM someunknownimg:latest\n")
         finding = Finding(
@@ -48,8 +48,8 @@ class TestDockerLatestUnknownImageRegression:
 
     def test_known_image_still_works(self, tmp_path):
         """Known images (python, node, etc.) must still get pinned correctly."""
-        from stca.layers.l8_autofix import _fix_docker_latest
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.layers.l8_autofix import _fix_docker_latest
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
         dockerfile = tmp_path / "Dockerfile"
         dockerfile.write_text("FROM python:latest\n")
         finding = Finding(
@@ -75,8 +75,8 @@ class TestFixMutableDefaultRegression:
 
     def test_guard_comment_updated(self):
         """The guard should have an updated comment (no longer TODO)."""
-        from stca.layers.l8_autofix import _fix_mutable_default
-        from stca.models import Finding, LayerID, Severity, BlastRadius, Category
+        from loomscan.layers.l8_autofix import _fix_mutable_default
+        from loomscan.models import Finding, LayerID, Severity, BlastRadius, Category
         import inspect
         source = inspect.getsource(_fix_mutable_default)
         assert "TODO: verify this is safe" not in source, (
@@ -94,12 +94,12 @@ class TestModuleRenameRegression:
 
     def test_version_vuln_checks_importable(self):
         """version_vuln_checks module must be importable."""
-        from stca.version_vuln_checks import scan_version_vuln_checks
+        from loomscan.version_vuln_checks import scan_version_vuln_checks
         assert callable(scan_version_vuln_checks)
 
     def test_orchestrator_uses_new_name(self):
         """Orchestrator must import from version_vuln_checks, not missing_patches."""
-        from stca.orchestrator import Orchestrator
+        from loomscan.orchestrator import Orchestrator
         import inspect
         source = inspect.getsource(Orchestrator)
         assert "version_vuln_checks" in source, (
@@ -118,13 +118,13 @@ class TestTunerReadPathRegression:
 
     def test_aggregator_has_tuning_adjustments(self):
         """Aggregator must have tuning_adjustments field."""
-        from stca.brain.aggregator import Aggregator
+        from loomscan.brain.aggregator import Aggregator
         agg = Aggregator()
         assert hasattr(agg, 'tuning_adjustments')
 
     def test_aggregator_has_load_tuning_method(self):
         """Aggregator must have _load_tuning method."""
-        from stca.brain.aggregator import Aggregator
+        from loomscan.brain.aggregator import Aggregator
         assert hasattr(Aggregator, '_load_tuning')
 
 
@@ -139,17 +139,17 @@ class TestFPLearnerLearnModeRegression:
 
     def test_fp_learner_has_learn_mode(self, tmp_path):
         """FPLearner must accept learn_mode parameter."""
-        from stca.precision import FPLearner
+        from loomscan.precision import FPLearner
         learner = FPLearner(tmp_path, learn_mode=False)
         assert learner._learn_mode is False
 
     def test_no_write_when_learn_mode_false(self, tmp_path):
         """When learn_mode=False, record_occurrence must not write to disk."""
-        from stca.precision import FPLearner
+        from loomscan.precision import FPLearner
         learner = FPLearner(tmp_path, learn_mode=False)
         learner.record_occurrence("test.rule", "app.py")
         # The FP learning file should NOT exist (no write)
-        assert not (tmp_path / ".stca-fp-learning.json").exists(), (
+        assert not (tmp_path / ".loomscan-fp-learning.json").exists(), (
             "FPLearner must not write to disk when learn_mode=False"
         )
         # But the in-memory pattern should exist
@@ -157,10 +157,10 @@ class TestFPLearnerLearnModeRegression:
 
     def test_write_when_learn_mode_true(self, tmp_path):
         """When learn_mode=True (default), record_occurrence should write."""
-        from stca.precision import FPLearner
+        from loomscan.precision import FPLearner
         learner = FPLearner(tmp_path, learn_mode=True)
         learner.record_occurrence("test.rule", "app.py")
-        assert (tmp_path / ".stca-fp-learning.json").exists()
+        assert (tmp_path / ".loomscan-fp-learning.json").exists()
 
 
 # =============================================================================
@@ -174,12 +174,12 @@ class TestL2MutationRenameRegression:
 
     def test_l2_test_coverage_exists(self):
         """L2TestCoverage class must exist and be importable."""
-        from stca.layers.l2_test_coverage import L2TestCoverage
+        from loomscan.layers.l2_test_coverage import L2TestCoverage
         assert L2TestCoverage is not None
 
     def test_l2_mutation_not_referenced(self):
         """L2Mutation should no longer be referenced in layers __init__."""
-        from stca.layers import ALL_LAYERS
+        from loomscan.layers import ALL_LAYERS
         # All layers should import fine without L2Mutation
         for layer_cls in ALL_LAYERS:
             assert layer_cls.__name__ != "L2Mutation", (
