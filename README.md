@@ -5,8 +5,6 @@
 
 <h1 align="center">LoomScan</h1>
 
-> **v5.9** — A deterministic-first, type-2 fuzzy aggregated bug detection pipeline with **2,095 rules across 40 packs covering 24 languages** (up from 1,995 in v5.4), **107 auto-fix patterns**, **275 secret detection patterns**, **10 unique differentiators**, and **78 CLI commands**. Free, offline, and production-ready. Native YAML rule engine (no semgrep dependency), multi-language CPG def-use chains, incremental CPG caching, SARIF Pro tier with threadFlow, Rust core for 10-50x faster scanning, spider mascot with inline-image support (Kitty/iTerm2/WezTerm/VS Code/Ghostty), and a Rich-powered progress bar.
-
 <p align="center">
   <a href="https://github.com/Daveshvats/loomscan/actions"><img src="https://github.com/Daveshvats/loomscan/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://pypi.org/project/loomscan/"><img src="https://img.shields.io/pypi/v/loomscan.svg" alt="PyPI"></a>
