@@ -1,3 +1,6 @@
+# LoomScan v5.9 🕷️
+
+> Static + Test + Constraint Analysis — 2,095 rules across 40 packs covering 24 languages, 107 auto-fix patterns, 275 secret detection patterns, 10 unique differentiators, 78 CLI commands. Free, offline, production-ready. Pixel art spider mascot with inline-image support (Kitty, iTerm2, WezTerm, VS Code, Ghostty). Rich-powered progress bar. Rust core for 10-50× faster scanning.
 
 <p align="center">
   <img src="assets/loomscan-logo.png" width="200" height="200" alt="LoomScan Logo" />
