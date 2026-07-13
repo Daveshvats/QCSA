@@ -1,12 +1,11 @@
+
 <p align="center">
   <img src="assets/loomscan-logo.png" width="200" height="200" alt="LoomScan Logo" />
 </p>
 
 <h1 align="center">LoomScan</h1>
 
-<p align="center">
-  <strong>Static + Test + Constraint Analysis — a deterministic-first, type-2 fuzzy aggregated bug detection pipeline</strong>
-</p>
+> **v5.9** — A deterministic-first, type-2 fuzzy aggregated bug detection pipeline with **2,095 rules across 40 packs covering 24 languages** (up from 1,995 in v5.4), **107 auto-fix patterns**, **275 secret detection patterns**, **10 unique differentiators**, and **78 CLI commands**. Free, offline, and production-ready. Native YAML rule engine (no semgrep dependency), multi-language CPG def-use chains, incremental CPG caching, SARIF Pro tier with threadFlow, Rust core for 10-50x faster scanning, spider mascot with inline-image support (Kitty/iTerm2/WezTerm/VS Code/Ghostty), and a Rich-powered progress bar.
 
 <p align="center">
   <a href="https://github.com/Daveshvats/loomscan/actions"><img src="https://github.com/Daveshvats/loomscan/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
@@ -21,8 +20,7 @@
   <a href="#-installation">Installation</a> ·
   <a href="#-features">Features</a> ·
   <a href="#-architecture">Architecture</a> ·
-  <a href="GUIDE.md">Full Guide</a> ·
-  <a href="#-publishing-guide">Publishing</a>
+  <a href="GUIDE.md">Full Guide</a>
 </p>
 
 ---
@@ -30,6 +28,8 @@
 ## 🕷️ What is LoomScan?
 
 LoomScan is a **free, offline, multi-language static analysis pipeline** that detects bugs, security vulnerabilities, and code quality issues across **24 programming languages**. It uses an **Interval Type-2 Fuzzy Inference System** (IT2-FIS) to aggregate findings from 42+ detection engines into confidence-interval-based decisions — no other SAST tool does this.
+
+The spider mascot ("Loomy") weaves a web of analysis, with an animated progress bar showing scan stages and inline-image rendering on modern terminals (Kitty, iTerm2, WezTerm, VS Code, Ghostty).
 
 ### Why LoomScan?
 
@@ -100,7 +100,7 @@ LoomScan uses a **3-tier installation model** — start basic, add features as n
 pip install loomscan
 ```
 
-- All 2,095 rules, 78 CLI commands, IT2-FIS brain
+- All 2,095 rules (1,995 in v5.4, now 2,095 with framework taint pack), 78 CLI commands, IT2-FIS brain
 - No compilation, no Rust, no tree-sitter
 - Works on Linux, macOS, Windows (Python 3.9+)
 
@@ -171,11 +171,23 @@ YAML engine:
 | 9 | **📊 9-Level Strictness** | PHPStan-inspired levels (1-9). Level 1 = critical only; Level 9 = everything. |
 | 10 | **⚡ Rust Core** | Optional Rust regex engine for 10-50× faster YAML rule scanning. Pre-built wheels. |
 
+### Spider Mascot + Progress Bar
+
+LoomScan features "Loomy" — an animated ASCII spider mascot that weaves a web while scanning. On modern terminals (Kitty, iTerm2, WezTerm, VS Code, Ghostty), Loomy renders as a real PNG image via inline-image protocols. The progress bar shows all 12 scan stages with live finding counts.
+
+```bash
+# Disable the mascot + progress bar for CI/CD
+loomscan check --full --no-tui
+
+# Or use env var
+LOOMSCAN_NO_TUI=1 loomscan check --full
+```
+
 ### Detection Coverage
 
 | Category | Count | Details |
 |----------|-------|---------|
-| **YAML pack rules** | 2,095 | 40 packs across 24 languages |
+| **YAML pack rules** | 2,095 | 40 packs across 24 languages (was 1,995 in v5.4) |
 | **Autofix patterns** | 107 | Python, JS, K8s, Docker, Rust, Java, Go, Kotlin, SQL, Bash, Dart, Swift, Scala |
 | **Secret patterns** | 275 | AWS, GitHub, Stripe, Slack, OpenAI, GCP, Azure, 200+ services |
 | **Taint sinks** | 88 | eval, exec, system, SQL, render, deserialization, path traversal |
@@ -525,6 +537,21 @@ python -m pytest tests/ -q
 
 ---
 
+## 📝 Version History
+
+- **v5.9** — Premium mascot (inline-image: Kitty/iTerm2/WezTerm/VS Code/Ghostty), doctor skfuzzy fix, `--version` flag
+- **v5.8** — 3-tier install model, `loomscan doctor`, Rust wheel CI, spider mascot redesign (8 frames)
+- **v5.7** — TUI mascot + progress bar, Rust core pyo3 bindings, incremental CPG caching
+- **v5.6** — Multi-language taint sources/sinks/sanitizers (JS/Java/Go), interprocedural KB 4× expansion
+- **v5.5** — Critical YAML wiring fix (all 2,095 rules now fire), Rust core source, cleanup
+- **v5.4** — Multi-lang CPG def-use chains, SARIF Pro tier (threadFlow), rename to LoomScan
+- **v5.3** — Multi-lang metamorphic testing, multi-lang LLM-verify, SARIF Pro tier
+- **v5.2** — Native YAML rule engine (no semgrep dependency), 1,995 rules now fire
+- **v5.1** — Framework taint rules (Flask/Django/Express/Spring/React), quickstart `--open-dashboard`
+- **v5.0** — `loomscan quickstart`, multi-language counterfactual (9 languages)
+
+---
+
 ## 🤝 Contributing
 
 ```bash
@@ -571,3 +598,5 @@ MIT — see [LICENSE](LICENSE)
   <a href="https://pypi.org/project/loomscan/">PyPI</a> ·
   <a href="GUIDE.md">Documentation</a>
 </p>
+```
+

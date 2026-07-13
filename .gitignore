@@ -1,18 +1,41 @@
-# Python
+# =============================================================================
+# LoomScan .gitignore — keeps build artifacts, caches, and runtime files
+# out of the GitHub repo. Source code, compiled VS Code extension, and
+# rule packs ARE committed.
+# =============================================================================
+
+# ── Python ──────────────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 *.egg-info/
 *.egg
 dist/
 build/
-.mimocode/
-# Virtual environments
+.eggs/
+
+# ── Virtual Environments ────────────────────────────────────────────────────
 .venv/
 venv/
 env/
+ENV/
 
-# STCA runtime artifacts
+# ── LoomScan Runtime Artifacts ──────────────────────────────────────────────
+# These are generated when LoomScan runs — never commit them
+.loomscan-cache/
+.loomscan-audit.log
+.loomscan-issues.db
+.loomscan-fp-learning.json
+.loomscan-hotspots.json
+.loomscan-hotspot-audit.log
+.loomscan-reports/
+.loomscan-fixes/
+loomscan-dashboard.html
+loomscan.sarif
+
+# ── Legacy STCA Runtime Artifacts (pre-rename) ─────────────────────────────
+# In case any old files linger from before the stca→loomscan rename
 .stca-cache/
 .stca-audit.log
 .stca-issues.db
@@ -20,26 +43,52 @@ env/
 .stca-hotspots.json
 .stca-hotspot-audit.log
 .stca-reports/
-stca-dashboard.html
+.stca-fixes/
 
-# Test/coverage cache
+# ── Test / Coverage Cache ──────────────────────────────────────────────────
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
+.coverage.*
 htmlcov/
+.tox/
 
-# IDE
+# ── IDE ────────────────────────────────────────────────────────────────────
 .idea/
 .vscode/
 *.swp
+*.swo
+*~
 
-# Editor plugins — compiled artifacts
-editor/vscode-stca/node_modules/
-editor/intellij-stca/build/
-editor/intellij-stca/.gradle/
+# ── Editor Plugins — Build Artifacts Only ──────────────────────────────────
+# NOTE: editor/vscode-loomscan/out/ IS committed (compiled extension.js
+#       is needed for CI tests). Only node_modules and .vscode-test are ignored.
+editor/vscode-loomscan/node_modules/
+editor/vscode-loomscan/.vscode-test/
+editor/vscode-loomscan/*.vsix
+editor/intellij-loomscan/build/
+editor/intellij-loomscan/.gradle/
+editor/intellij-loomscan/build/distributions/
 
-# OS files
+# ── Rust Core — Build Artifacts ────────────────────────────────────────────
+rust-core/target/
+rust-core/Cargo.lock
+
+# ── OS Files ───────────────────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Internal worklog (not for users)
+# ── Internal Worklog (not for users) ───────────────────────────────────────
 worklog.md
+
+# ── Examples — Runtime Artifacts ───────────────────────────────────────────
+examples/sample-python-repo/.loomscan-*
+examples/sample-python-repo/.stca-*
+examples/sample-python-repo/loomscan-dashboard.html
