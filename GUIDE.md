@@ -1,6 +1,6 @@
 # STCA Pipeline — Complete User Guide
 
-> **Static + Test + Constraint Analysis** — a deterministic-first, type-2 fuzzy aggregated bug detection pipeline that runs on any laptop, offline, across 7+ programming languages.
+> **v4.43** — Static + Test + Constraint Analysis. A deterministic-first, type-2 fuzzy aggregated bug detection pipeline that runs on any laptop, offline, across **24 programming languages** with **1,995 rules**, **107 auto-fix patterns**, **275 secret detection patterns**, and **9 unique differentiators**.
 
 This guide covers everything: installation, configuration, daily usage, CI/CD integration, advanced features, troubleshooting, and internals. Read it top-to-bottom for a full understanding, or jump to the section you need using the table of contents.
 
@@ -13,20 +13,20 @@ This guide covers everything: installation, configuration, daily usage, CI/CD in
 3. [Quick Start (5 Minutes)](#3-quick-start-5-minutes)
 4. [Core Concepts](#4-core-concepts)
 5. [The `check` Command — Your Daily Driver](#5-the-check-command--your-daily-driver)
-6. [Strictness Levels](#6-strictness-levels)
-7. [Reports and Dashboards](#7-reports-and-dashboards)
-8. [Configuration (.stca.yaml)](#8-configuration-stcayaml)
-9. [Baseline Mode (Only New Issues)](#9-baseline-mode-only-new-issues)
-10. [Auto-Fix](#10-auto-fix)
-11. [Pre-commit Hook Integration](#11-pre-commit-hook-integration)
-12. [CI/CD Integration (GitHub Actions)](#12-cicd-integration-github-actions)
-13. [LLM Tie-Breaker (Optional)](#13-llm-tie-breaker-optional)
-14. [Language Coverage](#14-language-coverage)
-15. [Fuzzing (L4 Layer)](#15-fuzzing-l4-layer)
-16. [Scanner Health Tracking](#16-scanner-health-tracking)
-17. [Advanced Commands Reference](#17-advanced-commands-reference)
+6. [Quality Gates (SonarQube-style)](#6-quality-gates)
+7. [Strictness Levels (1-9)](#7-strictness-levels)
+8. [Reports and Dashboards](#8-reports-and-dashboards)
+9. [Configuration (.stca.yaml)](#9-configuration)
+10. [Auto-Fix (107 patterns)](#10-auto-fix)
+11. [IDE Integration (VS Code + JetBrains)](#11-ide-integration)
+12. [CI/CD Integration (GitHub Actions + PR Bot)](#12-cicd-integration)
+13. [Unique Features](#13-unique-features)
+14. [Rule Management (list, submit, mine)](#14-rule-management)
+15. [Monorepo Support](#15-monorepo-support)
+16. [Language Coverage (24 languages)](#16-language-coverage)
+17. [Advanced Commands Reference (77 commands)](#17-advanced-commands)
 18. [Troubleshooting](#18-troubleshooting)
-19. [How It Works Internally](#19-how-it-works-internally)
+19. [How It Works Internally](#19-internals)
 20. [Glossary](#20-glossary)
 
 ---

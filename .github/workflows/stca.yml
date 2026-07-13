@@ -45,8 +45,12 @@ jobs:
               data = json.load(f)
           for run in data.get('runs', []):
               for result in run.get('results', []):
-                  if (result.get('level', 'note').lower()) == 'critical':
-                      print('STCA: critical finding — failing build')
+                  # v4.44: SARIF 'level' is none/note/warning/error — not 'critical'.
+                  # Check severity in properties instead.
+                  props = result.get('properties', {})
+                  sev = (props.get('severity') or props.get('fis_severity') or '').lower()
+                  if sev == 'critical':
+                      print(f'STCA: critical finding — failing build: {result.get(\"ruleId\", \"unknown\")}')
                       exit(1)
           print('STCA: no critical findings')
           "

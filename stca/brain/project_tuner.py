@@ -1,4 +1,4 @@
-# v4.9: TODO — Wire into feedback loop. This module provides per-rule
+# v4.10+: Wired into the orchestrator feedback loop (orchestrator.py:144-155).
 # confidence tuning that the current per-layer tuner.py cannot provide.
 
 

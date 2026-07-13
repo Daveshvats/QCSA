@@ -1,0 +1,27 @@
+# STCA Pipeline configuration — sample-python-repo
+layers:
+  L0_fast:       { enabled: true,  timeout_seconds: 10 }
+  L1_property:   { enabled: true,  timeout_seconds: 30 }
+  L2_mutation:   { enabled: false, timeout_seconds: 60 }
+  L3_invariants: { enabled: true,  timeout_seconds: 5 }
+  L4_fuzz:       { enabled: false, timeout_seconds: 60 }
+  L5_policy:     { enabled: true,  timeout_seconds: 15 }
+  L6_symbolic:   { enabled: false, timeout_seconds: 120 }
+  L7_simulation: { enabled: false, timeout_seconds: 300 }
+
+critical_paths:    ["**/auth/**", "**/crypto/**", "**/payment/**", "**/pii/**", "app.py"]
+concurrency_paths: ["**/concurrency/**", "**/async/**", "**/worker/**"]
+block_on: ["block"]
+warn_on: ["warn"]
+
+llm:
+  enabled: false
+  provider: ollama
+  model: qwen3-coder-1.5b
+  endpoint: http://localhost:11434
+  prm_threshold: 0.6
+  only_on_uncertain: true
+
+tools: {}
+stats_file: ".stca-stats.json"
+report_dir: ".stca-reports"

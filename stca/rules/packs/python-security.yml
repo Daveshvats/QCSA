@@ -1,204 +1,234 @@
-# Bundled Semgrep rule pack — Python security
-# Covers OWASP Top 10, common Python security antipatterns, and framework-specific issues
-# Free to use, extend, and modify.
-#
-# Apply with: semgrep --config stca/rules/packs/python-security.yml
-
 rules:
-  # === Injection ===
-  - id: py-eval-injection
-    pattern: eval(...)
-    message: eval() — code injection risk
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-95", owasp: "A03" }
-
-  - id: py-exec-injection
-    pattern: exec(...)
-    message: exec() — code injection risk
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-95", owasp: "A03" }
-
-  - id: py-shell-true
-    pattern: subprocess.(call|run|Popen)(..., shell=True, ...)
-    message: subprocess with shell=True — shell injection risk
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-78", owasp: "A03" }
-
-  - id: py-os-system
-    pattern: os.system(...)
-    message: os.system() — shell injection risk, use subprocess.run with shell=False
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-78", owasp: "A03" }
-
-  - id: py-sql-fstring
-    pattern-either:
-      - pattern: $CUR.execute(f"...")
-      - pattern: $CUR.execute("..." + $VAR)
-      - pattern: $CUR.execute("..." % $VAR)
-    message: SQL query built with string formatting — SQL injection risk
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-89", owasp: "A03" }
-
-  - id: py-pickle-load
-    pattern: pickle.load(...)
-    message: pickle.load — arbitrary code execution risk
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-502", owasp: "A08" }
-
-  - id: py-yaml-unsafe-load
-    pattern: yaml.load(...) without Loader=SafeLoader
-    message: yaml.load without SafeLoader — arbitrary code execution risk
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-502", owasp: "A08" }
-
-  # === Authentication / Authorization ===
-  - id: py-hardcoded-password
-    pattern-either:
-      - pattern: if $PWD == "..."
-      - pattern: $PWD = "..."
-      - pattern: password == "..."
-    message: Hardcoded password comparison
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-259", owasp: "A07" }
-
-  - id: py-hardcoded-secret
-    pattern-regex: "(?i)(api_key|secret|token)\\s*=\\s*[\"'][a-zA-Z0-9]{20,}[\"']"
-    message: Hardcoded API key/secret/token
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-798", owasp: "A05" }
-
-  - id: py-md5-password
-    pattern: hashlib.md5(...).hexdigest()
-    message: MD5 used — cryptographically broken, use bcrypt or argon2 for passwords
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-327" }
-
-  - id: py-sha1-password
-    pattern: hashlib.sha1(...).hexdigest()
-    message: SHA1 used — cryptographically broken for passwords
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-327" }
-
-  # === SSRF / Network ===
-  - id: py-requests-no-verify
-    pattern: requests.(get|post|put|delete|patch)(..., verify=False, ...)
-    message: SSL verification disabled — MITM risk
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-295", owasp: "A02" }
-
-  - id: py-urllib-no-verify
-    pattern: ssl._create_unverified_context()
-    message: Unverified SSL context — MITM risk
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-295" }
-
-  # === Path Traversal ===
-  - id: py-open-user-input
-    pattern: open($INPUT, ...)
-    message: File open with potentially user-controlled input — path traversal risk
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-22", owasp: "A01" }
-
-  # === XSS (Flask/Django templates) ===
-  - id: py-flask-markup
-    pattern: flask.Markup(...)
-    message: flask.Markup bypasses HTML escaping — XSS risk
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-79", owasp: "A03" }
-
-  - id: py-django-mark-safe
-    pattern: mark_safe(...)
-    message: mark_safe bypasses HTML escaping — XSS risk
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-79", owasp: "A03" }
-
-  # === Information Disclosure ===
-  - id: py-debug-true
-    pattern: app.run(..., debug=True, ...)
-    message: Flask DEBUG=True — leaks stack traces, allows code execution
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-489", owasp: "A05" }
-
-  - id: py-print-secret
-    pattern-regex: "(?i)print\\(.*?(password|secret|token|api_key|credit_card).*?\\)"
-    message: Print statement references secret/PII
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-532", owasp: "A09" }
-
-  - id: py-logger-secret
-    pattern-regex: "(?i)logger\\.\\w+\\(.*?(password|secret|token|api_key|credit_card).*?\\)"
-    message: Log statement references secret/PII
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-532", owasp: "A09" }
-
-  # === Race conditions / Concurrency ===
-  - id: py-threading-no-lock
-    pattern: threading.Thread(...)
-    message: Thread spawned — verify shared state is protected by a Lock
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-362" }
-
-  # === Deserialization ===
-  - id: py-jwt-no-verify
-    pattern: jwt.decode(..., verify=False, ...)
-    message: JWT verification disabled — token forgery risk
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-345", owasp: "A02" }
-
-  # === SSRF (server-side request forgery) ===
-  - id: py-requests-user-url
-    pattern: requests.get($URL, ...)
-    message: Potential SSRF — verify $URL is not user-controlled
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-918", owasp: "A10" }
-
-  # === Business logic antipatterns ===
-  - id: py-bare-except
-    pattern: "except:"
-    message: Bare except — swallows all exceptions including KeyboardInterrupt
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-396" }
-
-  - id: py-assert-in-prod
-    pattern: assert ...
-    message: assert is stripped with python -O — use real check
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-617" }
-
-  - id: py-mutable-default-arg
-    pattern: "def $FUNC(..., $ARG=[]):"
-    message: Mutable default argument — shared across calls, common bug
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-733" }
-
-  - id: py-broad-except-exception
-    pattern: "except Exception:"
-    message: Broad except Exception — may hide bugs
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-396" }
+- id: py-eval-injection
+  pattern: eval(...)
+  message: "eval() \u2014 code injection risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-95
+    owasp: A03
+- id: py-exec-injection
+  pattern: exec(...)
+  message: "exec() \u2014 code injection risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-95
+    owasp: A03
+- id: py-shell-true
+  pattern: subprocess.(call|run|Popen)(..., shell=True, ...)
+  message: "subprocess with shell=True \u2014 shell injection risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-78
+    owasp: A03
+- id: py-os-system
+  pattern: os.system(...)
+  message: "os.system() \u2014 shell injection risk, use subprocess.run with shell=False"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-78
+    owasp: A03
+- id: py-sql-fstring
+  pattern-either:
+  - pattern: $CUR.execute(f"...")
+  - pattern: $CUR.execute("..." + $VAR)
+  - pattern: $CUR.execute("..." % $VAR)
+  message: "SQL query built with string formatting \u2014 SQL injection risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-89
+    owasp: A03
+- id: py-pickle-load
+  pattern: pickle.load(...)
+  message: "pickle.load \u2014 arbitrary code execution risk"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-502
+    owasp: A08
+- id: py-yaml-unsafe-load
+  pattern: yaml.load(...) without Loader=SafeLoader
+  message: "yaml.load without SafeLoader \u2014 arbitrary code execution risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-502
+    owasp: A08
+- id: py-hardcoded-password
+  pattern-either:
+  - pattern: if $PWD == "..."
+  - pattern: $PWD = "..."
+  - pattern: password == "..."
+  message: Hardcoded password comparison
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-259
+    owasp: A07
+- id: py-hardcoded-secret
+  pattern-regex: (?i)(api_key|secret|token)\s*=\s*["'][a-zA-Z0-9]{20,}["']
+  message: Hardcoded API key/secret/token
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-798
+    owasp: A05
+- id: py-md5-password
+  pattern: hashlib.md5(...).hexdigest()
+  message: "MD5 used \u2014 cryptographically broken, use bcrypt or argon2 for passwords"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-327
+- id: py-sha1-password
+  pattern: hashlib.sha1(...).hexdigest()
+  message: "SHA1 used \u2014 cryptographically broken for passwords"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-327
+- id: py-requests-no-verify
+  pattern: requests.(get|post|put|delete|patch)(..., verify=False, ...)
+  message: "SSL verification disabled \u2014 MITM risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-295
+    owasp: A02
+- id: py-urllib-no-verify
+  pattern: ssl._create_unverified_context()
+  message: "Unverified SSL context \u2014 MITM risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-295
+- id: py-open-user-input
+  pattern: open($INPUT, ...)
+  message: "File open with potentially user-controlled input \u2014 path traversal\
+    \ risk"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-22
+    owasp: A01
+- id: py-flask-markup
+  pattern: flask.Markup(...)
+  message: "flask.Markup bypasses HTML escaping \u2014 XSS risk"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-79
+    owasp: A03
+- id: py-django-mark-safe
+  pattern: mark_safe(...)
+  message: "mark_safe bypasses HTML escaping \u2014 XSS risk"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-79
+    owasp: A03
+- id: py-debug-true
+  pattern: app.run(..., debug=True, ...)
+  message: "Flask DEBUG=True \u2014 leaks stack traces, allows code execution"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-489
+    owasp: A05
+- id: py-print-secret
+  pattern-regex: (?i)print\(.*?(password|secret|token|api_key|credit_card).*?\)
+  message: Print statement references secret/PII
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-532
+    owasp: A09
+- id: py-logger-secret
+  pattern-regex: (?i)logger\.\w+\(.*?(password|secret|token|api_key|credit_card).*?\)
+  message: Log statement references secret/PII
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-532
+    owasp: A09
+- id: py-threading-no-lock
+  pattern: threading.Thread(...)
+  message: "Thread spawned \u2014 verify shared state is protected by a Lock"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-362
+- id: python-py-jwt-no-verify
+  pattern: jwt.decode(..., verify=False, ...)
+  message: "JWT verification disabled \u2014 token forgery risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-345
+    owasp: A02
+- id: py-requests-user-url
+  pattern: requests.get($URL, ...)
+  message: "Potential SSRF \u2014 verify $URL is not user-controlled"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-918
+    owasp: A10
+- id: py-bare-except
+  pattern: 'except:'
+  message: "Bare except \u2014 swallows all exceptions including KeyboardInterrupt"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-396
+- id: py-assert-in-prod
+  pattern: assert ...
+  message: "assert is stripped with python -O \u2014 use real check"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-617
+- id: py-mutable-default-arg
+  pattern: 'def $FUNC(..., $ARG=[]):'
+  message: "Mutable default argument \u2014 shared across calls, common bug"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-733
+- id: py-broad-except-exception
+  pattern: 'except Exception:'
+  message: "Broad except Exception \u2014 may hide bugs"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-396

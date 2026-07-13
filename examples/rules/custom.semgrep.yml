@@ -1,0 +1,38 @@
+# Sample custom Semgrep rules — extend the built-in ruleset
+# Place in .stca-rules/ or anywhere Semgrep can find them
+# Run with: semgrep --config .stca-rules/custom.semgrep.yml
+
+rules:
+  - id: sample-python-print-with-secret
+    pattern: print(..., $SECRET, ...)
+    message: |
+      Print statement references a variable that might be a secret.
+      Check that $SECRET does not contain credentials, tokens, or PII.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      source: custom
+      cwe: "CWE-532"
+
+  - id: sample-python-fstring-sql
+    pattern: $CUR.execute(f"...")
+    message: |
+      SQL query built with f-string — SQL injection risk.
+      Use parameterized queries: cursor.execute("INSERT INTO t VALUES (?)", (val,))
+    languages: [python]
+    severity: ERROR
+    metadata:
+      source: custom
+      cwe: "CWE-89"
+
+  - id: sample-python-hardcoded-password
+    pattern-either:
+      - pattern: if $PASSWORD == "..."
+      - pattern: if "..." == $PASSWORD
+    message: |
+      Hardcoded password comparison — use a password hash with bcrypt/argon2.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      source: custom
+      cwe: "CWE-259"

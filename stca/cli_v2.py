@@ -167,13 +167,26 @@ def supply_chain_cmd(repo: str, project_license: str):
 
 @click.command("dashboard")
 @click.option("--repo", default=".", help="Repository root")
-@click.option("--input", "input_path", default=None, help="PipelineResult JSON to render")
-@click.option("--output", "-o", default="stca-dashboard.html", help="Output HTML path")
-def dashboard_cmd(repo: str, input_path: str, output: str):
-    """Generate a self-contained HTML dashboard with charts and filterable table."""
+@click.option("--input", "input_path", default=None, help="PipelineResult JSON to render (default: run full scan)")
+@click.option("--output", "-o", default=None, help="Output HTML path (default: <repo>/stca-dashboard.html)")
+@click.option("--open", "open_browser", is_flag=True, help="Open dashboard in browser after generating")
+def dashboard_cmd(repo: str, input_path: str, output: str, open_browser: bool):
+    """Generate a self-contained HTML dashboard with charts and filterable table.
+
+    v4.44: Fixed 2 bugs:
+    - When no --input, runs a FULL scan (was only running demo crypto+modern scan)
+    - Output defaults to <repo>/stca-dashboard.html (was CWD)
+    """
     from .report.dashboard import generate_dashboard
     repo_root = Path(repo).resolve()
-    out_path = Path(output)
+    # v4.44: Default output to repo dir, not CWD
+    if output:
+        out_path = Path(output)
+        if not out_path.is_absolute():
+            out_path = repo_root / out_path
+    else:
+        out_path = repo_root / "stca-dashboard.html"
+
     findings_json = None
     if input_path:
         try:
@@ -181,8 +194,27 @@ def dashboard_cmd(repo: str, input_path: str, output: str):
             findings_json = json.loads(Path(input_path).read_text(encoding="utf-8"))
         except Exception as e:
             click.echo(f"Could not load input JSON: {e}", err=True)
+            return
+    else:
+        # v4.44: Run a FULL scan instead of the demo crypto+modern scan
+        click.echo(f"Running full STCA scan on {repo_root}...")
+        try:
+            from .config import STCAConfig, find_config
+            from .orchestrator import Orchestrator
+            config = STCAConfig.from_file(find_config(repo_root))
+            orch = Orchestrator(repo_root, config)
+            result = orch.run_full()
+            findings_json = result.to_dict()
+            click.echo(f"Scan complete: {len(result.findings)} findings")
+        except Exception as e:
+            click.echo(f"Scan failed: {e}", err=True)
+            return
+
     generate_dashboard(repo_root, out_path, findings_json=findings_json)
     click.echo(f"Dashboard written to {out_path}")
+    if open_browser:
+        import webbrowser
+        webbrowser.open(f"file://{out_path.resolve()}")
 
 
 # =============================================================================

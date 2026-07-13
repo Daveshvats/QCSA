@@ -1,256 +1,287 @@
-# Bundled Semgrep rule pack — Python framework-specific (Django, Flask, FastAPI)
-# These rules catch framework-specific vulnerabilities that generic Python rules miss.
 rules:
-  # === Django ===
-  - id: django-raw-sql
-    pattern: "$MODEL.objects.raw($QUERY)"
-    message: "Django raw SQL — SQL injection risk if query is user-controlled"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-89", owasp: "A03" }
-
-  - id: django-extra
-    pattern: "$MODEL.objects.extra(where=[$COND])"
-    message: "Django extra() — SQL injection risk, use ORM or raw params"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-89" }
-
-  - id: django-debug-true
-    pattern: "DEBUG = True"
-    message: "Django DEBUG=True in production — leaks stack traces, allows code execution"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-489" }
-
-  - id: django-allow-all-hosts
-    pattern: "ALLOWED_HOSTS = [\"*\"]"
-    message: "Django ALLOWED_HOSTS=['*'] — Host header injection risk"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-444" }
-
-  - id: django-secret-key-hardcoded
-    pattern: "SECRET_KEY = \"...\""
-    message: "Django SECRET_KEY hardcoded — use environment variable"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-798" }
-
-  - id: django-csrf-exempt
-    pattern: "@csrf_exempt"
-    message: "Django @csrf_exempt — CSRF protection disabled"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-352" }
-
-  - id: django-clickjacking-no-xframe
-    pattern: "X_FRAME_OPTIONS = \"DENY\""
-    message: "Django X_FRAME_OPTIONS — verify it's set to DENY or SAMEORIGIN"
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-1021" }
-
-  - id: django-mark-safe
-    pattern: "mark_safe($X)"
-    message: "Django mark_safe — XSS bypass, verify $X is escaped"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-79" }
-
-  - id: django-model-form-fields-unsafe
-    pattern: "class $FORM(forms.ModelForm):\\n  class Meta:\\n    fields = \"__all__\""
-    message: "Django ModelForm with fields='__all__' — may expose sensitive fields"
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-200" }
-
-  # === Flask ===
-  - id: flask-debug-true
-    pattern: "app.run(..., debug=True, ...)"
-    message: "Flask debug=True — leaks stack traces, allows code execution via Werkzeug"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-489" }
-
-  - id: flask-secret-key-hardcoded
-    pattern: "app.secret_key = \"...\""
-    message: "Flask secret_key hardcoded — use environment variable"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-798" }
-
-  - id: flask-markup
-    pattern: "flask.Markup($X)"
-    message: "Flask Markup — XSS bypass, verify $X is escaped"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-79" }
-
-  - id: flask-send-file-user-input
-    pattern: "send_file($FILENAME)"
-    message: "Flask send_file with user input — path traversal risk"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-22" }
-
-  - id: flask-render-template-string
-    pattern: "render_template_string($TEMPLATE)"
-    message: "Flask render_template_string — SSTI (Server-Side Template Injection) risk"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-1336" }
-
-  - id: flask-cors-wildcard
-    pattern: "CORS(app, origins=\"*\")"
-    message: "Flask-CORS with origins='*' — allows any origin"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-942" }
-
-  # === FastAPI ===
-  - id: fastapi-no-auth-dependency
-    pattern: "@app.$METHOD($PATH)"
-    message: "FastAPI endpoint without auth dependency — verify it's public"
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-862" }
-
-  - id: fastapi-redirect-user-input
-    pattern: "RedirectResponse($URL)"
-    message: "FastAPI RedirectResponse — open redirect if $URL is user-controlled"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-601" }
-
-  - id: fastapi-html-response-user-input
-    pattern: "HTMLResponse($X)"
-    message: "FastAPI HTMLResponse — XSS if $X is user-controlled"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-79" }
-
-  # === General Python web ===
-  - id: py-jwt-no-verify
-    pattern: "jwt.decode(..., verify=False, ...)"
-    message: "JWT verification disabled — token forgery risk"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-345" }
-
-  - id: py-jwt-none-alg
-    pattern: "jwt.decode(..., algorithms=[\"none\"])"
-    message: "JWT alg:none — bypasses signature verification"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-345" }
-
-  - id: py-requests-no-verify-ssl
-    pattern: "requests.$METHOD(..., verify=False, ...)"
-    message: "SSL verification disabled — MITM risk"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-295" }
-
-  - id: py-urllib3-disable-warnings
-    pattern: "urllib3.disable_warnings()"
-    message: "urllib3 warnings disabled — may hide SSL issues"
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-754" }
-
-  - id: py-bcrypt-low-rounds
-    pattern: "bcrypt.hashpw(..., bcrypt.gensalt(rounds=4))"
-    message: "bcrypt with low rounds — use at least 12"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-916" }
-
-  - id: py-passlib-sha1
-    pattern: "passlib.hash.sha1_crypt"
-    message: "SHA1 for password hashing — use bcrypt or argon2"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-327" }
-
-  # === Async/concurrency bugs ===
-  - id: py-async-await-in-sync
-    pattern: "def $FUNC(...):\\n  ..."
-    message: "Sync function — verify it doesn't call async functions without await"
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-1058" }
-
-  - id: py-threading-race
-    pattern: "threading.Lock()"
-    message: "Lock used — verify it protects ALL shared mutable state"
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-362" }
-
-  - id: py-asyncio-create-task-no-ref
-    pattern: "asyncio.create_task($CORO)"
-    message: "asyncio.create_task without keeping reference — task may be garbage collected"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-404" }
-
-  # === Database ===
-  - id: py-sqlalchemy-text-user-input
-    pattern: "sqlalchemy.text($QUERY)"
-    message: "SQLAlchemy text() with user input — SQL injection if not parameterized"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-89" }
-
-  - id: py-mongo-find-raw
-    pattern: "$COL.find($QUERY)"
-    message: "MongoDB find with user input — NoSQL injection risk if $QUERY is dict from user"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-943" }
-
-  # === File handling ===
-  - id: py-tempfile-mktemp
-    pattern: "tempfile.mktemp(...)"
-    message: "tempfile.mktemp — race condition, use mkstemp"
-    languages: [python]
-    severity: WARNING
-    metadata: { cwe: "CWE-377" }
-
-  - id: py-shutil-rmtree-user-input
-    pattern: "shutil.rmtree($PATH)"
-    message: "shutil.rmtree with user input — path traversal risk"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-22" }
-
-  # === Logging ===
-  - id: py-logging-no-level
-    pattern: "logging.getLogger($NAME)"
-    message: "Logger without level set — may log sensitive info in production"
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-532" }
-
-  # === Cryptography ===
-  - id: py-crypto-des
-    pattern: "Crypto.Cipher.DES"
-    message: "DES encryption — broken, use AES-256"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-327" }
-
-  - id: py-crypto-ecb
-    pattern: "Crypto.Cipher.AES.new(..., Crypto.Cipher.AES.MODE_ECB)"
-    message: "AES ECB mode — penguin pattern, use GCM or CBC"
-    languages: [python]
-    severity: ERROR
-    metadata: { cwe: "CWE-327" }
-
-  - id: py-secrets-not-used
-    pattern: "random.SystemRandom()"
-    message: "random.SystemRandom — use the secrets module instead (cleaner API)"
-    languages: [python]
-    severity: INFO
-    metadata: { cwe: "CWE-338" }
+- id: django-raw-sql
+  pattern: $MODEL.objects.raw($QUERY)
+  message: "Django raw SQL \u2014 SQL injection risk if query is user-controlled"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-89
+    owasp: A03
+- id: django-extra
+  pattern: $MODEL.objects.extra(where=[$COND])
+  message: "Django extra() \u2014 SQL injection risk, use ORM or raw params"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-89
+- id: django-debug-true
+  pattern: DEBUG = True
+  message: "Django DEBUG=True in production \u2014 leaks stack traces, allows code\
+    \ execution"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-489
+- id: django-allow-all-hosts
+  pattern: ALLOWED_HOSTS = ["*"]
+  message: "Django ALLOWED_HOSTS=['*'] \u2014 Host header injection risk"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-444
+- id: django-secret-key-hardcoded
+  pattern: SECRET_KEY = "..."
+  message: "Django SECRET_KEY hardcoded \u2014 use environment variable"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-798
+- id: django-csrf-exempt
+  pattern: '@csrf_exempt'
+  message: "Django @csrf_exempt \u2014 CSRF protection disabled"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-352
+- id: django-clickjacking-no-xframe
+  pattern: X_FRAME_OPTIONS = "DENY"
+  message: "Django X_FRAME_OPTIONS \u2014 verify it's set to DENY or SAMEORIGIN"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-1021
+- id: django-mark-safe
+  pattern: mark_safe($X)
+  message: "Django mark_safe \u2014 XSS bypass, verify $X is escaped"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-79
+- id: django-model-form-fields-unsafe
+  pattern: class $FORM(forms.ModelForm):\n  class Meta:\n    fields = "__all__"
+  message: "Django ModelForm with fields='__all__' \u2014 may expose sensitive fields"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-200
+- id: flask-debug-true
+  pattern: app.run(..., debug=True, ...)
+  message: "Flask debug=True \u2014 leaks stack traces, allows code execution via\
+    \ Werkzeug"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-489
+- id: flask-secret-key-hardcoded
+  pattern: app.secret_key = "..."
+  message: "Flask secret_key hardcoded \u2014 use environment variable"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-798
+- id: flask-markup
+  pattern: flask.Markup($X)
+  message: "Flask Markup \u2014 XSS bypass, verify $X is escaped"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-79
+- id: flask-send-file-user-input
+  pattern: send_file($FILENAME)
+  message: "Flask send_file with user input \u2014 path traversal risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-22
+- id: flask-render-template-string
+  pattern: render_template_string($TEMPLATE)
+  message: "Flask render_template_string \u2014 SSTI (Server-Side Template Injection)\
+    \ risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-1336
+- id: flask-cors-wildcard
+  pattern: CORS(app, origins="*")
+  message: "Flask-CORS with origins='*' \u2014 allows any origin"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-942
+- id: fastapi-no-auth-dependency
+  pattern: '@app.$METHOD($PATH)'
+  message: "FastAPI endpoint without auth dependency \u2014 verify it's public"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-862
+- id: fastapi-redirect-user-input
+  pattern: RedirectResponse($URL)
+  message: "FastAPI RedirectResponse \u2014 open redirect if $URL is user-controlled"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-601
+- id: fastapi-html-response-user-input
+  pattern: HTMLResponse($X)
+  message: "FastAPI HTMLResponse \u2014 XSS if $X is user-controlled"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-79
+- id: py-jwt-no-verify
+  pattern: jwt.decode(..., verify=False, ...)
+  message: "JWT verification disabled \u2014 token forgery risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-345
+- id: py-jwt-none-alg
+  pattern: jwt.decode(..., algorithms=["none"])
+  message: "JWT alg:none \u2014 bypasses signature verification"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-345
+- id: py-requests-no-verify-ssl
+  pattern: requests.$METHOD(..., verify=False, ...)
+  message: "SSL verification disabled \u2014 MITM risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-295
+- id: py-urllib3-disable-warnings
+  pattern: urllib3.disable_warnings()
+  message: "urllib3 warnings disabled \u2014 may hide SSL issues"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-754
+- id: py-bcrypt-low-rounds
+  pattern: bcrypt.hashpw(..., bcrypt.gensalt(rounds=4))
+  message: "bcrypt with low rounds \u2014 use at least 12"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-916
+- id: py-passlib-sha1
+  pattern: passlib.hash.sha1_crypt
+  message: "SHA1 for password hashing \u2014 use bcrypt or argon2"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-327
+- id: py-async-await-in-sync
+  pattern: def $FUNC(...):\n  ...
+  message: "Sync function \u2014 verify it doesn't call async functions without await"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-1058
+- id: py-threading-race
+  pattern: threading.Lock()
+  message: "Lock used \u2014 verify it protects ALL shared mutable state"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-362
+- id: py-asyncio-create-task-no-ref
+  pattern: asyncio.create_task($CORO)
+  message: "asyncio.create_task without keeping reference \u2014 task may be garbage\
+    \ collected"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-404
+- id: py-sqlalchemy-text-user-input
+  pattern: sqlalchemy.text($QUERY)
+  message: "SQLAlchemy text() with user input \u2014 SQL injection if not parameterized"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-89
+- id: py-mongo-find-raw
+  pattern: $COL.find($QUERY)
+  message: "MongoDB find with user input \u2014 NoSQL injection risk if $QUERY is\
+    \ dict from user"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-943
+- id: py-tempfile-mktemp
+  pattern: tempfile.mktemp(...)
+  message: "tempfile.mktemp \u2014 race condition, use mkstemp"
+  languages:
+  - python
+  severity: WARNING
+  metadata:
+    cwe: CWE-377
+- id: py-shutil-rmtree-user-input
+  pattern: shutil.rmtree($PATH)
+  message: "shutil.rmtree with user input \u2014 path traversal risk"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-22
+- id: py-logging-no-level
+  pattern: logging.getLogger($NAME)
+  message: "Logger without level set \u2014 may log sensitive info in production"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-532
+- id: py-crypto-des
+  pattern: Crypto.Cipher.DES
+  message: "DES encryption \u2014 broken, use AES-256"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-327
+- id: py-crypto-ecb
+  pattern: Crypto.Cipher.AES.new(..., Crypto.Cipher.AES.MODE_ECB)
+  message: "AES ECB mode \u2014 penguin pattern, use GCM or CBC"
+  languages:
+  - python
+  severity: ERROR
+  metadata:
+    cwe: CWE-327
+- id: py-secrets-not-used
+  pattern: random.SystemRandom()
+  message: "random.SystemRandom \u2014 use the secrets module instead (cleaner API)"
+  languages:
+  - python
+  severity: INFO
+  metadata:
+    cwe: CWE-338

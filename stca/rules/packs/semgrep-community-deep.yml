@@ -1,942 +1,1129 @@
-# STCA Semgrep Community Deep (multi-language) Rules — 188 rules
 rules:
-  - id: sgpy-subprocess-shell-true
-    pattern: "subprocess\\.(?:call|run|Popen|check_call|check_output)\\s*\\([^)]*shell\\s*=\\s*True"
-    severity: high
-    message: "subprocess with shell=True — command injection"
-    metadata: {cwe: "CWE-78"}
-  - id: sgpy-subprocess-shell-true-user
-    pattern: "subprocess\\.(?:call|run|Popen)\\s*\\([^)]*shell\\s*=\\s*True[^)]*(?:input|user|request|args)"
-    severity: critical
-    message: "subprocess shell=True with user input — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgpy-pickle-load-user
-    pattern: "pickle\\.loads?\\s*\\(\\s*(?:request|input|stdin|sys\\.argv)"
-    severity: critical
-    message: "pickle.load on user input — RCE"
-    metadata: {cwe: "CWE-502"}
-  - id: sgpy-marshal-load-user
-    pattern: "marshal\\.loads?\\s*\\(\\s*(?:request|input|stdin|sys\\.argv)"
-    severity: critical
-    message: "marshal.load on user input — RCE"
-    metadata: {cwe: "CWE-502"}
-  - id: sgpy-yaml-load-unsafe
-    pattern: "yaml\\.load\\s*\\((?!.*Loader\\s*=\\s*yaml\\.SafeLoader)"
-    severity: critical
-    message: "yaml.load without SafeLoader — RCE"
-    metadata: {cwe: "CWE-502"}
-  - id: sgpy-yaml-full-load
-    pattern: "yaml\\.full_load\\s*\\("
-    severity: high
-    message: "yaml.full_load — RCE on untrusted data"
-    metadata: {cwe: "CWE-502"}
-  - id: sgpy-yaml-unsafe-load
-    pattern: "yaml\\.unsafe_load\\s*\\("
-    severity: critical
-    message: "yaml.unsafe_load — RCE"
-    metadata: {cwe: "CWE-502"}
-  - id: sgpy-xml-etree-xxe
-    pattern: "xml\\.etree\\.ElementTree\\.(?:parse|fromstring|iterparse)\\s*\\("
-    severity: high
-    message: "ElementTree — XXE risk, use defusedxml"
-    metadata: {cwe: "CWE-611"}
-  - id: sgpy-xml-sax-xxe
-    pattern: "xml\\.sax\\.(?:parse|make_parser)\\s*\\("
-    severity: high
-    message: "xml.sax — XXE risk, use defusedxml"
-    metadata: {cwe: "CWE-611"}
-  - id: sgpy-xml-dom-minidom
-    pattern: "xml\\.dom\\.minidom\\.(?:parse|parseString)\\s*\\("
-    severity: high
-    message: "minidom — XXE risk, use defusedxml"
-    metadata: {cwe: "CWE-611"}
-  - id: sgpy-lxml-etree-xxe
-    pattern: "lxml\\.etree\\.(?:parse|fromstring|HTMLParser|XMLParser)\\s*\\((?!.*resolve_entities\\s*=\\s*False)"
-    severity: high
-    message: "lxml.etree — XXE risk, set resolve_entities=False"
-    metadata: {cwe: "CWE-611"}
-  - id: sgpy-tempfile-race
-    pattern: "tempfile\\.mktemp\\s*\\("
-    severity: high
-    message: "mktemp — race condition, use mkstemp"
-    metadata: {cwe: "CWE-377"}
-  - id: sgpy-os-tempfile
-    pattern: "os\\.(?:tempnam|tmpnam)\\s*\\("
-    severity: high
-    message: "os.tempnam/tmpnam — race condition"
-    metadata: {cwe: "CWE-377"}
-  - id: sgpy-shutil-rmtree-user
-    pattern: "shutil\\.rmtree\\s*\\(\\s*(?:request|input|user|args)"
-    severity: critical
-    message: "rmtree with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgpy-os-remove-user
-    pattern: "os\\.(?:remove|unlink)\\s*\\(\\s*(?:request|input|user|args)"
-    severity: high
-    message: "os.remove with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgpy-os-rename-user
-    pattern: "os\\.rename\\s*\\(\\s*(?:request|input|user|args)"
-    severity: high
-    message: "os.rename with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgpy-os-chmod-user
-    pattern: "os\\.chmod\\s*\\(\\s*(?:request|input|user|args)"
-    severity: high
-    message: "os.chmod with user input — privilege escalation"
-    metadata: {cwe: "CWE-269"}
-  - id: sgpy-os-chown-user
-    pattern: "os\\.chown\\s*\\(\\s*(?:request|input|user|args)"
-    severity: critical
-    message: "os.chown with user input — privilege escalation"
-    metadata: {cwe: "CWE-269"}
-  - id: sgpy-os-symlink-user
-    pattern: "os\\.symlink\\s*\\(\\s*(?:request|input|user|args)"
-    severity: high
-    message: "os.symlink with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgpy-glob-user
-    pattern: "glob\\.glob\\s*\\(\\s*(?:request|input|user|args)"
-    severity: medium
-    message: "glob with user input — info leak"
-    metadata: {cwe: "CWE-200"}
-  - id: sgpy-importlib-user
-    pattern: "importlib\\.import_module\\s*\\(\\s*(?:request|input|user|args)"
-    severity: critical
-    message: "import_module with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgpy-exec-user
-    pattern: "\\bexec\\s*\\(\\s*(?:request|input|user|args)"
-    severity: critical
-    message: "exec with user input — RCE"
-    metadata: {cwe: "CWE-95"}
-  - id: sgpy-compile-user
-    pattern: "\\bcompile\\s*\\(\\s*(?:request|input|user|args)"
-    severity: critical
-    message: "compile with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgpy-getattr-user
-    pattern: "\\bgetattr\\s*\\(\\s*\\w+\\s*,\\s*(?:request|input|user|args)"
-    severity: high
-    message: "getattr with user input — method dispatch attack"
-    metadata: {cwe: "CWE-913"}
-  - id: sgpy-setattr-user
-    pattern: "\\bsetattr\\s*\\(\\s*\\w+\\s*,\\s*(?:request|input|user|args)"
-    severity: high
-    message: "setattr with user input — attribute injection"
-    metadata: {cwe: "CWE-913"}
-  - id: sgpyglobals-user
-    pattern: "\\bglobals\\s*\\(\\s*\\)\\s*\\["
-    severity: medium
-    message: "globals() access — verify intent"
-    metadata: {cwe: "CWE-913"}
-  - id: sgpy-locals-user
-    pattern: "\\blocals\\s*\\(\\s*\\)\\s*\\["
-    severity: medium
-    message: "locals() access — verify intent"
-    metadata: {cwe: "CWE-913"}
-  - id: sgpy-ctypes-user
-    pattern: "ctypes\\.(?:CDLL|WinDLL|OleDLL|PyDLL)\\s*\\(\\s*(?:request|input|user|args)"
-    severity: critical
-    message: "ctypes with user input — RCE via FFI"
-    metadata: {cwe: "CWE-78"}
-  - id: sgpy-socket-recv
-    pattern: "\\.recv\\s*\\(\\s*\\d{4,}\\s*\\)"
-    severity: low
-    message: "recv with large buffer — DoS risk"
-    metadata: {cwe: "CWE-400"}
-  - id: sgpy-socket-send-user
-    pattern: "\\.send\\s*\\(\\s*(?:request|input|user|args)"
-    severity: medium
-    message: "socket.send with user input — injection"
-    metadata: {cwe: "CWE-78"}
-  - id: sgpy-base64-decode-exec
-    pattern: "base64\\.b64decode\\s*\\([^)]*\\)\\s*\\)\\s*$"
-    severity: critical
-    message: "base64 decode + exec — obfuscated RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgpy-hashlib-md5
-    pattern: "hashlib\\.md5\\s*\\("
-    severity: high
-    message: "MD5 broken — use sha256"
-    metadata: {cwe: "CWE-327"}
-  - id: sgpy-hashlib-sha1
-    pattern: "hashlib\\.sha1\\s*\\("
-    severity: high
-    message: "SHA1 broken — use sha256"
-    metadata: {cwe: "CWE-327"}
-  - id: sgpy-hashlib-md4
-    pattern: "hashlib\\.new\\s*\\(\\s*['\\\"]md4['\\\"]"
-    severity: critical
-    message: "MD4 broken"
-    metadata: {cwe: "CWE-327"}
-  - id: sgpy-hmac-md5
-    pattern: "hmac\\.new\\s*\\([^,]+,\\s*[^,]+,\\s*hashlib\\.md5"
-    severity: high
-    message: "HMAC-MD5 — broken MAC"
-    metadata: {cwe: "CWE-327"}
-  - id: sgpy-secrets-token
-    pattern: "secrets\\.token_(?:urlsafe|hex)\\s*\\(\\s*\\d{2,}\\s*\\)"
-    severity: low
-    message: "secrets.token — good practice, verify length"
-    metadata: {cwe: "CWE-338"}
-  - id: sgpy-random-choice-security
-    pattern: "random\\.(?:choice|choices|randint|shuffle)\\s*\\("
-    severity: high
-    message: "random.* not CSPRNG — use secrets"
-    metadata: {cwe: "CWE-338"}
-  - id: sgpy-urandom-short
-    pattern: "os\\.urandom\\s*\\(\\s*[1-7]\\s*\\)"
-    severity: medium
-    message: "urandom with short length — insufficient entropy"
-    metadata: {cwe: "CWE-338"}
-  - id: sgpy-requests-no-timeout
-    pattern: "requests\\.(?:get|post|put|delete|patch|head)\\s*\\([^)]*\\)(?!.*timeout)"
-    severity: medium
-    message: "requests without timeout — DoS risk"
-    metadata: {cwe: "CWE-400"}
-  - id: sgpy-requests-session-no-verify
-    pattern: "\\.session\\s*\\(\\s*\\)\\.verify\\s*=\\s*False|Session\\s*\\(\\s*\\)\\.verify\\s*=\\s*False"
-    severity: critical
-    message: "requests Session verify=False — SSL bypass"
-    metadata: {cwe: "CWE-295"}
-  - id: sgpy-urllib-urlopen
-    pattern: "urllib\\.request\\.urlopen\\s*\\("
-    severity: medium
-    message: "urlopen — verify URL not user-controlled"
-    metadata: {cwe: "CWE-918"}
-  - id: sgpy-urllib-urlretrieve
-    pattern: "urllib\\.request\\.urlretrieve\\s*\\("
-    severity: medium
-    message: "urlretrieve — SSRF risk"
-    metadata: {cwe: "CWE-918"}
-  - id: sgpy-ftplib-user
-    pattern: "ftplib\\.FTP\\s*\\(\\s*(?:request|input|user|args)"
-    severity: high
-    message: "FTP with user input — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sgpy-smtplib-user
-    pattern: "smtplib\\.SMTP\\s*\\(\\s*(?:request|input|user|args)"
-    severity: high
-    message: "SMTP with user input — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sgpy-telnetlib-user
-    pattern: "telnetlib\\.Telnet\\s*\\(\\s*(?:request|input|user|args)"
-    severity: high
-    message: "Telnet with user input — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sgpy-paramiko-auto-policy
-    pattern: "AutoAddPolicy\\s*\\(\\s*\\)"
-    severity: high
-    message: "SSH AutoAddPolicy — MITM risk"
-    metadata: {cwe: "CWE-295"}
-  - id: sgpy-paramiko-set-missing-host
-    pattern: "set_missing_host_key_policy\\s*\\(\\s*AutoAddPolicy"
-    severity: high
-    message: "SSH missing host key policy = AutoAdd — MITM"
-    metadata: {cwe: "CWE-295"}
-  - id: sgjs-require-user
-    pattern: "\\brequire\\s*\\(\\s*(?:req|request|input|user|args)\\."
-    severity: critical
-    message: "require with user input — LFI/RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgjs-dynamic-import-user
-    pattern: "\\bimport\\s*\\(\\s*(?:req|request|input|user|args)\\."
-    severity: critical
-    message: "dynamic import with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgjs-child-process-exec-user
-    pattern: "child_process\\.exec\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: critical
-    message: "child_process.exec with user input — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgjs-child-process-exec-concat
-    pattern: "child_process\\.exec\\s*\\(\\s*['\\\"`][^'\\\"`]*['\\\"`]\\s*\\+"
-    severity: critical
-    message: "child_process.exec with concat — injection"
-    metadata: {cwe: "CWE-78"}
-  - id: sgjs-eval-concat
-    pattern: "\\beval\\s*\\(\\s*['\\\"`][^'\\\"`]*['\\\"`]\\s*\\+"
-    severity: critical
-    message: "eval with concat — code injection"
-    metadata: {cwe: "CWE-95"}
-  - id: sgjs-function-constructor
-    pattern: "new\\s+Function\\s*\\("
-    severity: high
-    message: "Function constructor — RCE risk"
-    metadata: {cwe: "CWE-94"}
-  - id: sgjs-settimeout-string
-    pattern: "setTimeout\\s*\\(\\s*['\\\"`]"
-    severity: high
-    message: "setTimeout with string — eval injection"
-    metadata: {cwe: "CWE-95"}
-  - id: sgjs-setinterval-string
-    pattern: "setInterval\\s*\\(\\s*['\\\"`]"
-    severity: high
-    message: "setInterval with string — eval injection"
-    metadata: {cwe: "CWE-95"}
-  - id: sgjs-vm-run-user
-    pattern: "\\bvm\\.(?:runInNewContext|runInThisContext|runInContext)\\s*\\([^)]*(?:req|request|input|user|args)"
-    severity: critical
-    message: "vm.run with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgjs-vm-compile-user
-    pattern: "\\bvm\\.compileFunction\\s*\\([^)]*(?:req|request|input|user|args)"
-    severity: critical
-    message: "vm.compileFunction with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgjs-prototype-pollution
-    pattern: "(?:Object\\.assign|Object\\.defineProperty)\\s*\\(\\s*Object\\.prototype"
-    severity: critical
-    message: "Object.prototype pollution — RCE surface"
-    metadata: {cwe: "CWE-1321"}
-  - id: sgjs-prototype-merge
-    pattern: "\\bmerge\\s*\\(\\s*\\w+\\s*,\\s*\\w+\\s*,\\s*true\\s*\\)"
-    severity: high
-    message: "deep merge — prototype pollution risk"
-    metadata: {cwe: "CWE-1321"}
-  - id: sgjs-require-resolve-user
-    pattern: "require\\.resolve\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: high
-    message: "require.resolve with user input — LFI"
-    metadata: {cwe: "CWE-98"}
-  - id: sgjs-fs-read-user
-    pattern: "fs\\.(?:readFile|readFileSync|createReadStream)\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: high
-    message: "fs.readFile with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgjs-fs-write-user
-    pattern: "fs\\.(?:writeFile|writeFileSync|createWriteStream|appendFile)\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: high
-    message: "fs.writeFile with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgjs-fs-unlink-user
-    pattern: "fs\\.(?:unlink|unlinkSync|rmdir|rmdirSync)\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: high
-    message: "fs.unlink with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgjs-fs-copy-user
-    pattern: "fs\\.(?:copyFile|copyFileSync)\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: high
-    message: "fs.copyFile with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgjs-crypto-md5
-    pattern: "crypto\\.createHash\\s*\\(\\s*['\\\"]md5['\\\"]"
-    severity: high
-    message: "MD5 broken — use sha256"
-    metadata: {cwe: "CWE-327"}
-  - id: sgjs-crypto-sha1
-    pattern: "crypto\\.createHash\\s*\\(\\s*['\\\"]sha1['\\\"]"
-    severity: high
-    message: "SHA1 broken — use sha256"
-    metadata: {cwe: "CWE-327"}
-  - id: sgjs-crypto-ecb
-    pattern: "crypto\\.createCipheriv\\s*\\(\\s*['\\\"]aes-\\d+-ecb['\\\"]"
-    severity: critical
-    message: "AES-ECB — deterministic"
-    metadata: {cwe: "CWE-327"}
-  - id: sgjs-crypto-des
-    pattern: "crypto\\.createCipher(?:iv)?\\s*\\(\\s*['\\\"]des['\\\"]"
-    severity: critical
-    message: "DES broken"
-    metadata: {cwe: "CWE-327"}
-  - id: sgjs-jwt-verify-false
-    pattern: "jwt\\.verify\\s*\\([^)]*verify\\s*:\\s*false|jwt\\.decode\\s*\\("
-    severity: critical
-    message: "JWT verify disabled or decode without verify — auth bypass"
-    metadata: {cwe: "CWE-345"}
-  - id: sgjs-jwt-none-alg
-    pattern: "jwt\\.sign\\s*\\([^)]*algorithm\\s*:\\s*['\\\"]none['\\\"]"
-    severity: critical
-    message: "JWT with alg=none — auth bypass"
-    metadata: {cwe: "CWE-345"}
-  - id: sgjs-jwt-hardcoded-secret
-    pattern: "jwt\\.sign\\s*\\([^)]*['\\\"](secret|password|key)['\\\"]"
-    severity: high
-    message: "JWT with hardcoded secret"
-    metadata: {cwe: "CWE-798"}
-  - id: sgjs-express-body-limit
-    pattern: "express\\.json\\s*\\(\\s*\\{\\s*limit\\s*:\\s*['\\\"]?\\d{3,}"
-    severity: medium
-    message: "Express body limit large — DoS risk"
-    metadata: {cwe: "CWE-400"}
-  - id: sgjs-express-no-helmet
-    pattern: "const\\s+app\\s*=\\s*express\\s*\\(\\s*\\)(?!.*helmet)"
-    severity: low
-    message: "Express without helmet — missing security headers"
-    metadata: {cwe: "CWE-693"}
-  - id: sgjs-express-cors-wildcard
-    pattern: "app\\.use\\s*\\(\\s*cors\\s*\\(\\s*\\{[^}]*origin\\s*:\\s*['\\\"]\\*['\\\"]"
-    severity: high
-    message: "Express CORS wildcard — CSRF risk"
-    metadata: {cwe: "CWE-942"}
-  - id: sgjs-express-static-user
-    pattern: "express\\.static\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: high
-    message: "express.static with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgjs-res-sendfile-user
-    pattern: "res\\.sendFile\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: high
-    message: "res.sendFile with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgjs-res-download-user
-    pattern: "res\\.download\\s*\\(\\s*(?:req|request|input|user|args)"
-    severity: high
-    message: "res.download with user input — path traversal"
-    metadata: {cwe: "CWE-22"}
-  - id: sgjs-axios-no-https
-    pattern: "axios\\.(?:get|post|put|delete)\\s*\\(\\s*['\\\"]http://"
-    severity: medium
-    message: "Axios HTTP (not HTTPS) — MITM risk"
-    metadata: {cwe: "CWE-319"}
-  - id: sgjs-fetch-no-https
-    pattern: "fetch\\s*\\(\\s*['\\\"]http://"
-    severity: medium
-    message: "fetch HTTP (not HTTPS) — MITM risk"
-    metadata: {cwe: "CWE-319"}
-  - id: sgjs-node-postgres-concat
-    pattern: "\\.query\\s*\\(\\s*['\\\"`][^'\\\"`]*['\\\"`]\\s*\\+"
-    severity: high
-    message: "pg.query with concat — SQL injection"
-    metadata: {cwe: "CWE-89"}
-  - id: sgjs-mongodb-where-user
-    pattern: "\\$where\\s*:\\s*(?:req|request|input|user|args)"
-    severity: critical
-    message: "MongoDB $where with user input — NoSQL injection"
-    metadata: {cwe: "CWE-943"}
-  - id: sgjs-mongodb-eval
-    pattern: "db\\.(?:eval|command)\\s*\\("
-    severity: critical
-    message: "MongoDB eval — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sggo-sql-concat
-    pattern: "db\\.(?:Query|Exec|QueryRow)\\s*\\(\\s*\\\"[^\\\"]*\\\"\\s*\\+\\s*(?:req|r\\.|c\\.Query|os\\.Args)"
-    severity: high
-    message: "Go SQL with concat — injection"
-    metadata: {cwe: "CWE-89"}
-  - id: sggo-sql-fmt
-    pattern: "db\\.(?:Query|Exec|QueryRow)\\s*\\(\\s*fmt\\.Sprintf"
-    severity: high
-    message: "Go SQL with Sprintf — injection"
-    metadata: {cwe: "CWE-89"}
-  - id: sggo-html-template-html
-    pattern: "template\\.HTML\\s*\\("
-    severity: high
-    message: "template.HTML — XSS bypass"
-    metadata: {cwe: "CWE-79"}
-  - id: sggo-html-template-js
-    pattern: "template\\.JS\\s*\\("
-    severity: high
-    message: "template.JS — XSS bypass"
-    metadata: {cwe: "CWE-79"}
-  - id: sggo-html-template-url
-    pattern: "template\\.URL\\s*\\("
-    severity: medium
-    message: "template.URL — verify trust"
-    metadata: {cwe: "CWE-79"}
-  - id: sggo-html-template-attr
-    pattern: "template\\.HTMLAttr\\s*\\("
-    severity: medium
-    message: "template.HTMLAttr — verify trust"
-    metadata: {cwe: "CWE-79"}
-  - id: sggo-os-exec-user
-    pattern: "exec\\.Command\\s*\\(\\s*\\\"?(?:req|r\\.|os\\.Args)"
-    severity: high
-    message: "exec.Command with user input — injection"
-    metadata: {cwe: "CWE-78"}
-  - id: sggo-os-exec-cmd-user
-    pattern: "exec\\.CommandContext\\s*\\(\\s*[^,]+,\\s*\\\"?(?:req|r\\.|os\\.Args)"
-    severity: high
-    message: "exec.CommandContext with user input"
-    metadata: {cwe: "CWE-78"}
-  - id: sggo-http-get-user
-    pattern: "http\\.Get\\s*\\(\\s*(?:req|r\\.|os\\.Args)"
-    severity: high
-    message: "http.Get with user input — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sggo-http-post-user
-    pattern: "http\\.Post\\s*\\(\\s*(?:req|r\\.|os\\.Args)"
-    severity: high
-    message: "http.Post with user input — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sggo-http-newrequest-user
-    pattern: "http\\.NewRequest\\s*\\(\\s*[^,]+,\\s*(?:req|r\\.|os\\.Args)"
-    severity: high
-    message: "http.NewRequest with user URL — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sggo-tls-insecure
-    pattern: "tls\\.Config\\s*\\{[^}]*InsecureSkipVerify\\s*:\\s*true"
-    severity: critical
-    message: "TLS InsecureSkipVerify — MITM"
-    metadata: {cwe: "CWE-295"}
-  - id: sggo-md5
-    pattern: "md5\\.New\\s*\\(\\s*\\)|md5\\.Sum\\s*\\("
-    severity: high
-    message: "MD5 broken — use sha256"
-    metadata: {cwe: "CWE-327"}
-  - id: sggo-sha1
-    pattern: "sha1\\.New\\s*\\(\\s*\\)|sha1\\.Sum\\s*\\("
-    severity: high
-    message: "SHA1 broken — use sha256"
-    metadata: {cwe: "CWE-327"}
-  - id: sggo-rand-not-secure
-    pattern: "math/rand\\.Read\\s*\\(|rand\\.(?:Intn|Float64|Read)\\s*\\("
-    severity: high
-    message: "math/rand not CSPRNG — use crypto/rand"
-    metadata: {cwe: "CWE-338"}
-  - id: sggo-panic-user
-    pattern: "\\bpanic\\s*\\(\\s*(?:req|r\\.|os\\.Args)"
-    severity: medium
-    message: "panic with user input — info leak"
-    metadata: {cwe: "CWE-209"}
-  - id: sgjava-runtime-exec-user
-    pattern: "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\(\\s*(?:request|input|user|args|req\\.getParameter)"
-    severity: critical
-    message: "Runtime.exec with user input — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgjava-processbuilder-user
-    pattern: "new\\s+ProcessBuilder\\s*\\(\\s*(?:request|input|user|args|req\\.getParameter)"
-    severity: critical
-    message: "ProcessBuilder with user input — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgjava-sql-statement-execute
-    pattern: "\\.execute(?:Query|Update)?\\s*\\(\\s*\\\"[^\\\"]*\\\"\\s*\\+"
-    severity: high
-    message: "Statement.execute with concat — SQL injection"
-    metadata: {cwe: "CWE-89"}
-  - id: sgjava-sql-prepared-concat
-    pattern: "\\.setString\\s*\\(\\s*\\d+\\s*,\\s*\\\"[^\\\"]*\\\"\\s*\\+"
-    severity: high
-    message: "PreparedStatement.setString with concat — injection"
-    metadata: {cwe: "CWE-89"}
-  - id: sgjava-objectinputstream
-    pattern: "new\\s+ObjectInputStream\\s*\\("
-    severity: critical
-    message: "ObjectInputStream — RCE on deserialization"
-    metadata: {cwe: "CWE-502"}
-  - id: sgjava-readobject
-    pattern: "\\.readObject\\s*\\("
-    severity: critical
-    message: "readObject — RCE on untrusted data"
-    metadata: {cwe: "CWE-502"}
-  - id: sgjava-xmlreader-xxe
-    pattern: "XMLReaderFactory\\.createXMLReader|SAXParserFactory\\.newInstance"
-    severity: high
-    message: "XML reader — verify XXE protection"
-    metadata: {cwe: "CWE-611"}
-  - id: sgjava-documentbuilder-xxe
-    pattern: "DocumentBuilderFactory\\.newInstance\\s*\\("
-    severity: high
-    message: "DocumentBuilder — set FEATURE_SECURE_PROCESSING"
-    metadata: {cwe: "CWE-611"}
-  - id: sgjava-unmarshaller-xxe
-    pattern: "JAXBContext\\.newInstance.*\\.createUnmarshaller"
-    severity: high
-    message: "JAXB Unmarshaller — XXE risk"
-    metadata: {cwe: "CWE-611"}
-  - id: sgjava-message-digest-md5
-    pattern: "MessageDigest\\.getInstance\\s*\\(\\s*\\\"MD5\\\""
-    severity: high
-    message: "MD5 broken — use SHA-256"
-    metadata: {cwe: "CWE-327"}
-  - id: sgjava-cipher-ecb
-    pattern: "Cipher\\.getInstance\\s*\\(\\s*\\\"AES/ECB"
-    severity: critical
-    message: "AES-ECB — deterministic"
-    metadata: {cwe: "CWE-327"}
-  - id: sgjava-cipher-des
-    pattern: "Cipher\\.getInstance\\s*\\(\\s*\\\"DES\\\""
-    severity: critical
-    message: "DES broken"
-    metadata: {cwe: "CWE-327"}
-  - id: sgjava-ssl-trust-all
-    pattern: "TrustManager\\s*\\{[^}]*checkServerTrusted\\s*\\([^)]*\\)\\s*\\{\\s*\\}|X509TrustManager\\s*\\{[^}]*getAcceptedIssuers\\s*\\(\\s*\\)\\s*\\{\\s*return\\s+null"
-    severity: critical
-    message: "SSL TrustManager accepts all — MITM"
-    metadata: {cwe: "CWE-295"}
-  - id: sgjava-spring-request-mapping-no-auth
-    pattern: "@(?:Get|Post|Put|Delete|Request)Mapping\\s*\\(\\s*\\\"/(?:api|admin)[^\\\"]*\\\"(?!.*@(?:PreAuthorize|Secured|RolesAllowed))"
-    severity: high
-    message: "Spring endpoint without @PreAuthorize — missing auth"
-    metadata: {cwe: "CWE-862"}
-  - id: sgjava-spring-redirect-user
-    pattern: "return\\s+\\\"redirect:\\\"\\s*\\+\\s*(?:request|input|user|req\\.getParameter)"
-    severity: high
-    message: "Spring redirect with user input — open redirect"
-    metadata: {cwe: "CWE-601"}
-  - id: sgjava-system-exit
-    pattern: "System\\.exit\\s*\\("
-    severity: medium
-    message: "System.exit — prevents container reuse"
-    metadata: {cwe: "CWE-754"}
-  - id: sgjava-thread-sleep
-    pattern: "Thread\\.sleep\\s*\\("
-    severity: low
-    message: "Thread.sleep — blocking, use ScheduledExecutor"
-    metadata: {cwe: "CWE-833"}
-  - id: sgjava-print-stack-trace
-    pattern: "\\.printStackTrace\\s*\\("
-    severity: medium
-    message: "printStackTrace — use logger"
-    metadata: {cwe: "CWE-532"}
-  - id: sgjava-class-forname-user
-    pattern: "Class\\.forName\\s*\\(\\s*(?:request|input|user|req\\.getParameter)"
-    severity: critical
-    message: "Class.forName with user input — RCE"
-    metadata: {cwe: "CWE-470"}
-  - id: sgjava-script-engine-eval
-    pattern: "ScriptEngine.*\\.eval\\s*\\("
-    severity: critical
-    message: "ScriptEngine.eval — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgjava-spring-model-attribute-user
-    pattern: "@ModelAttribute\\s*\\([^)]*\\)\\s*(?!.*BindingResult)"
-    severity: medium
-    message: "Spring @ModelAttribute without BindingResult — mass assignment"
-    metadata: {cwe: "CWE-915"}
-  - id: sgrb-send-user
-    pattern: "\\.send\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "Ruby .send with user input — method dispatch"
-    metadata: {cwe: "CWE-913"}
-  - id: sgrb-public-send-user
-    pattern: "\\.public_send\\s*\\(\\s*(?:params|request|input)"
-    severity: high
-    message: "Ruby .public_send with user input — method dispatch"
-    metadata: {cwe: "CWE-913"}
-  - id: sgrb-constantize-user
-    pattern: "(?:params|request|input)\\.[^)]*\\.constantize"
-    severity: critical
-    message: "constantize with user input — RCE"
-    metadata: {cwe: "CWE-470"}
-  - id: sgrb-instance-eval-user
-    pattern: "\\binstance_eval\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "instance_eval with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgrb-class-eval-user
-    pattern: "\\bclass_eval\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "class_eval with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgrb-module-eval-user
-    pattern: "\\bmodule_eval\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "module_eval with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgrb-yaml-load-user
-    pattern: "YAML\\.load\\s*\\(\\s*(?:params|request|input|File\\.read)"
-    severity: critical
-    message: "YAML.load — RCE"
-    metadata: {cwe: "CWE-502"}
-  - id: sgrb-yaml-load-file
-    pattern: "YAML\\.load_file\\s*\\("
-    severity: high
-    message: "YAML.load_file — RCE risk"
-    metadata: {cwe: "CWE-502"}
-  - id: sgrb-marshal-load-user
-    pattern: "Marshal\\.load\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "Marshal.load with user input — RCE"
-    metadata: {cwe: "CWE-502"}
-  - id: sgrb-marshal-restore-user
-    pattern: "Marshal\\.restore\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "Marshal.restore with user input — RCE"
-    metadata: {cwe: "CWE-502"}
-  - id: sgrb-open-user
-    pattern: "\\bopen\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "Kernel#open with user input — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgrb-io-popen-user
-    pattern: "IO\\.popen\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "IO.popen with user input — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgrb-erb-result-user
-    pattern: "ERB\\.new\\s*\\([^)]*\\)\\.result\\s*\\(\\s*(?:binding|params|request|input)"
-    severity: high
-    message: "ERB.result with user template — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgrb-system-user
-    pattern: "\\b(?:system|exec|spawn)\\s*\\(\\s*(?:params|request|input)"
-    severity: critical
-    message: "system() with user input — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgrb-backtick-user
-    pattern: "\\`[^\\`]*\\#\\{(?:params|request|input)"
-    severity: critical
-    message: "Backtick with user interpolation — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgrb-redirect-user
-    pattern: "redirect_to\\s+(?:params|request\\.\\w+)"
-    severity: high
-    message: "Open redirect via params"
-    metadata: {cwe: "CWE-601"}
-  - id: sgrb-render-inline-user
-    pattern: "render\\s+(?:inline|partial|template):\\s*(?:params|request|input)"
-    severity: critical
-    message: "render with user input — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgrb-html-safe-user
-    pattern: "\\.html_safe\\s*$|raw\\s+(?:params|request|input)"
-    severity: high
-    message: "html_safe/raw with user input — XSS"
-    metadata: {cwe: "CWE-79"}
-  - id: sgrb-csrf-disabled
-    pattern: "protect_from_forgery\\s+with:\\s*:null_session|skip_before_action\\s+:verify_authenticity_token"
-    severity: high
-    message: "CSRF protection disabled"
-    metadata: {cwe: "CWE-352"}
-  - id: sgrb-md5
-    pattern: "Digest::MD5\\b"
-    severity: high
-    message: "MD5 broken — use SHA256"
-    metadata: {cwe: "CWE-327"}
-  - id: sgrb-rand-security
-    pattern: "\\brand\\s*\\(\\s*\\)|Random\\.rand\\s*\\("
-    severity: high
-    message: "Random not CSPRNG"
-    metadata: {cwe: "CWE-338"}
-  - id: sgrb-where-interp
-    pattern: "\\.where\\s*\\(\\s*[\\\"'][^\\\"']*\\#\\{"
-    severity: high
-    message: "where with interpolation — SQL injection"
-    metadata: {cwe: "CWE-89"}
-  - id: sgrb-find-params
-    pattern: "\\.find\\s*\\(\\s*params\\["
-    severity: medium
-    message: "find(params[:id]) — IDOR risk"
-    metadata: {cwe: "CWE-639"}
-  - id: sgphp-eval-user
-    pattern: "\\beval\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)"
-    severity: critical
-    message: "PHP eval with superglobal — RCE"
-    metadata: {cwe: "CWE-95"}
-  - id: sgphp-assert-user
-    pattern: "\\bassert\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)"
-    severity: critical
-    message: "PHP assert with superglobal — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgphp-create-function-user
-    pattern: "\\bcreate_function\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)"
-    severity: critical
-    message: "create_function with superglobal — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgphp-preg-e
-    pattern: "\\bpreg_replace\\s*\\(\\s*['\\\"]\\/.*\\/e['\\\"]"
-    severity: critical
-    message: "preg_replace /e modifier — RCE"
-    metadata: {cwe: "CWE-94"}
-  - id: sgphp-system-user
-    pattern: "\\b(?:system|exec|shell_exec|passthru|popen|proc_open)\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)"
-    severity: critical
-    message: "system call with superglobal — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgphp-backtick-user
-    pattern: "\\`\\s*\\$_(?:GET|POST|REQUEST|COOKIE)"
-    severity: critical
-    message: "Backtick with superglobal — RCE"
-    metadata: {cwe: "CWE-78"}
-  - id: sgphp-unserialize-user
-    pattern: "\\bunserialize\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)"
-    severity: critical
-    message: "unserialize with superglobal — PHP object injection RCE"
-    metadata: {cwe: "CWE-502"}
-  - id: sgphp-include-user
-    pattern: "(?:include|require)(?:_once)?\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)"
-    severity: critical
-    message: "LFI/RFI via include of superglobal"
-    metadata: {cwe: "CWE-98"}
-  - id: sgphp-mysql-query-user
-    pattern: "(?:mysql_query|mysqli_query|->query|->execute)\\s*\\(\\s*[^,]*\\$_(?:GET|POST|REQUEST)"
-    severity: critical
-    message: "SQL with superglobal — injection"
-    metadata: {cwe: "CWE-89"}
-  - id: sgphp-header-user
-    pattern: "header\\s*\\(\\s*['\\\"]Location:['\\\"]?\\s*\\.\\s*\\$_(?:GET|POST|REQUEST)"
-    severity: high
-    message: "Header injection / open redirect via superglobal"
-    metadata: {cwe: "CWE-113"}
-  - id: sgphp-file-get-contents-user
-    pattern: "file_get_contents\\s*\\(\\s*\\$_(?:GET|POST|REQUEST)"
-    severity: high
-    message: "file_get_contents with superglobal — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sgphp-curl-url-user
-    pattern: "CURLOPT_URL\\s*,\\s*\\$_(?:GET|POST|REQUEST)"
-    severity: high
-    message: "cURL URL from superglobal — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sgphp-ssl-verify-false
-    pattern: "CURLOPT_SSL_VERIFYPEER\\s*,\\s*(?:false|0|FALSE)|CURLOPT_SSL_VERIFYHOST\\s*,\\s*0"
-    severity: high
-    message: "cURL SSL verification disabled"
-    metadata: {cwe: "CWE-295"}
-  - id: sgphp-error-suppression
-    pattern: "@\\s*\\w+\\s*\\("
-    severity: medium
-    message: "Error suppression @ — hides bugs"
-    metadata: {cwe: "CWE-755"}
-  - id: sgphp-md5-password
-    pattern: "\\bmd5\\s*\\(\\s*\\$_(?:POST|GET|REQUEST)\\[['\\\"]\\w*pass"
-    severity: critical
-    message: "MD5 of password — broken hash"
-    metadata: {cwe: "CWE-327"}
-  - id: sgphp-session-fixation
-    pattern: "session_start\\s*\\(\\s*\\)\\s*;(?![^;]*session_regenerate_id)"
-    severity: medium
-    message: "session_start without regenerate_id — session fixation"
-    metadata: {cwe: "CWE-384"}
-  - id: sgphp-csrf-no-token
-    pattern: "<form[^>]*method\\s*=\\s*[\\\"']post(?!.*csrf|.*token)"
-    severity: medium
-    message: "POST form without CSRF token"
-    metadata: {cwe: "CWE-352"}
-  - id: sgphp-extract-user
-    pattern: "\\bextract\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)"
-    severity: high
-    message: "extract on superglobal — variable injection"
-    metadata: {cwe: "CWE-913"}
-  - id: sgphp-parse-str-no-args
-    pattern: "\\bparse_str\\s*\\([^,)]+\\)\\s*;"
-    severity: medium
-    message: "parse_str without second arg — variable injection"
-    metadata: {cwe: "CWE-913"}
-  - id: sgphp-allow-url-include
-    pattern: "\\ballow_url_include\\s*=\\s*On"
-    severity: critical
-    message: "allow_url_include enabled — RFI"
-    metadata: {cwe: "CWE-98"}
-  - id: sgphp-allow-url-fopen
-    pattern: "\\ballow_url_fopen\\s*=\\s*On"
-    severity: high
-    message: "allow_url_fopen enabled — SSRF"
-    metadata: {cwe: "CWE-918"}
-  - id: sgi-docker-latest
-    pattern: "FROM\\s+\\S+:latest"
-    severity: medium
-    message: "Dockerfile FROM :latest — non-reproducible"
-    metadata: {cwe: "CWE-1104"}
-  - id: sgi-docker-root
-    pattern: "^\\s*USER\\s+root\\b"
-    severity: high
-    message: "Dockerfile runs as root"
-    metadata: {cwe: "CWE-250"}
-  - id: sgi-docker-secret-env
-    pattern: "^\\s*ENV\\s+\\w*(?:PASSWORD|SECRET|TOKEN|API_KEY)\\w*\\s*="
-    severity: critical
-    message: "Secret in Dockerfile ENV"
-    metadata: {cwe: "CWE-798"}
-  - id: sgi-docker-add-url
-    pattern: "^\\s*ADD\\s+https?://"
-    severity: medium
-    message: "ADD with remote URL — use curl+COPY"
-    metadata: {cwe: "CWE-829"}
-  - id: sgi-docker-no-healthcheck
-    pattern: "(?!.*HEALTHCHECK)"
-    severity: low
-    message: "Dockerfile missing HEALTHCHECK"
-    metadata: {cwe: "CWE-1061"}
-  - id: sgi-k8s-privileged
-    pattern: "privileged:\\s*true"
-    severity: critical
-    message: "K8s privileged container"
-    metadata: {cwe: "CWE-250"}
-  - id: sgi-k8s-run-as-root
-    pattern: "runAsUser:\\s*0\\b"
-    severity: high
-    message: "K8s runs as root"
-    metadata: {cwe: "CWE-250"}
-  - id: sgi-k8s-host-network
-    pattern: "hostNetwork:\\s*true"
-    severity: high
-    message: "K8s hostNetwork"
-    metadata: {cwe: "CWE-923"}
-  - id: sgi-k8s-host-pid
-    pattern: "hostPID:\\s*true"
-    severity: high
-    message: "K8s hostPID"
-    metadata: {cwe: "CWE-923"}
-  - id: sgi-k8s-image-latest
-    pattern: "image:\\s*\\S+:latest"
-    severity: medium
-    message: "K8s :latest tag"
-    metadata: {cwe: "CWE-1104"}
-  - id: sgi-tf-s3-public
-    pattern: "acl\\s*=\\s*\"public-read"
-    severity: critical
-    message: "Terraform S3 public-read"
-    metadata: {cwe: "CWE-732"}
-  - id: sgi-tf-sg-wildcard
-    pattern: "cidr_blocks\\s*=\\s*\\[\"0\\.0\\.0\\.0/0\"\\]"
-    severity: high
-    message: "Terraform SG 0.0.0.0/0"
-    metadata: {cwe: "CWE-732"}
-  - id: sgi-tf-rds-public
-    pattern: "publicly_accessible\\s*=\\s*true"
-    severity: critical
-    message: "Terraform RDS publicly accessible"
-    metadata: {cwe: "CWE-732"}
-  - id: sgi-tf-iam-wildcard
-    pattern: "action\\s*=\\s*\\[\"\\*\"\\]"
-    severity: critical
-    message: "Terraform IAM wildcard action"
-    metadata: {cwe: "CWE-732"}
-  - id: sgsec-aws-key
-    pattern: "AKIA[0-9A-Z]{16}"
-    severity: critical
-    message: "AWS access key ID"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-stripe-live
-    pattern: "sk_live_[A-Za-z0-9]{24,}"
-    severity: critical
-    message: "Stripe live secret key"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-github-pat
-    pattern: "gh[pousr]_[A-Za-z0-9]{36,}"
-    severity: critical
-    message: "GitHub personal access token"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-slack-token
-    pattern: "xox[baprs]-[A-Za-z0-9-]{10,}"
-    severity: critical
-    message: "Slack token"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-private-key
-    pattern: "-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
-    severity: critical
-    message: "Private key material"
-    metadata: {cwe: "CWE-321"}
-  - id: sgsec-google-api
-    pattern: "AIza[0-9A-Za-z\\-_]{35}"
-    severity: high
-    message: "Google API key"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-jwt-token
-    pattern: "eyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+"
-    severity: high
-    message: "Hardcoded JWT"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-db-url
-    pattern: "(?:postgres|mysql|mongodb|redis)://[^:\\s]+:[^@\\s]+@"
-    severity: high
-    message: "Database URL with credentials"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-generic-secret
-    pattern: "(?:secret|api[_-]?key|token)\\s*[:=]\\s*['\\\"][A-Za-z0-9+/=]{16,}['\\\"]"
-    severity: high
-    message: "Generic hardcoded secret"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-bcrypt-hash
-    pattern: "\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}"
-    severity: low
-    message: "Bcrypt hash — verify not leaked"
-    metadata: {cwe: "CWE-798"}
-  - id: sgsec-hardcoded-password
-    pattern: "(?:password|passwd|pwd)\\s*[:=]\\s*['\\\"][^'\\\"]{8,}['\\\"]"
-    severity: high
-    message: "Hardcoded password"
-    metadata: {cwe: "CWE-798"}
+- id: sgpy-subprocess-shell-true
+  pattern: subprocess\.(?:call|run|Popen|check_call|check_output)\s*\([^)]*shell\s*=\s*True
+  severity: high
+  message: "subprocess with shell=True \u2014 command injection"
+  metadata:
+    cwe: CWE-78
+- id: sgpy-subprocess-shell-true-user
+  pattern: subprocess\.(?:call|run|Popen)\s*\([^)]*shell\s*=\s*True[^)]*(?:input|user|request|args)
+  severity: critical
+  message: "subprocess shell=True with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgpy-pickle-load-user
+  pattern: pickle\.loads?\s*\(\s*(?:request|input|stdin|sys\.argv)
+  severity: critical
+  message: "pickle.load on user input \u2014 RCE"
+  metadata:
+    cwe: CWE-502
+- id: sgpy-marshal-load-user
+  pattern: marshal\.loads?\s*\(\s*(?:request|input|stdin|sys\.argv)
+  severity: critical
+  message: "marshal.load on user input \u2014 RCE"
+  metadata:
+    cwe: CWE-502
+- id: sgpy-yaml-load-unsafe
+  pattern: yaml\.load\s*\((?!.*Loader\s*=\s*yaml\.SafeLoader)
+  severity: critical
+  message: "yaml.load without SafeLoader \u2014 RCE"
+  metadata:
+    cwe: CWE-502
+- id: sgpy-yaml-full-load
+  pattern: yaml\.full_load\s*\(
+  severity: high
+  message: "yaml.full_load \u2014 RCE on untrusted data"
+  metadata:
+    cwe: CWE-502
+- id: sgpy-yaml-unsafe-load
+  pattern: yaml\.unsafe_load\s*\(
+  severity: critical
+  message: "yaml.unsafe_load \u2014 RCE"
+  metadata:
+    cwe: CWE-502
+- id: sgpy-xml-etree-xxe
+  pattern: xml\.etree\.ElementTree\.(?:parse|fromstring|iterparse)\s*\(
+  severity: high
+  message: "ElementTree \u2014 XXE risk, use defusedxml"
+  metadata:
+    cwe: CWE-611
+- id: sgpy-xml-sax-xxe
+  pattern: xml\.sax\.(?:parse|make_parser)\s*\(
+  severity: high
+  message: "xml.sax \u2014 XXE risk, use defusedxml"
+  metadata:
+    cwe: CWE-611
+- id: sgpy-xml-dom-minidom
+  pattern: xml\.dom\.minidom\.(?:parse|parseString)\s*\(
+  severity: high
+  message: "minidom \u2014 XXE risk, use defusedxml"
+  metadata:
+    cwe: CWE-611
+- id: sgpy-lxml-etree-xxe
+  pattern: lxml\.etree\.(?:parse|fromstring|HTMLParser|XMLParser)\s*\((?!.*resolve_entities\s*=\s*False)
+  severity: high
+  message: "lxml.etree \u2014 XXE risk, set resolve_entities=False"
+  metadata:
+    cwe: CWE-611
+- id: sgpy-tempfile-race
+  pattern: tempfile\.mktemp\s*\(
+  severity: high
+  message: "mktemp \u2014 race condition, use mkstemp"
+  metadata:
+    cwe: CWE-377
+- id: sgpy-os-tempfile
+  pattern: os\.(?:tempnam|tmpnam)\s*\(
+  severity: high
+  message: "os.tempnam/tmpnam \u2014 race condition"
+  metadata:
+    cwe: CWE-377
+- id: sgpy-shutil-rmtree-user
+  pattern: shutil\.rmtree\s*\(\s*(?:request|input|user|args)
+  severity: critical
+  message: "rmtree with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgpy-os-remove-user
+  pattern: os\.(?:remove|unlink)\s*\(\s*(?:request|input|user|args)
+  severity: high
+  message: "os.remove with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgpy-os-rename-user
+  pattern: os\.rename\s*\(\s*(?:request|input|user|args)
+  severity: high
+  message: "os.rename with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgpy-os-chmod-user
+  pattern: os\.chmod\s*\(\s*(?:request|input|user|args)
+  severity: high
+  message: "os.chmod with user input \u2014 privilege escalation"
+  metadata:
+    cwe: CWE-269
+- id: sgpy-os-chown-user
+  pattern: os\.chown\s*\(\s*(?:request|input|user|args)
+  severity: critical
+  message: "os.chown with user input \u2014 privilege escalation"
+  metadata:
+    cwe: CWE-269
+- id: sgpy-os-symlink-user
+  pattern: os\.symlink\s*\(\s*(?:request|input|user|args)
+  severity: high
+  message: "os.symlink with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgpy-glob-user
+  pattern: glob\.glob\s*\(\s*(?:request|input|user|args)
+  severity: medium
+  message: "glob with user input \u2014 info leak"
+  metadata:
+    cwe: CWE-200
+- id: sgpy-importlib-user
+  pattern: importlib\.import_module\s*\(\s*(?:request|input|user|args)
+  severity: critical
+  message: "import_module with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgpy-exec-user
+  pattern: \bexec\s*\(\s*(?:request|input|user|args)
+  severity: critical
+  message: "exec with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-95
+- id: sgpy-compile-user
+  pattern: \bcompile\s*\(\s*(?:request|input|user|args)
+  severity: critical
+  message: "compile with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgpy-getattr-user
+  pattern: \bgetattr\s*\(\s*\w+\s*,\s*(?:request|input|user|args)
+  severity: high
+  message: "getattr with user input \u2014 method dispatch attack"
+  metadata:
+    cwe: CWE-913
+- id: sgpy-setattr-user
+  pattern: \bsetattr\s*\(\s*\w+\s*,\s*(?:request|input|user|args)
+  severity: high
+  message: "setattr with user input \u2014 attribute injection"
+  metadata:
+    cwe: CWE-913
+- id: sgpyglobals-user
+  pattern: \bglobals\s*\(\s*\)\s*\[
+  severity: medium
+  message: "globals() access \u2014 verify intent"
+  metadata:
+    cwe: CWE-913
+- id: sgpy-locals-user
+  pattern: \blocals\s*\(\s*\)\s*\[
+  severity: medium
+  message: "locals() access \u2014 verify intent"
+  metadata:
+    cwe: CWE-913
+- id: sgpy-ctypes-user
+  pattern: ctypes\.(?:CDLL|WinDLL|OleDLL|PyDLL)\s*\(\s*(?:request|input|user|args)
+  severity: critical
+  message: "ctypes with user input \u2014 RCE via FFI"
+  metadata:
+    cwe: CWE-78
+- id: sgpy-socket-recv
+  pattern: \.recv\s*\(\s*\d{4,}\s*\)
+  severity: low
+  message: "recv with large buffer \u2014 DoS risk"
+  metadata:
+    cwe: CWE-400
+- id: sgpy-socket-send-user
+  pattern: \.send\s*\(\s*(?:request|input|user|args)
+  severity: medium
+  message: "socket.send with user input \u2014 injection"
+  metadata:
+    cwe: CWE-78
+- id: sgpy-base64-decode-exec
+  pattern: base64\.b64decode\s*\([^)]*\)\s*\)\s*$
+  severity: critical
+  message: "base64 decode + exec \u2014 obfuscated RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgpy-hashlib-md5
+  pattern: hashlib\.md5\s*\(
+  severity: high
+  message: "MD5 broken \u2014 use sha256"
+  metadata:
+    cwe: CWE-327
+- id: sgpy-hashlib-sha1
+  pattern: hashlib\.sha1\s*\(
+  severity: high
+  message: "SHA1 broken \u2014 use sha256"
+  metadata:
+    cwe: CWE-327
+- id: sgpy-hashlib-md4
+  pattern: hashlib\.new\s*\(\s*['\"]md4['\"]
+  severity: critical
+  message: MD4 broken
+  metadata:
+    cwe: CWE-327
+- id: sgpy-hmac-md5
+  pattern: hmac\.new\s*\([^,]+,\s*[^,]+,\s*hashlib\.md5
+  severity: high
+  message: "HMAC-MD5 \u2014 broken MAC"
+  metadata:
+    cwe: CWE-327
+- id: sgpy-secrets-token
+  pattern: secrets\.token_(?:urlsafe|hex)\s*\(\s*\d{2,}\s*\)
+  severity: low
+  message: "secrets.token \u2014 good practice, verify length"
+  metadata:
+    cwe: CWE-338
+- id: sgpy-random-choice-security
+  pattern: random\.(?:choice|choices|randint|shuffle)\s*\(
+  severity: high
+  message: "random.* not CSPRNG \u2014 use secrets"
+  metadata:
+    cwe: CWE-338
+- id: sgpy-urandom-short
+  pattern: os\.urandom\s*\(\s*[1-7]\s*\)
+  severity: medium
+  message: "urandom with short length \u2014 insufficient entropy"
+  metadata:
+    cwe: CWE-338
+- id: sgpy-requests-no-timeout
+  pattern: requests\.(?:get|post|put|delete|patch|head)\s*\([^)]*\)(?!.*timeout)
+  severity: medium
+  message: "requests without timeout \u2014 DoS risk"
+  metadata:
+    cwe: CWE-400
+- id: sgpy-requests-session-no-verify
+  pattern: \.session\s*\(\s*\)\.verify\s*=\s*False|Session\s*\(\s*\)\.verify\s*=\s*False
+  severity: critical
+  message: "requests Session verify=False \u2014 SSL bypass"
+  metadata:
+    cwe: CWE-295
+- id: sgpy-urllib-urlopen
+  pattern: urllib\.request\.urlopen\s*\(
+  severity: medium
+  message: "urlopen \u2014 verify URL not user-controlled"
+  metadata:
+    cwe: CWE-918
+- id: sgpy-urllib-urlretrieve
+  pattern: urllib\.request\.urlretrieve\s*\(
+  severity: medium
+  message: "urlretrieve \u2014 SSRF risk"
+  metadata:
+    cwe: CWE-918
+- id: sgpy-ftplib-user
+  pattern: ftplib\.FTP\s*\(\s*(?:request|input|user|args)
+  severity: high
+  message: "FTP with user input \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sgpy-smtplib-user
+  pattern: smtplib\.SMTP\s*\(\s*(?:request|input|user|args)
+  severity: high
+  message: "SMTP with user input \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sgpy-telnetlib-user
+  pattern: telnetlib\.Telnet\s*\(\s*(?:request|input|user|args)
+  severity: high
+  message: "Telnet with user input \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sgpy-paramiko-auto-policy
+  pattern: AutoAddPolicy\s*\(\s*\)
+  severity: high
+  message: "SSH AutoAddPolicy \u2014 MITM risk"
+  metadata:
+    cwe: CWE-295
+- id: sgpy-paramiko-set-missing-host
+  pattern: set_missing_host_key_policy\s*\(\s*AutoAddPolicy
+  severity: high
+  message: "SSH missing host key policy = AutoAdd \u2014 MITM"
+  metadata:
+    cwe: CWE-295
+- id: sgjs-require-user
+  pattern: \brequire\s*\(\s*(?:req|request|input|user|args)\.
+  severity: critical
+  message: "require with user input \u2014 LFI/RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgjs-dynamic-import-user
+  pattern: \bimport\s*\(\s*(?:req|request|input|user|args)\.
+  severity: critical
+  message: "dynamic import with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgjs-child-process-exec-user
+  pattern: child_process\.exec\s*\(\s*(?:req|request|input|user|args)
+  severity: critical
+  message: "child_process.exec with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgjs-child-process-exec-concat
+  pattern: child_process\.exec\s*\(\s*['\"`][^'\"`]*['\"`]\s*\+
+  severity: critical
+  message: "child_process.exec with concat \u2014 injection"
+  metadata:
+    cwe: CWE-78
+- id: sgjs-eval-concat
+  pattern: \beval\s*\(\s*['\"`][^'\"`]*['\"`]\s*\+
+  severity: critical
+  message: "eval with concat \u2014 code injection"
+  metadata:
+    cwe: CWE-95
+- id: sgjs-function-constructor
+  pattern: new\s+Function\s*\(
+  severity: high
+  message: "Function constructor \u2014 RCE risk"
+  metadata:
+    cwe: CWE-94
+- id: sgjs-settimeout-string
+  pattern: setTimeout\s*\(\s*['\"`]
+  severity: high
+  message: "setTimeout with string \u2014 eval injection"
+  metadata:
+    cwe: CWE-95
+- id: sgjs-setinterval-string
+  pattern: setInterval\s*\(\s*['\"`]
+  severity: high
+  message: "setInterval with string \u2014 eval injection"
+  metadata:
+    cwe: CWE-95
+- id: sgjs-vm-run-user
+  pattern: \bvm\.(?:runInNewContext|runInThisContext|runInContext)\s*\([^)]*(?:req|request|input|user|args)
+  severity: critical
+  message: "vm.run with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgjs-vm-compile-user
+  pattern: \bvm\.compileFunction\s*\([^)]*(?:req|request|input|user|args)
+  severity: critical
+  message: "vm.compileFunction with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgjs-prototype-pollution
+  pattern: (?:Object\.assign|Object\.defineProperty)\s*\(\s*Object\.prototype
+  severity: critical
+  message: "Object.prototype pollution \u2014 RCE surface"
+  metadata:
+    cwe: CWE-1321
+- id: sgjs-prototype-merge
+  pattern: \bmerge\s*\(\s*\w+\s*,\s*\w+\s*,\s*true\s*\)
+  severity: high
+  message: "deep merge \u2014 prototype pollution risk"
+  metadata:
+    cwe: CWE-1321
+- id: sgjs-require-resolve-user
+  pattern: require\.resolve\s*\(\s*(?:req|request|input|user|args)
+  severity: high
+  message: "require.resolve with user input \u2014 LFI"
+  metadata:
+    cwe: CWE-98
+- id: sgjs-fs-read-user
+  pattern: fs\.(?:readFile|readFileSync|createReadStream)\s*\(\s*(?:req|request|input|user|args)
+  severity: high
+  message: "fs.readFile with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgjs-fs-write-user
+  pattern: fs\.(?:writeFile|writeFileSync|createWriteStream|appendFile)\s*\(\s*(?:req|request|input|user|args)
+  severity: high
+  message: "fs.writeFile with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgjs-fs-unlink-user
+  pattern: fs\.(?:unlink|unlinkSync|rmdir|rmdirSync)\s*\(\s*(?:req|request|input|user|args)
+  severity: high
+  message: "fs.unlink with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgjs-fs-copy-user
+  pattern: fs\.(?:copyFile|copyFileSync)\s*\(\s*(?:req|request|input|user|args)
+  severity: high
+  message: "fs.copyFile with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgjs-crypto-md5
+  pattern: crypto\.createHash\s*\(\s*['\"]md5['\"]
+  severity: high
+  message: "MD5 broken \u2014 use sha256"
+  metadata:
+    cwe: CWE-327
+- id: sgjs-crypto-sha1
+  pattern: crypto\.createHash\s*\(\s*['\"]sha1['\"]
+  severity: high
+  message: "SHA1 broken \u2014 use sha256"
+  metadata:
+    cwe: CWE-327
+- id: sgjs-crypto-ecb
+  pattern: crypto\.createCipheriv\s*\(\s*['\"]aes-\d+-ecb['\"]
+  severity: critical
+  message: "AES-ECB \u2014 deterministic"
+  metadata:
+    cwe: CWE-327
+- id: sgjs-crypto-des
+  pattern: crypto\.createCipher(?:iv)?\s*\(\s*['\"]des['\"]
+  severity: critical
+  message: DES broken
+  metadata:
+    cwe: CWE-327
+- id: sgjs-jwt-verify-false
+  pattern: jwt\.verify\s*\([^)]*verify\s*:\s*false|jwt\.decode\s*\(
+  severity: critical
+  message: "JWT verify disabled or decode without verify \u2014 auth bypass"
+  metadata:
+    cwe: CWE-345
+- id: sgjs-jwt-none-alg
+  pattern: jwt\.sign\s*\([^)]*algorithm\s*:\s*['\"]none['\"]
+  severity: critical
+  message: "JWT with alg=none \u2014 auth bypass"
+  metadata:
+    cwe: CWE-345
+- id: sgjs-jwt-hardcoded-secret
+  pattern: jwt\.sign\s*\([^)]*['\"](secret|password|key)['\"]
+  severity: high
+  message: JWT with hardcoded secret
+  metadata:
+    cwe: CWE-798
+- id: sgjs-express-body-limit
+  pattern: express\.json\s*\(\s*\{\s*limit\s*:\s*['\"]?\d{3,}
+  severity: medium
+  message: "Express body limit large \u2014 DoS risk"
+  metadata:
+    cwe: CWE-400
+- id: sgjs-express-no-helmet
+  pattern: const\s+app\s*=\s*express\s*\(\s*\)(?!.*helmet)
+  severity: low
+  message: "Express without helmet \u2014 missing security headers"
+  metadata:
+    cwe: CWE-693
+- id: sgjs-express-cors-wildcard
+  pattern: app\.use\s*\(\s*cors\s*\(\s*\{[^}]*origin\s*:\s*['\"]\*['\"]
+  severity: high
+  message: "Express CORS wildcard \u2014 CSRF risk"
+  metadata:
+    cwe: CWE-942
+- id: sgjs-express-static-user
+  pattern: express\.static\s*\(\s*(?:req|request|input|user|args)
+  severity: high
+  message: "express.static with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgjs-res-sendfile-user
+  pattern: res\.sendFile\s*\(\s*(?:req|request|input|user|args)
+  severity: high
+  message: "res.sendFile with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgjs-res-download-user
+  pattern: res\.download\s*\(\s*(?:req|request|input|user|args)
+  severity: high
+  message: "res.download with user input \u2014 path traversal"
+  metadata:
+    cwe: CWE-22
+- id: sgjs-axios-no-https
+  pattern: axios\.(?:get|post|put|delete)\s*\(\s*['\"]http://
+  severity: medium
+  message: "Axios HTTP (not HTTPS) \u2014 MITM risk"
+  metadata:
+    cwe: CWE-319
+- id: sgjs-fetch-no-https
+  pattern: fetch\s*\(\s*['\"]http://
+  severity: medium
+  message: "fetch HTTP (not HTTPS) \u2014 MITM risk"
+  metadata:
+    cwe: CWE-319
+- id: sgjs-node-postgres-concat
+  pattern: \.query\s*\(\s*['\"`][^'\"`]*['\"`]\s*\+
+  severity: high
+  message: "pg.query with concat \u2014 SQL injection"
+  metadata:
+    cwe: CWE-89
+- id: sgjs-mongodb-where-user
+  pattern: \$where\s*:\s*(?:req|request|input|user|args)
+  severity: critical
+  message: "MongoDB $where with user input \u2014 NoSQL injection"
+  metadata:
+    cwe: CWE-943
+- id: sgjs-mongodb-eval
+  pattern: db\.(?:eval|command)\s*\(
+  severity: critical
+  message: "MongoDB eval \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sggo-sql-concat
+  pattern: db\.(?:Query|Exec|QueryRow)\s*\(\s*\"[^\"]*\"\s*\+\s*(?:req|r\.|c\.Query|os\.Args)
+  severity: high
+  message: "Go SQL with concat \u2014 injection"
+  metadata:
+    cwe: CWE-89
+- id: sggo-sql-fmt
+  pattern: db\.(?:Query|Exec|QueryRow)\s*\(\s*fmt\.Sprintf
+  severity: high
+  message: "Go SQL with Sprintf \u2014 injection"
+  metadata:
+    cwe: CWE-89
+- id: sggo-html-template-html
+  pattern: template\.HTML\s*\(
+  severity: high
+  message: "template.HTML \u2014 XSS bypass"
+  metadata:
+    cwe: CWE-79
+- id: sggo-html-template-js
+  pattern: template\.JS\s*\(
+  severity: high
+  message: "template.JS \u2014 XSS bypass"
+  metadata:
+    cwe: CWE-79
+- id: sggo-html-template-url
+  pattern: template\.URL\s*\(
+  severity: medium
+  message: "template.URL \u2014 verify trust"
+  metadata:
+    cwe: CWE-79
+- id: sggo-html-template-attr
+  pattern: template\.HTMLAttr\s*\(
+  severity: medium
+  message: "template.HTMLAttr \u2014 verify trust"
+  metadata:
+    cwe: CWE-79
+- id: sggo-os-exec-user
+  pattern: exec\.Command\s*\(\s*\"?(?:req|r\.|os\.Args)
+  severity: high
+  message: "exec.Command with user input \u2014 injection"
+  metadata:
+    cwe: CWE-78
+- id: sggo-os-exec-cmd-user
+  pattern: exec\.CommandContext\s*\(\s*[^,]+,\s*\"?(?:req|r\.|os\.Args)
+  severity: high
+  message: exec.CommandContext with user input
+  metadata:
+    cwe: CWE-78
+- id: sggo-http-get-user
+  pattern: http\.Get\s*\(\s*(?:req|r\.|os\.Args)
+  severity: high
+  message: "http.Get with user input \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sggo-http-post-user
+  pattern: http\.Post\s*\(\s*(?:req|r\.|os\.Args)
+  severity: high
+  message: "http.Post with user input \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sggo-http-newrequest-user
+  pattern: http\.NewRequest\s*\(\s*[^,]+,\s*(?:req|r\.|os\.Args)
+  severity: high
+  message: "http.NewRequest with user URL \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sggo-tls-insecure
+  pattern: tls\.Config\s*\{[^}]*InsecureSkipVerify\s*:\s*true
+  severity: critical
+  message: "TLS InsecureSkipVerify \u2014 MITM"
+  metadata:
+    cwe: CWE-295
+- id: sggo-md5
+  pattern: md5\.New\s*\(\s*\)|md5\.Sum\s*\(
+  severity: high
+  message: "MD5 broken \u2014 use sha256"
+  metadata:
+    cwe: CWE-327
+- id: sggo-sha1
+  pattern: sha1\.New\s*\(\s*\)|sha1\.Sum\s*\(
+  severity: high
+  message: "SHA1 broken \u2014 use sha256"
+  metadata:
+    cwe: CWE-327
+- id: sggo-rand-not-secure
+  pattern: math/rand\.Read\s*\(|rand\.(?:Intn|Float64|Read)\s*\(
+  severity: high
+  message: "math/rand not CSPRNG \u2014 use crypto/rand"
+  metadata:
+    cwe: CWE-338
+- id: sggo-panic-user
+  pattern: \bpanic\s*\(\s*(?:req|r\.|os\.Args)
+  severity: medium
+  message: "panic with user input \u2014 info leak"
+  metadata:
+    cwe: CWE-209
+- id: sgjava-runtime-exec-user
+  pattern: Runtime\.getRuntime\(\)\.exec\s*\(\s*(?:request|input|user|args|req\.getParameter)
+  severity: critical
+  message: "Runtime.exec with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgjava-processbuilder-user
+  pattern: new\s+ProcessBuilder\s*\(\s*(?:request|input|user|args|req\.getParameter)
+  severity: critical
+  message: "ProcessBuilder with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgjava-sql-statement-execute
+  pattern: \.execute(?:Query|Update)?\s*\(\s*\"[^\"]*\"\s*\+
+  severity: high
+  message: "Statement.execute with concat \u2014 SQL injection"
+  metadata:
+    cwe: CWE-89
+- id: sgjava-sql-prepared-concat
+  pattern: \.setString\s*\(\s*\d+\s*,\s*\"[^\"]*\"\s*\+
+  severity: high
+  message: "PreparedStatement.setString with concat \u2014 injection"
+  metadata:
+    cwe: CWE-89
+- id: sgjava-objectinputstream
+  pattern: new\s+ObjectInputStream\s*\(
+  severity: critical
+  message: "ObjectInputStream \u2014 RCE on deserialization"
+  metadata:
+    cwe: CWE-502
+- id: sgjava-readobject
+  pattern: \.readObject\s*\(
+  severity: critical
+  message: "readObject \u2014 RCE on untrusted data"
+  metadata:
+    cwe: CWE-502
+- id: sgjava-xmlreader-xxe
+  pattern: XMLReaderFactory\.createXMLReader|SAXParserFactory\.newInstance
+  severity: high
+  message: "XML reader \u2014 verify XXE protection"
+  metadata:
+    cwe: CWE-611
+- id: sgjava-documentbuilder-xxe
+  pattern: DocumentBuilderFactory\.newInstance\s*\(
+  severity: high
+  message: "DocumentBuilder \u2014 set FEATURE_SECURE_PROCESSING"
+  metadata:
+    cwe: CWE-611
+- id: sgjava-unmarshaller-xxe
+  pattern: JAXBContext\.newInstance.*\.createUnmarshaller
+  severity: high
+  message: "JAXB Unmarshaller \u2014 XXE risk"
+  metadata:
+    cwe: CWE-611
+- id: sgjava-message-digest-md5
+  pattern: MessageDigest\.getInstance\s*\(\s*\"MD5\"
+  severity: high
+  message: "MD5 broken \u2014 use SHA-256"
+  metadata:
+    cwe: CWE-327
+- id: sgjava-cipher-ecb
+  pattern: Cipher\.getInstance\s*\(\s*\"AES/ECB
+  severity: critical
+  message: "AES-ECB \u2014 deterministic"
+  metadata:
+    cwe: CWE-327
+- id: sgjava-cipher-des
+  pattern: Cipher\.getInstance\s*\(\s*\"DES\"
+  severity: critical
+  message: DES broken
+  metadata:
+    cwe: CWE-327
+- id: sgjava-ssl-trust-all
+  pattern: TrustManager\s*\{[^}]*checkServerTrusted\s*\([^)]*\)\s*\{\s*\}|X509TrustManager\s*\{[^}]*getAcceptedIssuers\s*\(\s*\)\s*\{\s*return\s+null
+  severity: critical
+  message: "SSL TrustManager accepts all \u2014 MITM"
+  metadata:
+    cwe: CWE-295
+- id: sgjava-spring-request-mapping-no-auth
+  pattern: '@(?:Get|Post|Put|Delete|Request)Mapping\s*\(\s*\"/(?:api|admin)[^\"]*\"(?!.*@(?:PreAuthorize|Secured|RolesAllowed))'
+  severity: high
+  message: "Spring endpoint without @PreAuthorize \u2014 missing auth"
+  metadata:
+    cwe: CWE-862
+- id: sgjava-spring-redirect-user
+  pattern: return\s+\"redirect:\"\s*\+\s*(?:request|input|user|req\.getParameter)
+  severity: high
+  message: "Spring redirect with user input \u2014 open redirect"
+  metadata:
+    cwe: CWE-601
+- id: sgjava-system-exit
+  pattern: System\.exit\s*\(
+  severity: medium
+  message: "System.exit \u2014 prevents container reuse"
+  metadata:
+    cwe: CWE-754
+- id: sgjava-thread-sleep
+  pattern: Thread\.sleep\s*\(
+  severity: low
+  message: "Thread.sleep \u2014 blocking, use ScheduledExecutor"
+  metadata:
+    cwe: CWE-833
+- id: sgjava-print-stack-trace
+  pattern: \.printStackTrace\s*\(
+  severity: medium
+  message: "printStackTrace \u2014 use logger"
+  metadata:
+    cwe: CWE-532
+- id: sgjava-class-forname-user
+  pattern: Class\.forName\s*\(\s*(?:request|input|user|req\.getParameter)
+  severity: critical
+  message: "Class.forName with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-470
+- id: sgjava-script-engine-eval
+  pattern: ScriptEngine.*\.eval\s*\(
+  severity: critical
+  message: "ScriptEngine.eval \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgjava-spring-model-attribute-user
+  pattern: '@ModelAttribute\s*\([^)]*\)\s*(?!.*BindingResult)'
+  severity: medium
+  message: "Spring @ModelAttribute without BindingResult \u2014 mass assignment"
+  metadata:
+    cwe: CWE-915
+- id: sgrb-send-user
+  pattern: \.send\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "Ruby .send with user input \u2014 method dispatch"
+  metadata:
+    cwe: CWE-913
+- id: sgrb-public-send-user
+  pattern: \.public_send\s*\(\s*(?:params|request|input)
+  severity: high
+  message: "Ruby .public_send with user input \u2014 method dispatch"
+  metadata:
+    cwe: CWE-913
+- id: sgrb-constantize-user
+  pattern: (?:params|request|input)\.[^)]*\.constantize
+  severity: critical
+  message: "constantize with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-470
+- id: sgrb-instance-eval-user
+  pattern: \binstance_eval\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "instance_eval with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgrb-class-eval-user
+  pattern: \bclass_eval\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "class_eval with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgrb-module-eval-user
+  pattern: \bmodule_eval\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "module_eval with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgrb-yaml-load-user
+  pattern: YAML\.load\s*\(\s*(?:params|request|input|File\.read)
+  severity: critical
+  message: "YAML.load \u2014 RCE"
+  metadata:
+    cwe: CWE-502
+- id: sgrb-yaml-load-file
+  pattern: YAML\.load_file\s*\(
+  severity: high
+  message: "YAML.load_file \u2014 RCE risk"
+  metadata:
+    cwe: CWE-502
+- id: sgrb-marshal-load-user
+  pattern: Marshal\.load\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "Marshal.load with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-502
+- id: sgrb-marshal-restore-user
+  pattern: Marshal\.restore\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "Marshal.restore with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-502
+- id: sgrb-open-user
+  pattern: \bopen\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "Kernel#open with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgrb-io-popen-user
+  pattern: IO\.popen\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "IO.popen with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgrb-erb-result-user
+  pattern: ERB\.new\s*\([^)]*\)\.result\s*\(\s*(?:binding|params|request|input)
+  severity: high
+  message: "ERB.result with user template \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgrb-system-user
+  pattern: \b(?:system|exec|spawn)\s*\(\s*(?:params|request|input)
+  severity: critical
+  message: "system() with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgrb-backtick-user
+  pattern: \`[^\`]*\#\{(?:params|request|input)
+  severity: critical
+  message: "Backtick with user interpolation \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgrb-redirect-user
+  pattern: redirect_to\s+(?:params|request\.\w+)
+  severity: high
+  message: Open redirect via params
+  metadata:
+    cwe: CWE-601
+- id: sgrb-render-inline-user
+  pattern: render\s+(?:inline|partial|template):\s*(?:params|request|input)
+  severity: critical
+  message: "render with user input \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgrb-html-safe-user
+  pattern: \.html_safe\s*$|raw\s+(?:params|request|input)
+  severity: high
+  message: "html_safe/raw with user input \u2014 XSS"
+  metadata:
+    cwe: CWE-79
+- id: sgrb-csrf-disabled
+  pattern: protect_from_forgery\s+with:\s*:null_session|skip_before_action\s+:verify_authenticity_token
+  severity: high
+  message: CSRF protection disabled
+  metadata:
+    cwe: CWE-352
+- id: sgrb-md5
+  pattern: Digest::MD5\b
+  severity: high
+  message: "MD5 broken \u2014 use SHA256"
+  metadata:
+    cwe: CWE-327
+- id: sgrb-rand-security
+  pattern: \brand\s*\(\s*\)|Random\.rand\s*\(
+  severity: high
+  message: Random not CSPRNG
+  metadata:
+    cwe: CWE-338
+- id: sgrb-where-interp
+  pattern: \.where\s*\(\s*[\"'][^\"']*\#\{
+  severity: high
+  message: "where with interpolation \u2014 SQL injection"
+  metadata:
+    cwe: CWE-89
+- id: sgrb-find-params
+  pattern: \.find\s*\(\s*params\[
+  severity: medium
+  message: "find(params[:id]) \u2014 IDOR risk"
+  metadata:
+    cwe: CWE-639
+- id: sgphp-eval-user
+  pattern: \beval\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: "PHP eval with superglobal \u2014 RCE"
+  metadata:
+    cwe: CWE-95
+- id: sgphp-assert-user
+  pattern: \bassert\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: "PHP assert with superglobal \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgphp-create-function-user
+  pattern: \bcreate_function\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: "create_function with superglobal \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgphp-preg-e
+  pattern: \bpreg_replace\s*\(\s*['\"]\/.*\/e['\"]
+  severity: critical
+  message: "preg_replace /e modifier \u2014 RCE"
+  metadata:
+    cwe: CWE-94
+- id: sgphp-system-user
+  pattern: \b(?:system|exec|shell_exec|passthru|popen|proc_open)\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: "system call with superglobal \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgphp-backtick-user
+  pattern: \`\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: "Backtick with superglobal \u2014 RCE"
+  metadata:
+    cwe: CWE-78
+- id: sgphp-unserialize-user
+  pattern: \bunserialize\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: "unserialize with superglobal \u2014 PHP object injection RCE"
+  metadata:
+    cwe: CWE-502
+- id: sgphp-include-user
+  pattern: (?:include|require)(?:_once)?\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  message: LFI/RFI via include of superglobal
+  metadata:
+    cwe: CWE-98
+- id: sgphp-mysql-query-user
+  pattern: (?:mysql_query|mysqli_query|->query|->execute)\s*\(\s*[^,]*\$_(?:GET|POST|REQUEST)
+  severity: critical
+  message: "SQL with superglobal \u2014 injection"
+  metadata:
+    cwe: CWE-89
+- id: sgphp-header-user
+  pattern: header\s*\(\s*['\"]Location:['\"]?\s*\.\s*\$_(?:GET|POST|REQUEST)
+  severity: high
+  message: Header injection / open redirect via superglobal
+  metadata:
+    cwe: CWE-113
+- id: sgphp-file-get-contents-user
+  pattern: file_get_contents\s*\(\s*\$_(?:GET|POST|REQUEST)
+  severity: high
+  message: "file_get_contents with superglobal \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sgphp-curl-url-user
+  pattern: CURLOPT_URL\s*,\s*\$_(?:GET|POST|REQUEST)
+  severity: high
+  message: "cURL URL from superglobal \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sgphp-ssl-verify-false
+  pattern: CURLOPT_SSL_VERIFYPEER\s*,\s*(?:false|0|FALSE)|CURLOPT_SSL_VERIFYHOST\s*,\s*0
+  severity: high
+  message: cURL SSL verification disabled
+  metadata:
+    cwe: CWE-295
+- id: sgphp-error-suppression
+  pattern: '@\s*\w+\s*\('
+  severity: medium
+  message: "Error suppression @ \u2014 hides bugs"
+  metadata:
+    cwe: CWE-755
+- id: sgphp-md5-password
+  pattern: \bmd5\s*\(\s*\$_(?:POST|GET|REQUEST)\[['\"]\w*pass
+  severity: critical
+  message: "MD5 of password \u2014 broken hash"
+  metadata:
+    cwe: CWE-327
+- id: sgphp-session-fixation
+  pattern: session_start\s*\(\s*\)\s*;(?![^;]*session_regenerate_id)
+  severity: medium
+  message: "session_start without regenerate_id \u2014 session fixation"
+  metadata:
+    cwe: CWE-384
+- id: sgphp-csrf-no-token
+  pattern: <form[^>]*method\s*=\s*[\"']post(?!.*csrf|.*token)
+  severity: medium
+  message: POST form without CSRF token
+  metadata:
+    cwe: CWE-352
+- id: sgphp-extract-user
+  pattern: \bextract\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: high
+  message: "extract on superglobal \u2014 variable injection"
+  metadata:
+    cwe: CWE-913
+- id: sgphp-parse-str-no-args
+  pattern: \bparse_str\s*\([^,)]+\)\s*;
+  severity: medium
+  message: "parse_str without second arg \u2014 variable injection"
+  metadata:
+    cwe: CWE-913
+- id: sgphp-allow-url-include
+  pattern: \ballow_url_include\s*=\s*On
+  severity: critical
+  message: "allow_url_include enabled \u2014 RFI"
+  metadata:
+    cwe: CWE-98
+- id: sgphp-allow-url-fopen
+  pattern: \ballow_url_fopen\s*=\s*On
+  severity: high
+  message: "allow_url_fopen enabled \u2014 SSRF"
+  metadata:
+    cwe: CWE-918
+- id: sgi-docker-latest
+  pattern: FROM\s+\S+:latest
+  severity: medium
+  message: "Dockerfile FROM :latest \u2014 non-reproducible"
+  metadata:
+    cwe: CWE-1104
+- id: sgi-docker-root
+  pattern: ^\s*USER\s+root\b
+  severity: high
+  message: Dockerfile runs as root
+  metadata:
+    cwe: CWE-250
+- id: sgi-docker-secret-env
+  pattern: ^\s*ENV\s+\w*(?:PASSWORD|SECRET|TOKEN|API_KEY)\w*\s*=
+  severity: critical
+  message: Secret in Dockerfile ENV
+  metadata:
+    cwe: CWE-798
+- id: sgi-docker-add-url
+  pattern: ^\s*ADD\s+https?://
+  severity: medium
+  message: "ADD with remote URL \u2014 use curl+COPY"
+  metadata:
+    cwe: CWE-829
+- id: sgi-docker-no-healthcheck
+  pattern: (?!.*HEALTHCHECK)
+  severity: low
+  message: Dockerfile missing HEALTHCHECK
+  metadata:
+    cwe: CWE-1061
+- id: sgi-k8s-privileged
+  pattern: privileged:\s*true
+  severity: critical
+  message: K8s privileged container
+  metadata:
+    cwe: CWE-250
+- id: sgi-k8s-run-as-root
+  pattern: runAsUser:\s*0\b
+  severity: high
+  message: K8s runs as root
+  metadata:
+    cwe: CWE-250
+- id: sgi-k8s-host-network
+  pattern: hostNetwork:\s*true
+  severity: high
+  message: K8s hostNetwork
+  metadata:
+    cwe: CWE-923
+- id: sgi-k8s-host-pid
+  pattern: hostPID:\s*true
+  severity: high
+  message: K8s hostPID
+  metadata:
+    cwe: CWE-923
+- id: sgi-k8s-image-latest
+  pattern: image:\s*\S+:latest
+  severity: medium
+  message: K8s :latest tag
+  metadata:
+    cwe: CWE-1104
+- id: sgi-tf-s3-public
+  pattern: acl\s*=\s*"public-read
+  severity: critical
+  message: Terraform S3 public-read
+  metadata:
+    cwe: CWE-732
+- id: sgi-tf-sg-wildcard
+  pattern: cidr_blocks\s*=\s*\["0\.0\.0\.0/0"\]
+  severity: high
+  message: Terraform SG 0.0.0.0/0
+  metadata:
+    cwe: CWE-732
+- id: sgi-tf-rds-public
+  pattern: publicly_accessible\s*=\s*true
+  severity: critical
+  message: Terraform RDS publicly accessible
+  metadata:
+    cwe: CWE-732
+- id: sgi-tf-iam-wildcard
+  pattern: action\s*=\s*\["\*"\]
+  severity: critical
+  message: Terraform IAM wildcard action
+  metadata:
+    cwe: CWE-732
+- id: sgsec-aws-key
+  pattern: AKIA[0-9A-Z]{16}
+  severity: critical
+  message: AWS access key ID
+  metadata:
+    cwe: CWE-798
+- id: sgsec-stripe-live
+  pattern: sk_live_[A-Za-z0-9]{24,}
+  severity: critical
+  message: Stripe live secret key
+  metadata:
+    cwe: CWE-798
+- id: sgsec-github-pat
+  pattern: gh[pousr]_[A-Za-z0-9]{36,}
+  severity: critical
+  message: GitHub personal access token
+  metadata:
+    cwe: CWE-798
+- id: sgsec-slack-token
+  pattern: xox[baprs]-[A-Za-z0-9-]{10,}
+  severity: critical
+  message: Slack token
+  metadata:
+    cwe: CWE-798
+- id: sgsec-private-key
+  pattern: '-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'
+  severity: critical
+  message: Private key material
+  metadata:
+    cwe: CWE-321
+- id: sgsec-google-api
+  pattern: AIza[0-9A-Za-z\-_]{35}
+  severity: high
+  message: Google API key
+  metadata:
+    cwe: CWE-798
+- id: sgsec-jwt-token
+  pattern: eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+
+  severity: high
+  message: Hardcoded JWT
+  metadata:
+    cwe: CWE-798
+- id: sgsec-db-url
+  pattern: (?:postgres|mysql|mongodb|redis)://[^:\s]+:[^@\s]+@
+  severity: high
+  message: Database URL with credentials
+  metadata:
+    cwe: CWE-798
+- id: sgsec-generic-secret
+  pattern: (?:secret|api[_-]?key|token)\s*[:=]\s*['\"][A-Za-z0-9+/=]{16,}['\"]
+  severity: high
+  message: Generic hardcoded secret
+  metadata:
+    cwe: CWE-798
+- id: sgsec-bcrypt-hash
+  pattern: \$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}
+  severity: low
+  message: "Bcrypt hash \u2014 verify not leaked"
+  metadata:
+    cwe: CWE-798
+- id: sgsec-hardcoded-password
+  pattern: (?:password|passwd|pwd)\s*[:=]\s*['\"][^'\"]{8,}['\"]
+  severity: high
+  message: Hardcoded password
+  metadata:
+    cwe: CWE-798

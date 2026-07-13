@@ -57,6 +57,10 @@ class STCAConfig:
         "**/__pycache__/**", "**/.venv/**", "**/venv/**",
     ])
 
+    # v4.43: Strictness level (1-9, PHPStan-inspired) — stored as top-level key
+    # (was stored in layers dict as __strictness__, causing crash on reload)
+    strictness_level: int = 5
+
     # LLM tie-breaker
     llm: Dict[str, object] = field(default_factory=lambda: {
         "enabled": False,                # off by default — pipeline is deterministic-first
@@ -124,6 +128,11 @@ class STCAConfig:
         # v4.37: Monorepo support
         cfg.workspaces = raw.get("workspaces", cfg.workspaces)
         cfg.workspace_exclude = raw.get("workspace_exclude", cfg.workspace_exclude)
+        # v4.43: Strictness level (top-level key, not in layers)
+        cfg.strictness_level = raw.get("strictness_level", 5)
+        # Also clean up any stale __strictness__ from layers (v4.42 and earlier)
+        if "__strictness__" in cfg.layers:
+            del cfg.layers["__strictness__"]
         cfg.llm.update(raw.get("llm", {}))
         cfg.tools.update(raw.get("tools", {}))
         cfg.stats_file = raw.get("stats_file", cfg.stats_file)
@@ -149,6 +158,8 @@ class STCAConfig:
             # v4.37: Monorepo support
             "workspaces": self.workspaces,
             "workspace_exclude": self.workspace_exclude,
+            # v4.43: Strictness level (top-level key)
+            "strictness_level": self.strictness_level,
             "llm": self.llm,
             "tools": self.tools,
             "stats_file": self.stats_file,

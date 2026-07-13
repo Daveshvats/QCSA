@@ -9,6 +9,8 @@ tree-sitter-go>=0.21
 tree-sitter-java>=0.21
 tree-sitter-c>=0.21
 tree-sitter-cpp>=0.21
+tree-sitter-typescript>=0.21
+tree-sitter-rust>=0.21
 numpy>=1.24
 scikit-fuzzy>=0.5
 
@@ -16,11 +18,15 @@ scikit-fuzzy>=0.5
 hypothesis>=6.100
 mutmut>=3.0
 pip-audit>=2.7
+google-re2>=0.3
 
 [dev]
 pytest>=7.0
 pytest-cov>=4.0
 hypothesis>=6.100
+mypy>=1.8
+build>=1.0
+twine>=4.0
 
 [fuzz]
 atheris>=2.1
@@ -33,6 +39,9 @@ mutmut>=3.0
 
 [property]
 hypothesis>=6.100
+
+[re2]
+google-re2>=0.3
 
 [supply-chain]
 pip-audit>=2.7

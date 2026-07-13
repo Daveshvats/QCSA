@@ -1,188 +1,242 @@
 # STCA Pipeline — Static + Test + Constraint Analysis
 
-> A deterministic-first, type-2 fuzzy aggregated bug detection pipeline. Now with **Code Property Graph (CPG) cross-file taint tracking**, **typestate analysis**, **metamorphic testing**, **differential testing**, **LLM-as-oracle with verified reasoning**, and **Joern-style CPG queries** — detection depth comparable to CodeQL/Joern, free and offline.
+> **v4.43** — A deterministic-first, type-2 fuzzy aggregated bug detection pipeline with **1,995 rules across 39 packs covering 24 languages**, **107 auto-fix patterns**, **275 secret detection patterns**, **9 unique differentiators**, and **77 CLI commands**. Free, offline, and production-ready.
 
-## What's new in this build (detection frontier)
+## Quick Start
 
-This release focuses purely on **detection depth**. We borrowed techniques from CodeQL, Joern, CodeScene, Mungo, and the 2024-2025 LLM4SE research wave.
+```bash
+# Install
+pip install -e .
 
-### 6 new detection engines
+# Verify installation
+stca doctor
 
-| Engine | Inspired by | What it catches |
-|---|---|---|
-| **Code Property Graph (CPG)** | Joern (Yamaguchi 2014) | Merges AST + CFG + PDG into one graph. Foundation for cross-file analysis |
-| **Cross-file taint tracking** | CodeQL dataflow library | Source→sink flows across function calls and file boundaries. Catches `request → 5 functions → eval()` |
-| **Typestate analysis** | Mungo, Plaid, Frama-C | State machine violations: close-then-use, requires_prior, double-action. 5 protocol patterns (file/connection/payment/session/transaction) |
-| **Metamorphic testing** | Chen 2018, oracle problem | Oracle-free bug detection: `sort(sort(x)) == sort(x)`, `hash(x) == hash(x)`, etc. Catches semantic bugs no oracle can |
-| **Differential testing** | Evosuite, McKeeman 1998 | Refactor verification: `func_old(x) == func_new(x)` for all x. Catches refactor regressions |
-| **LLM-as-oracle with verified reasoning** | SWE-agent, CodePRM (ACL 2025) | LLM proposes hypotheses ("function crashes on None"); STCA verifies by execution. Only confirmed bugs reported |
+# Scan a git diff
+stca check
 
-### CPG queries (Joern-style DSL)
+# Scan the full repo
+stca check --full
 
-```python
-from stca.cpg import build_cpg_for_repo
-from stca.cpg_queries import (query_unsanitized_taint_flows, query_unused_variables,
-                               query_dangerous_patterns_in_auth, query_function_complexity)
+# Get JSON output
+stca check --full --json
 
-cpg = build_cpg_for_repo(repo_root)
+# Run quality gate (SonarQube-style)
+stca gate --full --preset strict
 
-# Find every unsanitized source→sink flow
-flows = query_unsanitized_taint_flows(cpg)
-
-# Find variables assigned but never used
-unused = query_unused_variables(cpg)
-
-# Find dangerous patterns in auth code (eval, exec, system in auth functions)
-auth_issues = query_dangerous_patterns_in_auth(cpg)
-
-# Find high-complexity functions
-complexity = query_function_complexity(cpg, threshold=15)
+# Apply auto-fixes
+stca fix --apply
 ```
 
-### End-to-end detection: 23 findings on the sample repo (was 10)
+## What Makes STCA Unique
 
-Running `stca check` on the same buggy diff:
-- **Before this build**: 10 findings, WARN decision
-- **After this build**: 23 findings (3 CRITICAL, 13 HIGH), **BLOCK decision**
+STCA has **9 capabilities no competitor offers**:
 
-The new CRITICALs come from cross-file taint flows the old single-file tracker missed.
+| # | Feature | What It Does |
+|---|---------|-------------|
+| 1 | **IT2-FIS Brain** | Type-2 fuzzy inference system with 50 rules. Produces confidence *intervals* (not point estimates). Aggregates severity, confidence, blast radius, exploitability, and source-layer reliability into BLOCK/WARN/PASS/UNCERTAIN decisions. |
+| 2 | **LLM-Verify** | LLM proposes hypotheses ("function crashes on None input"); STCA verifies by *execution*. Only confirmed bugs are reported. PRM-gated (process reward model scores the LLM's reasoning). |
+| 3 | **Counterfactual Mutation** | Mutates the code (removes lines, injects guards) and re-runs detectors. If the finding disappears → true positive (boost confidence). If it persists → false positive (demote). |
+| 4 | **Metamorphic Testing** | Oracle-free bug detection: `sort(sort(x)) == sort(x)`, `hash(x) == hash(x)`. Catches semantic bugs no test oracle can. |
+| 5 | **Knowledge Graph** | Builds a codebase structure graph (1,400+ nodes for a typical project). `stca impact --changed file.py` shows blast radius (which functions are affected by your change). |
+| 6 | **Rule Auto-Mining** | `stca mine` scans git history for bug-fix commits and auto-generates Semgrep rules from the diff. Every bug you've ever fixed becomes a permanent rule. |
+| 7 | **Spec Mining** | `stca spec` mines API usage patterns from your codebase (e.g., "open() is always followed by close()") and flags deviations. Adaptive — learns from your code, not from generic rules. |
+| 8 | **--uncertain Flag** | `stca check --uncertain` shows only 30-70% confidence findings — the ones worth human review. No competitor has this. |
+| 9 | **9-Level Strictness** | PHPStan-inspired strictness levels (1-9). Level 1 = only critical findings; Level 9 = everything including style issues. |
 
-## Architecture (15 layers + 6 new detection engines + brain + autofix)
+## Rule Coverage
+
+| Category | Count | Details |
+|----------|-------|---------|
+| **YAML pack rules** | 1,995 | 39 packs across 24 languages |
+| **Secret patterns** | 275 | AWS, Stripe, GitHub, Slack, OpenAI, Anthropic, GCP, Azure, +200 more |
+| **Auto-fix patterns** | 107 | Python, JS, Java, Go, C/C++, Rust, PHP, Ruby, C#, Kotlin, SQL, Bash, Dart, Swift, Scala |
+| **CPG queries** | 6 | Taint flows, unused variables, auth patterns, complexity, def-use chains, cross-function taint |
+| **Taint sinks** | 28 | Cross-file source→sink patterns |
+| **Typestate protocols** | 5 | File, connection, payment, session, transaction |
+
+## Supported Languages (24)
+
+Python, JavaScript, TypeScript, Go, Java, Rust, C, C++, PHP, Ruby, C#, Swift, Scala, Kotlin, SQL, Bash, Dart, Lua, R, Haskell, Elixir, Objective-C, Groovy, Julia, Perl, COBOL
+
+## CLI Commands (77)
+
+### Core
+```bash
+stca check [--full] [--json] [--sarif --output file] [--strictness N] [--uncertain]
+stca gate [--full] [--preset strict|balanced|permissive|custom] [--max-critical N] [--max-high N]
+stca fix [--apply] [--finding-id ID]
+stca init / install-tools / doctor
+```
+
+### IDE Integration
+```bash
+stca lsp                    # Start LSP server (VS Code / JetBrains / Neovim)
+stca watch                  # Incremental scanning with sub-second feedback
+stca playground             # Web UI for testing regex rules (localhost:8765)
+```
+
+### Analysis
+```bash
+stca cpg --query taint|unused|auth|complexity|def_use|cross_func
+stca typestate             # State machine violations
+stca metamorphic           # Oracle-free bug detection
+stca differential          # Refactor verification
+stca llm-verify            # LLM proposes, STCA verifies by execution
+stca impact --changed file.py  # Blast radius analysis
+stca spec                  # Spec mining (adaptive API pattern learning)
+stca mine                  # Rule auto-mining from git history
+```
+
+### Rules
+```bash
+stca rules list             # List all 39 built-in packs
+stca rules show <pack>      # Show rules in a pack
+stca rules pull <pack>      # Pull external pack
+stca rules submit --pack my-rules.yml --name my-pack --language python  # Submit community rules
+```
+
+### CI/CD
+```bash
+stca bot --pr 42 --token $GITHUB_TOKEN  # PR comment bot (inline review comments)
+stca check --sarif --output stca.sarif   # SARIF for GitHub Code Scanning
+stca gate --preset strict                 # Quality gate (exit 0=pass, 1=fail)
+```
+
+### Quality
+```bash
+stca strictness --level N   # Set strictness (1-9)
+stca code-quality           # Multi-language code quality
+stca config-scan            # Scan config files for secrets
+stca duplicates             # Code duplication detection
+stca deadcode               # Dead code analysis
+stca hotspot                # Security hotspot detection
+```
+
+## IDE Extensions
+
+### VS Code
+```bash
+code --install-extension editor/vscode-stca/stca-0.2.0.vsix
+```
+- Real-time diagnostics via LSP
+- Hover shows rule details + fix suggestions
+- Code actions: "Apply STCA fix" (quickfix)
+- 6 commands: CheckRepo, CheckFile, ApplyFix, ShowUncertain, Gate, Restart
+- 17 language activations
+
+### JetBrains (IntelliJ, PyCharm, WebStorm, etc.)
+```bash
+cd editor/intellij-stca && ./gradlew buildPlugin
+# Install: Settings > Plugins > Install from Disk > build/distributions/*.zip
+```
+- LSP support via IntelliJ 2023.1+ platform
+- 7 actions, settings panel, tool window, status bar widget
+- CI builds automatically via `.github/workflows/build-jetbrains.yml`
+
+## Architecture
 
 ```
-git diff
+git diff / --full
    │
-   ▼
-[tree-sitter diff slicer] — Python, JS/TS, Go, Java, C, C++
-   │
-   ├─► L0  Fast hooks + multi-language linters + bundled Semgrep rule packs (88 rules)
-   ├─► L0  CPG-based cross-file taint tracking  ← NEW (replaces single-file)
-   ├─► L0  Typestate analysis  ← NEW (state machine violations)
-   ├─► L0  CPG queries  ← NEW (Joern-style: taint, unused vars, auth, complexity)
-   ├─► L0b Supply chain (pip-audit, osv-scanner, npm audit, govulncheck, cargo audit)
-   ├─► L0c Dependency health (outdated, deprecated, restrictive licenses)
-   ├─► L0d Behavioral analysis (hotspots, complexity, knowledge drift)
-   ├─► L0e IaC scanning (Dockerfile, K8s, Terraform, GitHub Actions)
+   ├─► L0  Fast hooks (1,995 YAML rules + 275 secret patterns + 107 autofix)
+   ├─► L0  CPG cross-file taint tracking + def-use chains
+   ├─► L0  Typestate analysis (5 protocols)
+   ├─► L0  Spec mining (adaptive API pattern learning)
+   ├─► L0b Supply chain (pip-audit, npm audit, osv-scanner, cargo audit, govulncheck)
+   ├─► L0e IaC scanning (Dockerfile, K8s, Terraform, CloudFormation, GitHub Actions)
    ├─► L0f Commit risk (size, time, message, author, reverts)
-   ├─► L1  Property tests (Hypothesis) on changed functions
-   ├─► L1  Metamorphic tests  ← NEW (oracle-free bug detection)
-   ├─► L1  Differential tests  ← NEW (refactor verification)
-   ├─► L2  Mutation testing on diff (mutmut, incremental)
+   ├─► L1  Property tests (Hypothesis) + Metamorphic tests + Differential tests
+   ├─► L2  Mutation testing (mutmut)
    ├─► L3  Invariant checks (Daikon-style)
-   ├─► L4  Directed greybox fuzz of diff (Atheris)
-   ├─► L5  Policy-as-code (OPA/Rego + static fallback)
-   ├─► L6  Symbolic verification (Kani for Rust critical paths)
-   ├─► L7  Deterministic simulation (concurrency code, opt-in)
-   ├─► L8  Auto-Fix (deterministic patches for HIGH/CRITICAL findings)
-   │
-   ▼
-[Inline suppression filter] (# stca: ignore comments)
+   ├─► L4  Directed greybox fuzz (Atheris)
+   ├─► L5  Policy-as-code (OPA/Rego)
+   ├─► L6  Symbolic verification (Kani for Rust)
+   ├─► L7  Deterministic simulation
+   ├─► L8  Auto-Fix (107 patterns across 15 languages)
    │
    ▼
 ┌─────────────────────────────────────────────────────┐
-│  IT2-FIS Aggregation Brain (~50 fuzzy rules)        │
-│  + Auto-tuning from feedback (stca tuning apply)    │
-│  + LLM-as-oracle with verified reasoning  ← NEW     │
-│  Type-2 fuzzy inference over:                       │
-│    severity / confidence / blast radius /           │
-│    exploitability / source-layer reliability        │
+│  IT2-FIS Aggregation Brain (50 fuzzy rules)         │
+│  + Bayesian second opinion (BBN with CPTs)          │
+│  + Counterfactual mutation verification             │
+│  + LLM-as-oracle (PRM-gated, execution-verified)    │
 │  Output: BLOCK / WARN / PASS / UNCERTAIN            │
+│  + Confidence intervals (not point estimates)       │
 └─────────────────────────────────────────────────────┘
    │
-   ▼ (only if UNCERTAIN — and only if user opts in)
-[Optional LLM tie-breaker, gated by CodePRM step-scoring]
-   │
    ▼
-SARIF + Rich TUI + static HTML + JSON + CycloneDX SBOM
+SARIF 2.1.0 + Rich TUI + HTML + JSON + CycloneDX SBOM + SPDX SBOM
 ```
 
-## Quick start
+## Quality Gates (SonarQube-style)
 
 ```bash
-cd stca-pipeline
-python3 -m venv .venv
-.venv/bin/pip install -e .
-.venv/bin/stca install-tools    # auto-install gitleaks, semgrep, opa, etc.
-.venv/bin/stca doctor           # verify
+# Presets
+stca gate --full --preset strict       # 0 critical, 0 high, 5/1k LOC
+stca gate --full --preset balanced     # 0 critical, 5 high, 10/1k LOC (DEFAULT)
+stca gate --full --preset permissive   # 5 critical, 20 high, 20/1k LOC
+stca gate --full --preset custom --max-critical 0 --max-high 10
+
+# Exit codes: 0=pass, 1=fail, 2=error, 3=scanner failure
 ```
 
-## New CLI commands
+## Monorepo Support
+
+```yaml
+# .stca.yaml
+workspaces:
+  - "apps/*"
+  - "packages/*"
+workspace_exclude:
+  - "**/node_modules/**"
+```
 
 ```bash
-# CPG queries (Joern-style)
-stca cpg --query stats          # build CPG, show stats
-stca cpg --query taint          # unsanitized taint flows
-stca cpg --query unused         # unused variables
-stca cpg --query auth           # dangerous patterns in auth code
-stca cpg --query complexity     # high-complexity functions
-
-# Typestate analysis (state machine violations)
-stca typestate                  # all Python files
-stca typestate --file app.py    # specific file
-
-# Metamorphic testing (oracle-free)
-stca metamorphic                # all Python files
-stca metamorphic --file app.py
-
-# Differential testing (refactor verification)
-stca differential               # detect function pairs (foo vs foo_new)
-stca differential --file app.py
-
-# LLM-as-oracle with verified reasoning
-stca llm-verify --file app.py   # LLM proposes, STCA verifies by execution
-stca llm-verify --file app.py --function authenticate
+stca monorepo --list     # List resolved workspaces
+stca monorepo --scan     # Scan each workspace, report findings
+stca monorepo --add 'services/*'
 ```
 
-## Existing CLI commands (still work)
+## GitHub Actions Integration
 
-```bash
-stca init / install-tools / doctor
-stca check [--staged] [--json] [--quiet]
-stca fix [--apply]
-stca bootstrap invariants / harnesses / properties
-stca rules list / pull / show
-stca behavioral hotspots
-stca taint                      # old single-file tracker (kept for compat)
-stca duplicates
-stca tuning apply
-stca suppressions list
-stca cache stats / clear
-stca sbom [--format spdx]
-stca feedback tp / fp / capture / stats
+```yaml
+# .github/workflows/stca.yml
+- name: Install STCA
+  run: pip install --user .
+- name: Run STCA
+  run: stca check --sarif --output stca.sarif --strictness 5
+- name: Upload SARIF
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: stca.sarif
 ```
 
-## Detection depth comparison (vs major tools)
+```yaml
+# .github/workflows/stca-bot.yml — PR comment bot
+- name: Run STCA PR Bot
+  run: stca bot --token ${{ secrets.GITHUB_TOKEN }}
+```
 
-| Detection capability | STCA | Snyk Code | CodeQL | Joern | SonarQube |
-|---|---|---|---|---|---|
-| Multi-language bundled rules | 88 | AI model | Query packs | Query packs | 5000+ |
-| Single-file taint tracking | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Cross-file taint tracking | ✅ CPG-based | ✅ AI | ✅ Deepest | ✅ | ⚠️ Limited |
-| Typestate (state machines) | ✅ 5 protocols | ❌ | ⚠️ | ⚠️ | ❌ |
-| Metamorphic testing | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Differential testing | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Symbolic verification | ✅ Kani | ❌ | ❌ | ❌ | ❌ |
-| Mutation testing | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Property-based testing | ✅ Hypothesis | ❌ | ❌ | ❌ | ❌ |
-| Fuzzing | ✅ Atheris | ❌ | ✅ OSS-Fuzz | ❌ | ❌ |
-| Behavioral (hotspots) | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Commit risk metadata | ✅ | ❌ | ❌ | ❌ | ❌ |
-| IaC scanning | ✅ | ✅ | ❌ | ❌ | ❌ |
-| SCA (dependency CVEs) | ✅ 5 ecosystems | ✅ 11 ecosystems | ❌ | ❌ | ⚠️ |
-| LLM-assisted (with verification) | ✅ PRM-gated | ✅ Black-box | ❌ | ❌ | ✅ AI CodeFix |
-| Aggregation brain | ✅ IT2-FIS | Per-finding | Per-query | Per-query | Quality gate |
-| Auto-tuning from feedback | ✅ | ❌ | ❌ | ❌ | ❌ |
+## Competitive Position
 
-**STCA's detection depth is now competitive with CodeQL/Joern for Python, while remaining free and offline.**
+| Axis | STCA v4.43 | Semgrep | SonarQube | CodeQL |
+|------|-----------|---------|-----------|--------|
+| Total rules | ~2,700 | 3,000+ | 5,000+ | 1,500+ |
+| Languages | 24 | 30+ | 30+ | 6 (deep) |
+| Auto-fix | 107 | ~50 | ~200 | ❌ |
+| Secrets | 275 | 200+ | enterprise | ❌ |
+| FIS aggregation | ✅ | ❌ | ❌ | ❌ |
+| LLM-verify | ✅ | ❌ | ❌ | ❌ |
+| Rule mining | ✅ | ❌ | ❌ | ❌ |
+| Spec mining | ✅ | ❌ | ❌ | ❌ |
+| Free + offline | ✅ | ✅ CE | ⚠️ limits | ✅ |
+| IDE plugins | VS Code + JetBrains | ✅ | SonarLint | ❌ |
 
-## Honest limits
+## Test Suite
 
-- CPG construction takes ~2-3s for the first run on a 50-file repo (cached after)
-- Cross-file taint tracking is Python-only (CPG builder is Python-only for now)
-- Typestate protocols are hand-defined (5 patterns: file/connection/payment/session/transaction)
-- Metamorphic testing requires Hypothesis and may generate false positives for non-idempotent functions
-- Differential testing requires function pairs (foo vs foo_new) — won't detect regressions without a reference
-- LLM-verify requires Ollama running locally with qwen3-coder-1.5b+
+- **717 tests passed**, 35 skipped (tree-sitter grammars), 0 failed
+- 291 smoke tests across v4.33-v4.43
+- E2E tests for: SARIF, cross-file taint, max-files override, Docker healthcheck, LSP hover/code actions, spec mining, def-use chains, fast_regex, rules submit, PR bot, playground, monorepo
 
 ## License
 

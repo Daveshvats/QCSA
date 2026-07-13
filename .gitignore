@@ -1,5 +1,46 @@
+# Python
 __pycache__/
 *.pyc
-.stca-cache/
-.mimocode/
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environments
 .venv/
+venv/
+env/
+
+# STCA runtime artifacts
+.stca-cache/
+.stca-audit.log
+.stca-issues.db
+.stca-fp-learning.json
+.stca-hotspots.json
+.stca-hotspot-audit.log
+.stca-reports/
+stca-dashboard.html
+
+# Test/coverage cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Editor plugins — compiled artifacts
+editor/vscode-stca/out/
+editor/vscode-stca/node_modules/
+editor/intellij-stca/build/
+editor/intellij-stca/.gradle/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Internal worklog (not for users)
+worklog.md

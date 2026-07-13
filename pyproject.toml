@@ -4,19 +4,25 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stca-pipeline"
-version = "4.42.0"
+version = "4.44.0"
 description = "Static + Test + Constraint Analysis — an offline, deterministic-first bug detection pipeline with a type-2 fuzzy aggregation brain"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "STCA Project" }]
-keywords = ["static-analysis", "fuzzing", "mutation-testing", "formal-methods", "fuzzy-logic", "developer-tools"]
+keywords = ["static-analysis", "security", "sast", "fuzzing", "mutation-testing", "fuzzy-logic", "developer-tools", "code-quality"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Security",
+    "Environment :: Console",
 ]
 
 dependencies = [
@@ -38,32 +44,39 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-llm = ["requests>=2.28"]      # for Ollama client
-fuzz = ["atheris>=2.1"]       # Python fuzzing (L4)
-property = ["hypothesis>=6.100"]
-mutation = ["mutmut>=3.0"]    # L2 mutation testing
+llm = ["requests>=2.28"]           # for Ollama client (LLM-verify)
+fuzz = ["atheris>=2.1"]            # Python fuzzing (L4)
+property = ["hypothesis>=6.100"]   # Property-based testing (L1)
+mutation = ["mutmut>=3.0"]         # L2 mutation testing
 supply-chain = ["pip-audit>=2.7"]  # L0b Python CVEs
+re2 = ["google-re2>=0.3"]          # ReDoS protection (linear-time regex)
 all-tools = [
     "hypothesis>=6.100",
     "mutmut>=3.0",
     "pip-audit>=2.7",
+    "google-re2>=0.3",
 ]
-dev = ["pytest>=7.0", "pytest-cov>=4.0", "hypothesis>=6.100", "mypy>=1.8"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "hypothesis>=6.100", "mypy>=1.8", "build>=1.0", "twine>=4.0"]
 
 [project.scripts]
 stca = "stca.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/local/stca-pipeline"
+Documentation = "https://github.com/local/stca-pipeline/blob/main/GUIDE.md"
+Issues = "https://github.com/local/stca-pipeline/issues"
+
 [tool.setuptools.packages.find]
 include = ["stca*"]
+
+[tool.setuptools.package-data]
+"stca.rules" = ["packs/*.yml", "policies/*.rego"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
 
 [tool.mypy]
-# v4.5: Gradual typing — start permissive, tighten over time.
-# Would have caught the engine= wiring gap (field never set) and the
-# TypeScript-warning-block deletion regression.
 python_version = "3.12"
 warn_return_any = false
 warn_unused_configs = true
@@ -74,11 +87,8 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 no_implicit_optional = true
 files = ["stca/"]
-
-# Exclude the largest files for now — they need refactoring before
-# type checking is useful. Tighten this list over time.
 exclude = [
-    "stca/cli.py",           # 2,067 lines — needs split first
-    "stca/orchestrator.py",  # 1,565 lines — needs split first
-    "stca/v4_restored.py",   # 1,520 lines — needs split first
+    "stca/cli.py",
+    "stca/orchestrator.py",
+    "stca/v4_restored.py",
 ]

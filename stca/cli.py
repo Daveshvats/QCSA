@@ -533,12 +533,14 @@ def _generate_sbom(repo_root: Path, fmt: str) -> str:
                    "Set to 0 for unlimited. Env: STCA_MAX_FILES")
 @click.option("--uncertain", is_flag=True, default=False,
               help="Show only 30-70% confidence findings (the ones worth human review)")
+@click.option("--summary", is_flag=True, default=False,
+              help="Group findings by rule_id (compact output)")
 @click.option("-v", "--verbose", is_flag=True,
               help="Enable DEBUG-level logging on stca namespace")
 def check(repo: str, base: str, staged: bool, as_json: bool, quiet: bool,
           strictness: int, baseline: bool, full: bool,
           strict_scanners: bool, sarif: bool, output_path: Optional[str],
-          max_files: int, uncertain: bool, verbose: bool):
+          max_files: int, uncertain: bool, summary: bool, verbose: bool):
     """Run the pipeline on a git diff (or full repo with --full)."""
     import logging as _logging
     import os as _os
@@ -607,6 +609,21 @@ def check(repo: str, base: str, staged: bool, as_json: bool, quiet: bool,
         click.echo(result.final_decision.value)
     elif as_json:
         click.echo(json.dumps(result.to_dict(), indent=2))
+    elif summary:
+        # v4.44: Group findings by rule_id for compact output
+        from collections import defaultdict
+        by_rule = defaultdict(list)
+        for f in result.findings:
+            by_rule[f.rule_id].append(f)
+        click.echo(f"\n=== STCA Summary: {len(result.findings)} findings across {len(by_rule)} rules ===\n")
+        for rule_id, findings in sorted(by_rule.items(), key=lambda x: -len(x[1])):
+            files = list({f.file for f in findings})[:3]
+            files_str = ", ".join(files)
+            if len({f.file for f in findings}) > 3:
+                files_str += f" (+{len({f.file for f in findings}) - 3} more)"
+            sev = findings[0].severity.value if hasattr(findings[0].severity, 'value') else str(findings[0].severity)
+            click.echo(f"  {rule_id}: {len(findings)} findings ({sev}) — {files_str}")
+        click.echo(f"\nDecision: {result.final_decision.value}")
     else:
         render_tui(result)
 
@@ -946,7 +963,11 @@ def metamorphic_cmd(repo: str, file_path: str):
     from .metamorphic import run_metamorphic_tests
     repo_root = Path(repo).resolve()
     if file_path:
-        files = [Path(file_path)]
+        # v4.43: Resolve relative paths against repo_root (was crashing)
+        f = Path(file_path)
+        if not f.is_absolute():
+            f = repo_root / f
+        files = [f]
     else:
         skip_dirs = {".git", "__pycache__", ".venv", "venv", "node_modules",
                      ".stca-cache", ".stca-reports", ".stca-fixes"}
@@ -972,7 +993,11 @@ def differential_cmd(repo: str, file_path: str):
     from .differential import run_differential_tests, find_function_pairs
     repo_root = Path(repo).resolve()
     if file_path:
-        files = [Path(file_path)]
+        # v4.43: Resolve relative paths against repo_root (was crashing)
+        f = Path(file_path)
+        if not f.is_absolute():
+            f = repo_root / f
+        files = [f]
     else:
         skip_dirs = {".git", "__pycache__", ".venv", "venv", "node_modules",
                      ".stca-cache", ".stca-reports", ".stca-fixes"}
@@ -1628,7 +1653,9 @@ def strictness_cmd(repo: str, level: int):
         repo_root = Path(repo).resolve()
         cfg_path = find_config(repo_root)
         config = STCAConfig.from_file(cfg_path)
-        config.layers["__strictness__"] = {"level": level}
+        # v4.43: Store strictness as a top-level key, not in layers dict
+        # (was causing crash when .stca.yaml contained __strictness__)
+        config.strictness_level = level
         config.save(cfg_path)
         sl = get_level(level)
         click.echo(f"Strictness set to level {level}: {sl.name}")

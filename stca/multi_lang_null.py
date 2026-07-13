@@ -52,7 +52,7 @@ def _detect_null_normalized(tree: NormalizedNode) -> List[UnifiedFinding]:
                         rule_id="NULL.DEREF", severity="high",
                         description=f"'{node.obj}' may be null and is dereferenced via '.{node.attr}'",
                         file=tree.file, line=node.line, function=func.name, language=lang,
-                        category="nullness", cwe="CWE-476", variable=node.obj))
+                        category="nullness", cwe="CWE-476", evidence=node.obj))
     return findings
 
 def _detect_null_py(file_path: Path) -> List[UnifiedFinding]:
